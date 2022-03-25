@@ -1,17 +1,30 @@
+################ Plot R0 as a function of proportion of DNCOV tests (Figure S7) ################ 
+
+
+################    Set up ################   
+
+# setwd("Q:/testing_SARS-CoV-2_variants")
+
+# rm(list = ls())
+
+library(tidyverse)
+library(ggpubr)
+library(cowplot)
 
 ################  Import data ###############
 
 
-variant_data = read.csv("Veneto/Veneto_variant_data.csv")[, -1]
+
+variant_data = read.csv("counterfactuals/Veneto/Veneto_variant_data.csv")[, -1]
 variant_data$Date = as.Date.character(variant_data$Date, format = "%Y-%m-%d")
 
-modelfit1_df_veneto = read.csv( "Results/modelfit1_df_veneto.csv")[,-1]
+modelfit1_df_veneto = read.csv( "counterfactuals/Results/modelfit1_df_veneto.csv")[,-1]
 
 
-modelfit1_df_italy = read.csv("Results/modelfit1_df_italy.csv")
+modelfit1_df_italy = read.csv("counterfactuals/Results/modelfit1_df_italy.csv")
 
 
-variant_data_italy = read.csv("Italy/Italy_variant_data.csv")[,-1]
+variant_data_italy = read.csv("counterfactuals/Italy/Italy_variant_data.csv")[,-1]
 variant_data_italy$Date = as.Date.character(variant_data_italy$Date, format = "%Y-%m-%d")
 
 

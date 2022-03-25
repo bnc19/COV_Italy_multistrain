@@ -1,14 +1,22 @@
 
+################  Plot data on number of antigen and molecular tests in Veneto and Italy (Figure 1) ################   
+
+################    Set up ################   
+
+# setwd("Q:/testing_SARS-CoV-2_variants")
+
+# rm(list = ls())
+
 ################  Import data ###############
 
 library(Hmisc)
 library(tidyverse)
- 
+
   
-Italy_test_data = read.csv("data/Italy_daily_test_data.csv") 
+Italy_test_data = read.csv("model_fitting/data/Italy_daily_test_data.csv") 
 Italy_test_data$total = Italy_test_data$pcr_daily_average + Italy_test_data$antigen_daily_average
 
-Veneto_test_data = read.csv("data/Veneto_daily_test_data.csv") 
+Veneto_test_data = read.csv("model_fitting/data/Veneto_daily_test_data.csv") 
 Veneto_test_data$total = Veneto_test_data$pcr_daily_average + Veneto_test_data$antigen_daily_average
 
 
@@ -23,11 +31,11 @@ Italy_test_conf =  data.frame(Date = Italy_test_data$Date,
 
 
 Veneto_test_conf %>% 
-  filter(Date > "2020-09-01") %>% 
+  filter(Date >= "2020-09-01") %>% 
   summarise(mean = mean (PointEst))
 
 Italy_test_conf %>% 
-  filter(Date > "2020-09-01") %>% 
+  filter(Date >= "2020-09-01") %>% 
   summarise(mean = mean (PointEst))
 
 Test_conf = Veneto_test_conf %>% 

@@ -1,24 +1,18 @@
-#################################################################
-# Calculate test metrics based on prevalence  
-#################################################################
+################  Diagnosis of concordant and discordant variants under alternative testing strategies (figure 6)  ################  
 
 
-#################################################################
-# Set up 
-#################################################################
+################  Set up ################  
+# rm(list = ls())
+# setwd("Q:/testing_SARS-CoV-2_variants")
 
 # rm(list = ls())
 
 library(tidyverse)
-library(ggplot2)
 library(ggpubr)
 library(cowplot)
 
-setwd(
-  "C:/Users/bnc19/OneDrive - Imperial College London/SEIR italy cov/COV_Italy_multistrain_2/counterfactuals_V2/run_fixed_rstan"
-)
 
-source("R/plot_PPV_NPV_p_t+.R")
+source("counterfactuals/R/plot_PPV_NPV_p_t+.R")
 
 
 # define prevelance 
@@ -38,9 +32,8 @@ C_D_prev = drop_na(C_D_prev)
 
 
 
-#########################################################################
-# Results 
-#########################################################################
+################   Results ################  
+
 
 
 test_spec_pos_ag = calc_test_met_pos_ag(C_D_prev = C_D_prev, 
@@ -66,19 +59,6 @@ test_spec_pos_ag_50_fu = calc_test_met_pos_ag(C_D_prev = C_D_prev,
                                         y_axis_ticks = T,
                                         percent_follow_up = .5,
                                         title = "DNCOV follows 50% ANCOV+")
-
-test_spec_pos_ag_20_fu = calc_test_met_pos_ag(C_D_prev = C_D_prev, 
-                                              PCR_sens = 0.92 ,
-                                              Ag_sens_C = 0.643,
-                                              Ag_sens_D = 0.0,
-                                              Ag_spec = 0.985,
-                                              PCR_spec = 1,
-                                              proportion_Ag = 1,
-                                              x_axis_ticks = T,
-                                              y_axis_ticks = T,
-                                              percent_follow_up = .2,
-                                              title = "DNCOV follows 20% ANCOV+")
-
 
 
 
@@ -107,19 +87,6 @@ test_spec_neg_ag_50_fu = calc_test_met_neg_ag(C_D_prev = C_D_prev,
                                         y_axis_ticks = T,
                                         title = "DNCOV follows 50% ANCOV-",
                                         percent_follow_up = 0.50)
-
-
-test_spec_neg_ag_20_fu = calc_test_met_neg_ag(C_D_prev = C_D_prev, 
-                                              PCR_sens = 0.92 ,
-                                              Ag_sens_C = 0.643,
-                                              Ag_sens_D = 0.0,
-                                              Ag_spec = 0.985,
-                                              PCR_spec = 1,
-                                              proportion_Ag = 1,
-                                              x_axis_ticks = T,
-                                              y_axis_ticks = T,
-                                              title = "DNCOV follows 20% ANCOV-",
-                                              percent_follow_up = 0.20)
 
 
 

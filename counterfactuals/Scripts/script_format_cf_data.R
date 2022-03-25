@@ -1,20 +1,20 @@
-############################################################################
-# Set working directory and source used defined functions                  
-############################################################################
 
-setwd(
-  "C:/Users/bnc19/OneDrive - Imperial College London/SEIR italy cov/COV_Italy_multistrain_2/counterfactuals_V2/run_fixed_rstan"
-)
+################  format data to run counterfactuals ################  
+
+################  Set up ################  
+
+# rm(list = ls())
+#  setwd("Q:/testing_SARS-CoV-2_variants/model_fitting")
+
 
 library(tidyverse)
 library(Hmisc)
-source("R/Format_data_for_SEIQR_model.R")  # function to format external data based on seeding 
-source("R/Format_variant_data.R")
+source("counterfactuals/R/Format_data_for_SEIQR_model.R")  # function to format external data based on seeding 
+source("counterfactuals/R/Format_variant_data.R")
 
 
-#############################################################################
-# Import and define external data for Italy 
-#############################################################################
+
+################   Import and define external data for Italy ################  
 
 susceptible_italy =  59257566 - 4847026
 recovered_italy =  1482377 - 93401
@@ -32,13 +32,13 @@ recovered_italy =  1482377 - 93401
 # convert dates into date format and format daily data to match 
 
 formated_data_italy  = format_data_for_SEIQR_model(
-  read.csv("raw_data/dailyReportedIncidence_italy.csv")$new_case,
+  read.csv("model_fitting/data/dailyReportedIncidence_italy.csv")$new_case,
   c(0,0,0,0, 0,0,0,0,0,0.0003,0.0005, 0.0009 ,0.0014, 0.002),
-  round(read.csv("raw_data/Italy_monthly_test_data.csv")$pcr_daily_average),
-  round(read.csv("raw_data/Italy_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("raw_data/Italy_deaths.csv") ,
-  round(read.csv("raw_data/Italy_daily_test_data.csv")$pcr_daily) ,
-  round(read.csv("raw_data/Italy_daily_test_data.csv")$antigen_daily),
+  round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$pcr_daily_average),
+  round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$antigen_daily_average),
+  read.csv("model_fitting/data/Italy_deaths.csv") ,
+  round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$pcr_daily) ,
+  round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$antigen_daily),
   start_date = "01-05-2020",
   end_date = "31-05-2021",
   time_intervention = c("07-11-2020" , "15-03-2021"),
@@ -53,12 +53,12 @@ Italy_variant_data = Format_variant_data(
   index_Al = 9:14,
   start_date = "01-05-2020",
   end_date = "31-05-2021",
-  A_data = read.csv("raw_data/Dataset_Italy_A_v5.csv")$Freq_new,
-  M_data = read.csv("raw_data/Dataset_Italy_M_v5.csv")$Freq_new,
-  O_data = read.csv("raw_data/Dataset_Italy_O_v1.csv")$Freq_new,
-  Al_data = read.csv("raw_data/Dataset_Italy_Alpha_v1.csv") $Freq_new,
-  n_seq = read.csv("raw_data/Dataset_Italy_A_v5.csv")$TotSeq_new,
-  average_daily_reported_incidence = read.csv("raw_data/Dataset_Italy_A_v5.csv")$new_reported_cases_daily_new)
+  A_data = read.csv("model_fitting/data/Dataset_Italy_A_v5.csv")$Freq_new,
+  M_data = read.csv("model_fitting/data/Dataset_Italy_M_v5.csv")$Freq_new,
+  O_data = read.csv("model_fitting/data/Dataset_Italy_O_v1.csv")$Freq_new,
+  Al_data = read.csv("model_fitting/data/Dataset_Italy_Alpha_v1.csv") $Freq_new,
+  n_seq = read.csv("model_fitting/data/Dataset_Italy_A_v5.csv")$TotSeq_new,
+  average_daily_reported_incidence = read.csv("model_fitting/data/Dataset_Italy_A_v5.csv")$new_reported_cases_daily_new)
 
 x_i_data_italy = c(
   formated_data_italy[[2]]$n_months,
@@ -76,11 +76,11 @@ x_i_data_italy = c(
 
 
 
-write.csv(Italy_variant_data, "Italy/Italy_variant_data.csv")
-write.csv(x_i_data_italy, "Italy/x_i_data_italy.csv")
-write.csv(formated_data_italy[[3]]$average_monthly_vaccination_i, "Italy/average_daily_vaccination_i_italy.csv")
-write.csv(formated_data_italy[[1]]$daily_Ag_i, "Italy/daily_Ag_i_italy.csv")
-write.csv(formated_data_italy[[1]]$daily_PCR_i, "Italy/daily_PCR_i_italy.csv")
+write.csv(Italy_variant_data, "counterfactuals/Italy/Italy_variant_data.csv")
+write.csv(x_i_data_italy, "counterfactuals/Italy/x_i_data_italy.csv")
+write.csv(formated_data_italy[[3]]$average_monthly_vaccination_i, "counterfactuals/Italy/average_daily_vaccination_i_italy.csv")
+write.csv(formated_data_italy[[1]]$daily_Ag_i, "counterfactuals/Italy/daily_Ag_i_italy.csv")
+write.csv(formated_data_italy[[1]]$daily_PCR_i, "counterfactuals/Italy/daily_PCR_i_italy.csv")
 
 
 
@@ -106,13 +106,13 @@ recovered_ven =  93401
 # convert dates into date format and format daily data to match 
 
 formated_data_Veneto  = format_data_for_SEIQR_model(
-  read.csv("raw_data/dailyReportedIncidence.csv")$new_case,
+  read.csv("model_fitting/data/dailyReportedIncidence.csv")$new_case,
   c(0,0,0,0, 0,0,0,0,0,0.00043, 0.00039,0.00096,0.0018, 0.0028),
-  round(read.csv("raw_data/Veneto_monthly_test_data.csv")$pcr_daily_average),
-  round(read.csv("raw_data/Veneto_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("raw_data/Veneto_deaths.csv") ,
-  round(read.csv("raw_data/Veneto_daily_test_data.csv")$pcr_daily) ,
-  round(read.csv("raw_data/Veneto_daily_test_data.csv")$antigen_daily),
+  round(read.csv("model_fitting/data/Veneto_monthly_test_data.csv")$pcr_daily_average),
+  round(read.csv("model_fitting/data/Veneto_monthly_test_data.csv")$antigen_daily_average),
+  read.csv("model_fitting/data/Veneto_deaths.csv") ,
+  round(read.csv("model_fitting/data/Veneto_daily_test_data.csv")$pcr_daily) ,
+  round(read.csv("model_fitting/data/Veneto_daily_test_data.csv")$antigen_daily),
   start_date = "01-07-2020",
   end_date = "31-05-2021",
   time_intervention = c("15-11-2020" , "15-03-2021"),
@@ -127,12 +127,12 @@ index_O = c(5,7:9),
 index_Al = 9:14 ,
 start_date = "01-07-2020",
 end_date = "31-05-2021",
-A_data = read.csv("raw_data/Dataset_Veneto_A_v5.csv")$Freq ,
-M_data = read.csv("raw_data/Dataset_Veneto_M_v5.csv")$Freq ,
-O_data = read.csv("raw_data/Dataset_Veneto_O_v1.csv")$Freq ,
-Al_data = read.csv("raw_data/Dataset_Veneto_Alpha_v1.csv")$Freq ,
-n_seq = read.csv("raw_data/Dataset_Veneto_A_v5.csv")$TotSeq,
-average_daily_reported_incidence = read.csv("raw_data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily)
+A_data = read.csv("model_fitting/data/Dataset_Veneto_A_v5.csv")$Freq ,
+M_data = read.csv("model_fitting/data/Dataset_Veneto_M_v5.csv")$Freq ,
+O_data = read.csv("model_fitting/data/Dataset_Veneto_O_v1.csv")$Freq ,
+Al_data = read.csv("model_fitting/data/Dataset_Veneto_Alpha_v1.csv")$Freq ,
+n_seq = read.csv("model_fitting/data/Dataset_Veneto_A_v5.csv")$TotSeq,
+average_daily_reported_incidence = read.csv("model_fitting/data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily)
 
 x_i_data_Veneto = c(
   formated_data_Veneto[[2]]$n_months,
@@ -152,13 +152,13 @@ x_i_data_Veneto = c(
 ################ italy testing in veneto #######################
 
 formated_data_Veneto_I_test  = format_data_for_SEIQR_model(
-  read.csv("raw_data/dailyReportedIncidence.csv")$new_case,
+  read.csv("model_fitting/data/dailyReportedIncidence.csv")$new_case,
   c(0,0,0,0, 0,0,0,0,0,0.00043, 0.00039,0.00096,0.0018, 0.0028),
-  round(read.csv("raw_data/Italy_monthly_test_data.csv")$pcr_daily_average),
-  round(read.csv("raw_data/Italy_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("raw_data/Veneto_deaths.csv") ,
-  round(read.csv("raw_data/Italy_daily_test_data.csv")$pcr_daily) ,
-  round(read.csv("raw_data/Italy_daily_test_data.csv")$antigen_daily),
+  round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$pcr_daily_average),
+  round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$antigen_daily_average),
+  read.csv("model_fitting/data/Veneto_deaths.csv") ,
+  round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$pcr_daily) ,
+  round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$antigen_daily),
   start_date = "01-07-2020",
   end_date = "31-05-2021",
   time_intervention = c("15-11-2020" , "15-03-2021"),
@@ -182,12 +182,12 @@ x_i_data_Veneto_italy_test = c(
 
 
 
-write.csv(Veneto_variant_data, "Veneto/Veneto_variant_data.csv")
-write.csv(x_i_data_Veneto, "Veneto/x_i_data.csv")
-write.csv(formated_data_Veneto[[3]]$average_monthly_vaccination_i, "Veneto/average_daily_vaccination_i.csv")
-write.csv(formated_data_Veneto[[1]]$daily_Ag_i, "Veneto/daily_Ag_i.csv")
-write.csv(formated_data_Veneto[[1]]$daily_PCR_i, "Veneto/daily_PCR_i.csv")
-write.csv(x_i_data_Veneto_italy_test, "Veneto/x_i_data_Veneto_italy_test.csv")
-write.csv(formated_data_Veneto_I_test[[1]]$daily_Ag_i, "Veneto/daily_Ag_i_Itest.csv")
-write.csv(formated_data_Veneto_I_test[[1]]$daily_PCR_i, "Veneto/daily_PCR_i_Itest.csv")
+write.csv(Veneto_variant_data, "counterfactuals/Veneto/Veneto_variant_data.csv")
+write.csv(x_i_data_Veneto, "counterfactuals/Veneto/x_i_data.csv")
+write.csv(formated_data_Veneto[[3]]$average_monthly_vaccination_i, "counterfactuals/Veneto/average_daily_vaccination_i.csv")
+write.csv(formated_data_Veneto[[1]]$daily_Ag_i, "counterfactuals/Veneto/daily_Ag_i.csv")
+write.csv(formated_data_Veneto[[1]]$daily_PCR_i, "counterfactuals/Veneto/daily_PCR_i.csv")
+write.csv(x_i_data_Veneto_italy_test, "counterfactuals/Veneto/x_i_data_Veneto_italy_test.csv")
+write.csv(formated_data_Veneto_I_test[[1]]$daily_Ag_i, "counterfactuals/Veneto/daily_Ag_i_Itest.csv")
+write.csv(formated_data_Veneto_I_test[[1]]$daily_PCR_i, "counterfactuals/Veneto/daily_PCR_i_Itest.csv")
 

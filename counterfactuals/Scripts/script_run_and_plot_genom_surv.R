@@ -1,19 +1,20 @@
+
+################ run analysis and plot genomic detection of concordant and         ################ 
+################ discordant variants under alternative testing strategies  (fig 7) ################  
+
+
 ################   Set up  ################  
 
 
 # rm(list = ls())
+# setwd("Q:/testing_SARS-CoV-2_variants")
 
 library(tidyverse)
 library(cowplot)
 library(ggpubr)
 
 
-
-setwd(
-  "C:/Users/bnc19/OneDrive - Imperial College London/SEIR italy cov/COV_Italy_multistrain_2/counterfactuals_V2/run_fixed_rstan"
-)
-
-source("R/plot_variant_detection_prob.R")
+source("counterfactuals/R/plot_variant_detection_prob.R")
 
 
 ################  Produce plots ################
