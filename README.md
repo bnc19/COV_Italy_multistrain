@@ -89,15 +89,60 @@ Posterior distributions from fitting the multivariant model to epidemiological a
 
 * *x_i_data.csv* integer data provided to rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Veneto, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
-
 Data for counterfactual analysis where we assume that the proportion of ANCOV and DNCOV tests conducted in Veneto was the same as in the rest of Italy over the study period: 
 
 * *x_i_data_Veneto_italy_test.csv* integer data provided to rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Italy, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
-* * *daily_Ag_i_Itest.csv* Daily antigen tests administered in Italy during Veneto study period. 
+* *daily_Ag_i_Itest.csv* Daily antigen tests administered in Italy during Veneto study period. 
 
 * *daily_PCR_i_Itest.csv* Daily molecular tests administered in Italy during Veneto study period. 
 
+
+#### Scripts 
+
+The order of scripts presented here indicates the order in which the anaysis was conducted and is presented in the paper. Some scripts output results used in later scripts, however data and results are pre-provided so each script can also be run as as a standalone. 
+
+* *script_plot_proportion_antigen_test.R* Script to plot data on number of antigen and molecular tests in Veneto and Italy (Figure 1)
+
+* *script_format_cf_data.R* Script to format data to run counterfactuals. Takes external genomic and epidemiological data and user imputted dates to start and end study, seed variants and introduce introductions and formats data to imput to rstan model. 
+ 
+* *script_sample_posterior.R* Script to sample from posterior distribution obtained by running the multivariant rstan model in *model_fitting*. Also produces mean and 95% CrI from the 2.5 and 97.5 percentiles of the posterior distribution sample.
+ 
+* *script_run_main_analysis.R* Script to run the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce obseved data presented in the main analysis. Also runs the counterfactual testing scenarios for Veneto (assuming proportion of antigen and molecular tests conducted in Veneto was the same as in the rest of Italy over the study period; assuming a molecular test followed a negative antigen test; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 64.3%; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 87.5%; and assuming different scaling factors of R0M). 
+
+* *script_plot_model_fit_and_cf.R* Script to plot the transmission dynamics of all variants under the baseline testing scenario, the % of incidence that is reported, cumulative incidence obtained under counterfactual scenarios (Figure 5). 
+
+* *script_run_and_plot_test_performance.R* Script to estimate and plot the performance of alternative antigen and molecular based testing strategies in diagnosing  concordant and discordant variants (Figure 6).
+
+* *script_run_and_plot_genom_surv.R* Script to estimate and plot the proportion of genomic detection of concordant and discordant variants under alternative antigen and molecular based testing strategies (Figure 7). 
+
+* *script_plot_R0.R* Script to plot R0 as a function of proportion of molecular tests conducted (Figure S7)
+
+* *script_run_and_plot_sensitivity_analysis.R* Script to run and plot the results of the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce obseved data for a sensitivity analysis where antigen test sensitivity is assumed to be 87.5% (Figure S8). 
+
+
+#### Models 
+
+Fixed-parameter rstan models which take random samples of the posterior distribution obtained by running the multivariant rstan model in *model_fitting* as imput.
+
+* *stan_model.stan* - baseline model of testing in Veneto and the rest of Italy during the study period (molecular test follows a positive antigen test)
+
+* *stan_model_PCR_after_ag.stan* - counterfactual model of testing in Veneto where a molecular tests follows a negative antigen test. 
+
+* *stan_model_pPCR_0.stan* - counterfactual model of testing in Veneto where only antigen tests are used (i.e., no molecular testing). 
+
+#### R 
+The R folder contains the function used by the  scripts
+
+* *Format_data_for_SEIQR_model.R* Function to format posterior chains, variant and epidemiological data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
+
+* *Format_variant_data.R* Function to format variant-specific genomic data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
+
+* *replicate_rstan_fit.R* Functions to run multivariant models assuming fixed parameters. Required to run *script_run_main_analysis.R*.
+
+* *plot_PPV_NPV_p_t+.R* # Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
+
+* *plot_variant_detection_prob.R* # Function to calculate proportion of variant detected by genomic surveillance, dependent on  % samples sequenced, test sensitivity, variant prevalence,  and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
 
 
 
