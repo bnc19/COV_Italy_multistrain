@@ -36,12 +36,8 @@ run_SEIR_stan_Italy_sens = function(Al_data,
                                gamma = 1 / 2.1 ,
                                phi_Ag ,
                                phi_PCR , 
-                               NB = T, 
                                prior_seed_mean ,
-                               prior_seed_sd,
-                               deaths,
-                               rho_a,
-                               rho_b, AD = 0.8) {
+                               prior_seed_sd) {
   #########################################################
   # Load packages
   #########################################################
@@ -92,9 +88,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   time_switch2 =  which(daily_date == as.Date.character(time_intervention[2], format = "%d-%m-%Y"))
   seed_alpha =  which(daily_date == as.Date.character(time_seed_alpha, format = "%d-%m-%Y"))
   seed_M =  which(daily_date == as.Date.character(time_seed_M, format = "%d-%m-%Y"))
-  
-  
-  
+
   
   n_days = length(daily_date)
   n_months = round(n_days / 30)
@@ -112,8 +106,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   
   daily_Ag_i = daily_Ag[(length(daily_Ag) - n_days + 1):length(daily_Ag)]
   
-  deaths_i = deaths$cum_deaths[(length(deaths$cum_deaths )-n_days+1): length(deaths$cum_deaths )]
-  
+
   # format monthly data to length of seed plus data fitting 
   
   monthly_PCR_i = monthly_PCR[(length(monthly_PCR) - n_months + 1):length(monthly_PCR)]
@@ -208,12 +201,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
     month_index = index_1st_month,
     
     seed_mean = prior_seed_mean ,
-    seed_sd = prior_seed_sd,
-    rho_a = rho_a,
-    rho_b= rho_b,
-    rel_tol = 1e-4,
-    abs_tol = 1e-4,
-    max_num_steps=5000
+    seed_sd = prior_seed_sd
   )
   
   
@@ -230,18 +218,6 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   # run model
   #########################################################
   
-  if (NB == FALSE) {
-    SEIR__fit = sampling(
-      SEIR_model,
-      data = model_data,
-      init = ini_1_SEIR,
-      chains = n_chains,
-      warmup = n_warmups,
-      iter = n_iter,
-      thin = n_thin,
-      control = list(max_treedepth = 15)
-    )
-  } else if (NB == TRUE) {
     SEIR__fit = sampling(
       SEIR_model,
       data = model_data,
@@ -252,12 +228,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
       thin = n_thin,
       control = list(
         max_treedepth = 15,
-        adapt_delta = AD
-  
-      )
-    )
-  }
-  
+        adapt_delta = 0.97)) 
   
   SEIR__fit_summary = summary(SEIR__fit, pars = pars)$summary
   
@@ -297,40 +268,18 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   fit_SEIR_O = SEIR_fit_posts$reported_incidence[,, 3]
   fit_SEIR_Al = SEIR_fit_posts$reported_incidence[,, 4]
   
-  R_0_M = R0_chain_M = SEIR_fit_posts$R_0[, 1]
-  R_0_A = R0_chain_A = SEIR_fit_posts$R_0[, 2]
-  R_0_O = R0_chain_O = SEIR_fit_posts$R_0[, 3]
-  R_0_Al = R0_chain_Al = SEIR_fit_posts$R_0[, 4]
-  
-  pPCR_chain_daily =  SEIR_fit_posts$pPCR_daily
-  pPCR_chain_monthly = SEIR_fit_posts$pPCR
-  
-  
-  true_incidence_M = SEIR_fit_posts$true_incidence[, ,1]
-  true_incidence_A = SEIR_fit_posts$true_incidence[,, 2]
-  true_incidence_O = SEIR_fit_posts$true_incidence[,, 3]
-  true_incidence_Al = SEIR_fit_posts$true_incidence[,, 4]
-  
-  totalIncidence = SEIR_fit_posts$total_incidence ## true incidence not stratified by variant
-  susceptible = SEIR_fit_posts$susceptible
-  recovered = SEIR_fit_posts$recovered
-  
-  
+
   # list all variants
   
   reportedList = list(fit_SEIR_M, fit_SEIR_A, fit_SEIR_O, fit_SEIR_Al)  # reported incidence, plot against data
-  trueList = list(true_incidence_M, true_incidence_A, true_incidence_O, true_incidence_Al)  # true incidence 
-  
-  R0List = list(R_0_M, R_0_A, R_0_O, R_0_Al)  # R0 values
+
   dataList = list(M_data[index_M], A_data[index_A], O_data[index_O], Al_data[index_Al])  # data
   indexList = list(index_M_i, index_A_i, index_O_i, index_Al_i)  # index data by month
   
   # empty lists
-  Median = Lower = Upper = R0Est =  dataConf = dataDay =  trueMedian = trueLower = trueUpper = list()
-  cumulativeReportedMedian = cumulativeReportedLower = cumulativeReportedUpper = list()
-  cumulativeTrueMedian = cumulativeTrueLower = cumulativeTrueUpper = list()
-  
-  # calculate median and 95% CrI. Time = columns, iteratios = rows.
+  Median = Lower = Upper  =  dataConf = dataDay = list()
+ 
+  # calculate median and 95% CrI. Time = columns, iterations = rows.
   
   for (i in 1:length(dataList)) {
     # find the median of each column
@@ -338,41 +287,13 @@ run_SEIR_stan_Italy_sens = function(Al_data,
     Median[[i]] = apply(reportedList[[i]], 2, median)
     Lower[[i]] = apply(reportedList[[i]], 2, quantile, probs = c(0.025))
     Upper[[i]] = apply(reportedList[[i]], 2, quantile, probs = c(0.975))
-    
-    
-    
-    
-    R0Est[[i]] = quantile(R0List[[i]], probs = c(0.5, 0.025, 0.975))
-    
-    trueMedian[[i]] = apply(trueList[[i]], 2, median)
-    trueLower[[i]] = apply(trueList[[i]], 2, quantile, probs = c(0.025))
-    trueUpper[[i]] = apply(trueList[[i]], 2, quantile, probs = c(0.975))
-    
-    
-    # cumulatively sum across the rows (i.e. by day)
-    # this transposes the matrix, so then find the median of each row
-    
-    cumulativeReportedMedian[[i]] = apply(apply(reportedList[[i]], 1, cumsum), 1 , median)
-    cumulativeReportedLower[[i]]  = apply(apply(reportedList[[i]], 1, cumsum), 1 , quantile, probs =
-                                            c(0.025))
-    cumulativeReportedUpper[[i]]  = apply(apply(reportedList[[i]], 1, cumsum), 1 , quantile, probs =
-                                            c(0.975))
-    
-    cumulativeTrueMedian[[i]]  = apply(apply(trueList[[i]], 1, cumsum), 1 , median)
-    cumulativeTrueLower[[i]]  = apply(apply(trueList[[i]], 1, cumsum), 1 , quantile, probs =
-                                        c(0.025))
-    cumulativeTrueUpper[[i]]  = apply(apply(trueList[[i]], 1, cumsum), 1 , quantile, probs =
-                                        c(0.975))
-    
   }
   
   # account for seeding and aggregating from day to month
   
   monthly_date = daily_date[ which(as.numeric(format(daily_date, "%d")) == 1) ]
   
-  
-  
-  
+
   # calculate binomial confidence intervals
   
   for (i in 1:length(dataList)) {
@@ -422,61 +343,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   )
   
   
-  
-  trueIncidence = data.frame(dataDay[, 1], trueMedian, trueLower, trueUpper)
-  cumulativeTrueIncidence = data.frame(dataDay[, 1],
-                                       cumulativeTrueMedian,
-                                       cumulativeTrueLower,
-                                       cumulativeTrueUpper)
-  cumulativeReportedIncidence = data.frame(
-    dataDay[, 1],
-    cumulativeReportedMedian,
-    cumulativeReportedLower,
-    cumulativeReportedUpper
-  )
-  
-  
-  colNames = c(
-    "Date",
-    "M_fit_M",
-    "A_fit_M" ,
-    "O_fit_M",
-    "Al_fit_M",
-    "M_fit_L",
-    "A_fit_L" ,
-    "O_fit_L" ,
-    "Al_fit_L",
-    "M_fit_U",
-    "A_fit_U" ,
-    "O_fit_U",
-    "Al_fit_U"
-  )
-  
-  colnames(trueIncidence) = colNames
-  
-  colnames(cumulativeTrueIncidence) = colNames
-  
-  colnames(cumulativeReportedIncidence) = colNames
-  
-  
-  
-  
-  cumulativeTotalIncidenceRaw = apply(totalIncidence, 1, cumsum)
-  
-  
-  cumulativeTotalIncidence = t(round(apply(
-    cumulativeTotalIncidenceRaw,
-    1,
-    quantile,
-    probs = c(0.025, 0.5, 0.975)
-  )))# sum across the days
-  
-  
-  susc =  t(round(apply( susceptible,2,quantile, probs = c(0.025, 0.5, 0.975)  )))
-  recov =  t(round(apply( recovered,2,quantile, probs = c(0.025, 0.5, 0.975)  )))
-  
-  susc_recov = data.frame(susc,recov)
-  colnames(susc_recov) = c("S_M", "R_M", "S_L", "R_L", "S_U", "R_U")
+
   
   #### plot reported incidence against data #########
   
@@ -524,157 +391,12 @@ run_SEIR_stan_Italy_sens = function(Al_data,
     ggtitle(Location)
   
   
-  #### plot true incidence #########
-  
-  trueIncidencePlot = ggplot(trueIncidence, aes(x = Date, y = M_fit_M)) +
-    geom_ribbon(aes(ymin = M_fit_L, ymax = M_fit_U),
-                fill = "orange",
-                alpha = 0.5) +
-    geom_line(aes(y = M_fit_M, color = "M234I-A376T model"), size = 1) +
-    geom_ribbon(aes(ymin = A_fit_L, ymax = A_fit_U),
-                fill = "sky blue",
-                alpha = 0.5) +
-    geom_line(aes(y = A_fit_M, color = "A220V model"), size = 1) +
-    geom_ribbon(aes(ymin = O_fit_L, ymax = O_fit_U),
-                fill = "pink",
-                alpha = 0.5) +
-    geom_line(aes(y = O_fit_M, color = "Other model"), size = 1) +
-    geom_ribbon(aes(ymin = Al_fit_L, ymax = Al_fit_U),
-                fill = "lavender",
-                alpha = 0.5) +
-    geom_line(aes(y = Al_fit_M, color = "Alpha model"), size = 1) +
-    scale_colour_manual(
-      name = '',
-      values = c(
-        'M234I-A376T model' = 'orange',
-        'A220V model' = 'sky blue',
-        'Other model' = 'pink',
-        'Alpha model' = 'lavender'
-      )
-    ) +
-    labs(x = "Date", y = paste0("Incidence")) +
-    theme_bw() + theme(text = element_text(size = 16)) +
-    scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
-    ggtitle(Location)
-  
-  
-  #### plot cumulative reported incidence #########
-  cumulativeReportedIncidence$Reported = cumsum(daily_reported_incidence_i)
-  cumulativeReportedIncidence$Total_M = rowSums(cumulativeReportedIncidence[, 2:5])
-  cumulativeReportedIncidence$Total_L = rowSums(cumulativeReportedIncidence[, 6:9])
-  cumulativeReportedIncidence$Total_U = rowSums(cumulativeReportedIncidence[, 10:13])
-  
-  
-  cumulativeReportedIncidencePlot = ggplot(cumulativeReportedIncidence, aes(x =
-                                                                              Date, y = M_fit_M)) +
-    geom_ribbon(aes(ymin = M_fit_L, ymax = M_fit_U),
-                fill = "orange",
-                alpha = 0.5) +
-    geom_line(aes(y = M_fit_M, color = "M234I-A376T model"), size = 1) +
-    geom_ribbon(aes(ymin = A_fit_L, ymax = A_fit_U),
-                fill = "sky blue",
-                alpha = 0.5) +
-    geom_line(aes(y = A_fit_M, color = "A220V model"), size = 1) +
-    geom_ribbon(aes(ymin = O_fit_L, ymax = O_fit_U),
-                fill = "pink",
-                alpha = 0.5) +
-    geom_line(aes(y = O_fit_M, color = "Other model"), size = 1) +
-    geom_ribbon(aes(ymin = Al_fit_L, ymax = Al_fit_U),
-                fill = "lavender",
-                alpha = 0.5) +
-    geom_line(aes(y = Al_fit_M, color = "Alpha model"), size = 1) +
-    geom_line(aes(y = Reported, color = "Overall data"), size = 1) +
-    geom_line(aes(y = Total_M, color = "Overall model"), size = 1) +
-    geom_ribbon(aes(ymin = Total_L, ymax = Total_U),
-                fill = "grey",
-                alpha = 0.5) +
-    
-    
-    
-    scale_colour_manual(
-      name = '',
-      values = c(
-        'M234I-A376T model' = 'orange',
-        'A220V model' = 'sky blue',
-        'Other model' = 'pink',
-        'Alpha model' = 'lavender' ,
-        'Overall data' = 'black',
-        'Overall model' = 'grey'
-      )
-    ) +
-    labs(x = "Date", y = paste0("Incidence")) +
-    theme_bw() + theme(text = element_text(size = 16)) +
-    scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
-    ggtitle(Location)
-  
-  
-  #### plot cumulative true incidence #########
-  cumulativeTrueIncidence$Overall_L = cumulativeTotalIncidence[, 1]
-  cumulativeTrueIncidence$Overall_M = cumulativeTotalIncidence[, 2]
-  cumulativeTrueIncidence$Overall_U = cumulativeTotalIncidence[, 3]
-  
-  cumulativeTrueIncidencePlot = ggplot(cumulativeTrueIncidence, aes(x =
-                                                                      Date, y = M_fit_M)) +
-    geom_ribbon(aes(ymin = M_fit_L, ymax = M_fit_U),
-                fill = "orange",
-                alpha = 0.5) +
-    geom_line(aes(y = M_fit_M, color = "M234I-A376T model"), size = 1) +
-    geom_ribbon(aes(ymin = A_fit_L, ymax = A_fit_U),
-                fill = "sky blue",
-                alpha = 0.5) +
-    geom_line(aes(y = A_fit_M, color = "A220V model"), size = 1) +
-    geom_ribbon(aes(ymin = O_fit_L, ymax = O_fit_U),
-                fill = "pink",
-                alpha = 0.5) +
-    geom_line(aes(y = O_fit_M, color = "Other model"), size = 1) +
-    geom_ribbon(aes(ymin = Al_fit_L, ymax = Al_fit_U),
-                fill = "lavender",
-                alpha = 0.5) +
-    geom_line(aes(y = Al_fit_M, color = "Alpha model"), size = 1) +
-    geom_ribbon(aes(ymin = Overall_L, ymax = Overall_U),
-                fill = "grey",
-                alpha = 0.5) +
-    geom_line(aes(y = Overall_M, color = "Overall"), size = 1) +
-    scale_colour_manual(
-      name = '',
-      values = c(
-        'M234I-A376T model' = 'orange',
-        'A220V model' = 'sky blue',
-        'Other model' = 'pink',
-        'Alpha model' = 'lavender' ,
-        'Overall' = 'black'
-      )
-    ) +
-    labs(x = "Date", y = paste0("Incidence")) +
-    theme_bw() + theme(text = element_text(size = 16)) +
-    scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
-    ggtitle(Location)
-  
-  
   
   
   ### compile data ###
   
-  names(R0Est) = c("M234I-A376T", "A220V", "Other", "Alpha")
-  R0Post = round(t(data.frame(R0Est)), 2)
-  
-  
+ 
   reportedIncidence[, -1] =  round(reportedIncidence[, -1])
-  trueIncidence[, -1] =  round(trueIncidence[, -1])
-  cumulativeReportedIncidence[, -1] =  round(cumulativeReportedIncidence[, -1])
-  cumulativeTrueIncidence[, -1] =  round(cumulativeTrueIncidence[, -1])
-  
-  
-  Cum_death = tail(deaths_i, 1)
-  
-  IFRRaw = Cum_death / tail(cumulativeTotalIncidenceRaw, 1)  * 100
-  
-  IFR = quantile(IFRRaw, probs = c(0.025, 0.5, 0.975))
-  finalCumulativeIncidence = as.numeric(tail(cumulativeTotalIncidence, 1))
-  proportionInfected = finalCumulativeIncidence / (n_pop - n_recov)
-  
-  IFRcumulativeIncidence = round(data.frame(IFR, finalCumulativeIncidence, proportionInfected),
-                                 2)
   
   
   beta_chain_M =  SEIR_fit_posts$beta[,1]
@@ -706,50 +428,12 @@ run_SEIR_stan_Italy_sens = function(Al_data,
     unit = "cm",
     dpi = 720
   )
-  ggsave(
-    trueIncidencePlot,
-    file = paste0(filePath, "/trueIncidencePlot.jpg"),
-    height = 20,
-    width = 30,
-    unit = "cm",
-    dpi = 720
-  )
-  ggsave(
-    cumulativeReportedIncidencePlot,
-    file = paste0(filePath, "/cumulativeReportedIncidencePlot.jpg"),
-    height = 20,
-    width = 30,
-    unit = "cm",
-    dpi = 720
-  )
-  ggsave(
-    cumulativeTrueIncidencePlot,
-    file = paste0(filePath, "/cumulativeTrueIncidencePlot.jpg"),
-    height = 20,
-    width = 30,
-    unit = "cm",
-    dpi = 720
-  )
-  
-  
-  write.csv(R0Post, file =  paste0(filePath, "/R0Post.csv"))
+
   write.csv(posteriorChains, file =  paste0(filePath, "/posteriorChains.csv"))
-  write.csv(IFRcumulativeIncidence,
-            file =  paste0(filePath, "/IFRcumulativeIncidence.csv"))
-  
-  write.csv(trueIncidence, file = paste0(filePath,  "/trueIncidence.csv"))
+ 
   write.csv(reportedIncidence,
             file = paste0(filePath,  "/reportedIncidence.csv"))
-  write.csv(
-    cumulativeReportedIncidence,
-    file = paste0(filePath,  "/cumulativeReportedIncidence.csv"))
-  
-  write.csv(cumulativeTrueIncidence,
-            file = paste0(filePath,  "/cumulativeTrueIncidence.csv"))
-  #  write.csv(cumulativeTotalIncidence, file = paste0(filePath,  "/cumulativeTotalIncidence.csv"))
-  
-  write.csv(susc_recov , file = paste0(filePath, "/Susc_Rec.csv"))
-  
+
   return(SEIR__fit)
   
 }
