@@ -1,17 +1,15 @@
-# COV_Italy_multistrain
-
-## Repository structure
+# Repository structure
 
 This repository is divided into 2 sections: 
 
 * *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto (between July 2020-May 2021) and the rest of Italy (between May 2020-2021), separately. 
 * *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures from the manuscript. 
 
-### *model_fitting*
+## *model_fitting*
 
 **This folder contains**
 
-#### Data
+### Data
 
 * *Dataset_Italy_A_v5.csv*, *Dataset_Italy_Alpha_v1.csv*, *Dataset_Italy_M_v5.csv*, *Dataset_Italy_O_v1.csv*: 
 For Italy excluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data on the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
@@ -37,23 +35,23 @@ For Italy excluding Veneto, data on the mean daily per-capita number of second d
 * *Vac_Veneto_For_Month.csv*
 For Veneto, data on the mean daily per-capita number of second doses administered in month M, obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
-#### Scripts 
+### Scripts 
 * fit_SEIR_model_on_cluster.R is the main script to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
 
-#### Model 
+### Model 
 * *neg_bin_sens.stan* Rstan model to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy, assuming a negative binomial likelihood. 
 
-#### R
+### R
 The R folder contains the function used by the main script
  * *run_testing_rstan_sens.R* 
 
 
 
-### *counterfactuals*
+## *counterfactuals*
 
 **This folder contains**
 
-#### Italy 
+### Italy 
 The Italy folder contains data pertaining to Italy exluding the Veneto region. 
 
 * *posteriorChains.csv*, *posteriorChains_sens.csv*:
@@ -71,7 +69,7 @@ Posterior distributions from fitting the multivariant model to epidemiological a
 
 * *x_i_data_italy.csv* integer data provided to Rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
-#### Veneto 
+### Veneto 
 The Veneto folder contains data pertaining to the Italian region of Veneto. 
 
 * *posteriorChains.csv*, *posteriorChains_sens.csv*:
@@ -98,7 +96,7 @@ Data for counterfactual analysis where we assume that the proportion of ANCOV an
 * *daily_PCR_i_Itest.csv* Daily molecular tests administered in Italy during Veneto study period. 
 
 
-#### Scripts 
+### Scripts 
 
 The order of scripts presented here indicates the order in which the analysis was conducted and is presented in the paper. Some scripts output results used in later scripts, however data and results are pre-provided so each script can also be run as a standalone. 
 
@@ -121,7 +119,7 @@ The order of scripts presented here indicates the order in which the analysis wa
 * *script_run_and_plot_sensitivity_analysis.R* Script to run and plot the results of the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce observed data for a sensitivity analysis where antigen test sensitivity is assumed to be 87.5% (Figure S8). 
 
 
-#### Models 
+### Models 
 
 Fixed-parameter Rstan models which take random samples of the posterior distribution obtained by running the multivariant Rstan model in *model_fitting* as input.
 
@@ -131,7 +129,7 @@ Fixed-parameter Rstan models which take random samples of the posterior distribu
 
 * *stan_model_pPCR_0.stan* - counterfactual model of testing in Veneto where only antigen tests are used (i.e., no molecular testing). 
 
-#### R 
+### R 
 The R folder contains the function used by the scripts
 
 * *Format_data_for_SEIQR_model.R* Function to format posterior chains and genomic and epidemiological data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
@@ -146,7 +144,7 @@ The R folder contains the function used by the scripts
 
 
 
-### References 
+## References 
 (1) Elbe, S. & Buckland‐Merrett, G. Data, disease, and diplomacy: GISAID’s innovative contribution to global health. Global challenges 1, 33-46 (2017).
 
 (2) Civile, P.d.C.d.M.-D.d.P. Dati COVID-19 Italia. 2021. [cited 3 March 2022] Available from:https://github.com/pcm-dpc/COVID-19 
