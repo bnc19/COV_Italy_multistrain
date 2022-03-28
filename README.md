@@ -12,7 +12,7 @@ This repository is divided into 3 sections:
 **This folder contains**
 
 * *S2.xlsx* -  data on frequency of variants carying concordant and discordant mutations during the study period in Veneto and the rest of Italy 
-* *S2.RMD* 
+* *S2.Rmd* - Rmarkdown file to run anal
 
 ## *model_fitting*
 
