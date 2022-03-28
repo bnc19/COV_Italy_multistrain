@@ -148,5 +148,7 @@ The R folder contains the function used by the scripts
 
 ### References 
 (1) Elbe, S. & Buckland‐Merrett, G. Data, disease, and diplomacy: GISAID’s innovative contribution to global health. Global challenges 1, 33-46 (2017).
-(2) Civile, P.d.C.d.M.-D.d.P. Dati COVID-19 Italia. 2021.
-(3) Commissario straordinario per l'emergenza Covid-19 - Presidenza del Consiglio dei Ministri. Open Data su consegna e somministrazione dei vaccini anti COVID-19 in Italia.  2021 16th November 2021 [cited 3 March 2022] Available from: https://github.com/italia/covid19
+
+(2) Civile, P.d.C.d.M.-D.d.P. Dati COVID-19 Italia. 2021. [cited 3 March 2022] Available from:https://github.com/pcm-dpc/COVID-19 
+
+(3) Commissario straordinario per l'emergenza Covid-19 - Presidenza del Consiglio dei Ministri. Open Data su consegna e somministrazione dei vaccini anti COVID-19 in Italia. 2021 16th November 2021 [cited 3 March 2022] Available from: https://github.com/italia/covid19
