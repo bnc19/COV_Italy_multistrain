@@ -5,7 +5,7 @@
 This repository is divided into 2 sections: 
 
 * *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto (between July 2020-May 2021) and the rest of Italy (between May 2020-2021), separately. 
-* *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivitiy analyses, code to calculate test performance metrics and estimate varaint detection by genomic surveillance, and code to produce figures from the manuscript. 
+* *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures from the manuscript. 
 
 ### *model_fitting*
 
@@ -13,35 +13,35 @@ This repository is divided into 2 sections:
 
 #### Data
 
-* *Dataset_Italy_A_v5.csv*, *Dataset_Italy_Alpha_v1.csv*, *Dataset_Italy_M_v5.csv*, *Dataset_Italy_O_v1.csv* : 
-For Italy exluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained obtained from the Civil Protection (2).  
+* *Dataset_Italy_A_v5.csv*, *Dataset_Italy_Alpha_v1.csv*, *Dataset_Italy_M_v5.csv*, *Dataset_Italy_O_v1.csv*: 
+For Italy excluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
 
 * *Dataset_Veneto_A_v5.csv*, *Dataset_Veneto_Alpha_v1.csv*, *Dataset_Veneto_M_v5.csv*, *Dataset_Veneto_O_v1.csv*:
-For Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained obtained from the Civil Protection (2).  
+For Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
 
-* *Italy_daily_test_data.csv*, *Italy_monthly_test_data.csv* : 
-For Italy exluding Veneto,  data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month M, obtained from the Civil Protection (2). 
+* *Italy_daily_test_data.csv*, *Italy_monthly_test_data.csv*: 
+For Italy excluding Veneto, data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month M, obtained from the Civil Protection (2). 
 
-* *Veneto_daily_test_data.csv*, *Veneto_monthly_test_data.csv* : 
-For Veneto,  data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month M, obtained from the Civil Protection (2). 
+* *Veneto_daily_test_data.csv*, *Veneto_monthly_test_data.csv*: 
+For Veneto, data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month M, obtained from the Civil Protection (2). 
 
-* *dailyReportedIncidence_italy.csv* :
-For Italy exluding Veneto, data on the daily reported incidence, obtained obtained from the Civil Protection (2).  
+* *dailyReportedIncidence_italy.csv*:
+For Italy excluding Veneto, data on the daily reported incidence, obtained from the Civil Protection (2).  
 
-* *dailyReportedIncidence_veneto.csv* :
-For Veneto, data on the daily reported incidence, obtained obtained from the Civil Protection (2).  
+* *dailyReportedIncidence_veneto.csv*:
+For Veneto, data on the daily reported incidence, obtained from the Civil Protection (2).  
 
 * *Vac_Italy_For_Month.csv*
-For Italy exluding Veneto, data on the mean daily per-capita number of second doses administered in month M, obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
+For Italy excluding Veneto, data on the mean daily per-capita number of second doses administered in month M, obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
 * *Vac_Veneto_For_Month.csv*
 For Veneto, data on the mean daily per-capita number of second doses administered in month M, obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
 #### Scripts 
-* fit_SEIR_model_on_cluster.R is the main script to to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
+* fit_SEIR_model_on_cluster.R is the main script to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
 
 #### Model 
-* *neg_bin_sens.stan* R stan model to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy, assuming a negative binomial likelihood. 
+* *neg_bin_sens.stan* Rstan model to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy, assuming a negative binomial likelihood. 
 
 #### R
 The R folder contains the function used by the main script
@@ -56,12 +56,12 @@ The R folder contains the function used by the main script
 #### Italy 
 The Italy folder contains data pertaining to Italy exluding the Veneto region. 
 
-* *posteriorChains.csv*, *posteriorChains_sens.csv* :
+* *posteriorChains.csv*, *posteriorChains_sens.csv*:
 Posterior distributions from fitting the multivariant model to epidemiological and genomic data from Italy excluding Veneto in Rstan, assuming an antigen test sensitivity of 64.3% (main analysis) or 87.5% (sensitivity analysis). 
 
 * *100_posterior_samples_italy.csv*, *100_posterior_samples_italy_sens.csv* 100 random samples of the posterior distributions, assuming an antigen test sensitivity of 64.3% (main analysis) or 87.5% (sensitivity analysis), obtained using the script *script_sample_posterior.R*. 
 
-* *Italy_variant_data.csv*  Mean and 95% CI daily variant specific incidence in month M, assumed to be the 1st of each month, derived from the available epidemiological and genomic data.
+* *Italy_variant_data.csv* Mean and 95% CI daily variant specific incidence in month M, assumed to be the 1st of each month, derived from the available epidemiological and genomic data.
 
 * *average_daily_vaccination_i_italy.csv* Mean daily vaccination in month M during Italy study period. 
 
@@ -69,17 +69,17 @@ Posterior distributions from fitting the multivariant model to epidemiological a
 
 * *daily_PCR_i_italy.csv* Daily molecular tests administered during Italy study period. 
 
-* *x_i_data_italy.csv* integer data provided to rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
+* *x_i_data_italy.csv* integer data provided to Rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
 #### Veneto 
 The Veneto folder contains data pertaining to the Italian region of Veneto. 
 
-* *posteriorChains.csv*, *posteriorChains_sens.csv* :
+* *posteriorChains.csv*, *posteriorChains_sens.csv*:
 Posterior distributions from fitting the multivariant model to epidemiological and genomic data from Veneto in Rstan, assuming an antigen test sensitivity of 64.3% (main analysis) or 87.5% (sensitivity analysis). 
 
 * *100_posterior_samples_veneto.csv*, *100_posterior_samples_veneto_sens.csv* 100 random samples of the posterior distributions, assuming an antigen test sensitivity of 64.3% (main analysis) or 87.5% (sensitivity analysis), obtained using the script *script_sample_posterior.R*. 
 
-* *Veneto_variant_data.csv*  Mean and 95% CI daily variant specific incidence in month M, assumed to be the 1st of each month, derived from the available epidemiological and genomic data.
+* *Veneto_variant_data.csv* Mean and 95% CI daily variant specific incidence in month M, assumed to be the 1st of each month, derived from the available epidemiological and genomic data.
 
 * *average_daily_vaccination_i.csv* Mean daily vaccination in month M during Veneto study period. 
 
@@ -87,11 +87,11 @@ Posterior distributions from fitting the multivariant model to epidemiological a
 
 * *daily_PCR_i.csv* Daily molecular tests administered during Veneto study period. 
 
-* *x_i_data.csv* integer data provided to rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Veneto, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
+* *x_i_data.csv* integer data provided to Rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Veneto, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
 Data for counterfactual analysis where we assume that the proportion of ANCOV and DNCOV tests conducted in Veneto was the same as in the rest of Italy over the study period: 
 
-* *x_i_data_Veneto_italy_test.csv* integer data provided to rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Italy, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
+* *x_i_data_Veneto_italy_test.csv* integer data provided to Rstan. Includes: Number of months to run the model, vector position of the first of each month, monthly average number of antigen and molecular tests administered in Italy, population assumed to be susceptible at the start of the study period (S comp), population assumed to have immunity at the start of the study period (R comp), number of days to run the model, time point interventions were implemented, time point to seed M234I-A376T and alpha variants.  
 
 * *daily_Ag_i_Itest.csv* Daily antigen tests administered in Italy during Veneto study period. 
 
@@ -100,41 +100,41 @@ Data for counterfactual analysis where we assume that the proportion of ANCOV an
 
 #### Scripts 
 
-The order of scripts presented here indicates the order in which the anaysis was conducted and is presented in the paper. Some scripts output results used in later scripts, however data and results are pre-provided so each script can also be run as as a standalone. 
+The order of scripts presented here indicates the order in which the analysis was conducted and is presented in the paper. Some scripts output results used in later scripts, however data and results are pre-provided so each script can also be run as a standalone. 
 
 * *script_plot_proportion_antigen_test.R* Script to plot data on number of antigen and molecular tests in Veneto and Italy (Figure 1)
 
-* *script_format_cf_data.R* Script to format data to run counterfactuals. Takes external genomic and epidemiological data and user imputted dates to start and end study, seed variants and introduce introductions and formats data to imput to rstan model. 
+* *script_format_cf_data.R* Script to format data to run counterfactuals. Takes external genomic and epidemiological data and user defined dates (e.g., start and end of the study period, variant seeding, and interventions) and returns data in the required format to run the Rstan models.  
  
-* *script_sample_posterior.R* Script to sample from posterior distribution obtained by running the multivariant rstan model in *model_fitting*. Also produces mean and 95% CrI from the 2.5 and 97.5 percentiles of the posterior distribution sample.
+* *script_sample_posterior.R* Script to sample from posterior distribution obtained by running the multivariant Rstan model in *model_fitting*. Also produces mean and 95% CrI from the 2.5 and 97.5 percentiles of the posterior distribution sample.
  
-* *script_run_main_analysis.R* Script to run the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce obseved data presented in the main analysis. Also runs the counterfactual testing scenarios for Veneto (assuming proportion of antigen and molecular tests conducted in Veneto was the same as in the rest of Italy over the study period; assuming a molecular test followed a negative antigen test; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 64.3%; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 87.5%; and assuming different scaling factors of R0M). 
+* *script_run_main_analysis.R* Script to run the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce observed data presented in the main analysis. Also runs the counterfactual testing scenarios for Veneto (assuming proportion of antigen and molecular tests conducted in Veneto was the same as in the rest of Italy over the study period; assuming a molecular test followed a negative antigen test; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 64.3%; assuming an antigen-based mass testing strategy and an antigen test sensitivity of 87.5%; and assuming different scaling factors of R0M). 
 
 * *script_plot_model_fit_and_cf.R* Script to plot the transmission dynamics of all variants under the baseline testing scenario, the % of incidence that is reported, cumulative incidence obtained under counterfactual scenarios (Figure 5). 
 
-* *script_run_and_plot_test_performance.R* Script to estimate and plot the performance of alternative antigen and molecular based testing strategies in diagnosing  concordant and discordant variants (Figure 6).
+* *script_run_and_plot_test_performance.R* Script to estimate and plot the performance of alternative antigen and molecular based testing strategies in diagnosing concordant and discordant variants (Figure 6).
 
 * *script_run_and_plot_genom_surv.R* Script to estimate and plot the proportion of genomic detection of concordant and discordant variants under alternative antigen and molecular based testing strategies (Figure 7). 
 
 * *script_plot_R0.R* Script to plot R0 as a function of proportion of molecular tests conducted (Figure S7)
 
-* *script_run_and_plot_sensitivity_analysis.R* Script to run and plot the results of the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce obseved data for a sensitivity analysis where antigen test sensitivity is assumed to be 87.5% (Figure S8). 
+* *script_run_and_plot_sensitivity_analysis.R* Script to run and plot the results of the baseline model of testing in Veneto and the rest of Italy (molecular tests follows positive antigen test) to reproduce observed data for a sensitivity analysis where antigen test sensitivity is assumed to be 87.5% (Figure S8). 
 
 
 #### Models 
 
-Fixed-parameter rstan models which take random samples of the posterior distribution obtained by running the multivariant rstan model in *model_fitting* as imput.
+Fixed-parameter Rstan models which take random samples of the posterior distribution obtained by running the multivariant Rstan model in *model_fitting* as input.
 
-* *stan_model.stan* - baseline model of testing in Veneto and the rest of Italy during the study period (molecular test follows a positive antigen test)
+* *stan_model.stan* - baseline model of testing in Veneto and the rest of Italy during the study period (molecular test follows a positive antigen test).
 
 * *stan_model_PCR_after_ag.stan* - counterfactual model of testing in Veneto where a molecular tests follows a negative antigen test. 
 
 * *stan_model_pPCR_0.stan* - counterfactual model of testing in Veneto where only antigen tests are used (i.e., no molecular testing). 
 
 #### R 
-The R folder contains the function used by the  scripts
+The R folder contains the function used by the scripts
 
-* *Format_data_for_SEIQR_model.R* Function to format posterior chains, variant and epidemiological data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
+* *Format_data_for_SEIQR_model.R* Function to format posterior chains and genomic and epidemiological data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
 
 * *Format_variant_data.R* Function to format variant-specific genomic data to run multivariant models assuming fixed parameters. Required to run *script_format_cf_data.R*. 
 
@@ -142,11 +142,11 @@ The R folder contains the function used by the  scripts
 
 * *plot_PPV_NPV_p_t+.R* # Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
 
-* *plot_variant_detection_prob.R* # Function to calculate proportion of variant detected by genomic surveillance, dependent on  % samples sequenced, test sensitivity, variant prevalence,  and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
+* *plot_variant_detection_prob.R* # Function to calculate proportion of variant detected by genomic surveillance, dependent on % samples sequenced, test sensitivity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
 
 
 
 ### References 
-(1) Elbe, S. & Buckland‐Merrett, G. Data, disease and diplomacy: GISAID’s innovative contribution to global health. Global challenges 1, 33-46 (2017).
+(1) Elbe, S. & Buckland‐Merrett, G. Data, disease, and diplomacy: GISAID’s innovative contribution to global health. Global challenges 1, 33-46 (2017).
 (2) Civile, P.d.C.d.M.-D.d.P. Dati COVID-19 Italia. 2021.
-(3) Commissario straordinario per l'emergenza Covid-19 - Presidenza del Consiglio dei Ministri. Open Data su consegna e somministrazione dei vaccini anti COVID-19 in Italia.  2021 16th November 2021 [cited  3 March 2022]Available from: https://github.com/italia/covid19-opendata-vaccini
+(3) Commissario straordinario per l'emergenza Covid-19 - Presidenza del Consiglio dei Ministri. Open Data su consegna e somministrazione dei vaccini anti COVID-19 in Italia.  2021 16th November 2021 [cited 3 March 2022] Available from: https://github.com/italia/covid19
