@@ -38,9 +38,9 @@ run_SEIR_stan_Italy_sens = function(Al_data,
                                phi_PCR , 
                                prior_seed_mean ,
                                prior_seed_sd) {
-  #########################################################
-  # Load packages
-  #########################################################
+
+  ########## Load packages    ########## 
+  
   library(dplyr)
   library(ggplot2)
   library(rstan)
@@ -51,11 +51,9 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   
   
   
-  #########################################################
-  # If index not given, no missing data
-  #########################################################
-  
-  
+
+  ##########  If index not given, no missing data   ########## 
+
   # index for GISAID data
   
   if (is.null(index_A)) {
@@ -74,9 +72,9 @@ run_SEIR_stan_Italy_sens = function(Al_data,
     index_Al = 1:length(Al_data)
   }
   
-  #########################################################
-  # data wrangling to work with dates
-  #########################################################
+
+  ##########  data wrangling to work with dates   ########## 
+
   
   
   start_date_d = as.Date.character(start_date, format = "%d-%m-%Y")
@@ -131,9 +129,9 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   index_Al_i  = index_Al - (length(Al_data)- n_months)
   
   
-  #########################################################
-  # data as list for Stan model ####
-  #########################################################
+
+  ##########  data as list for Stan model  ########## 
+
   
   model_data = list(
     n_data_A  =  length(index_A),
@@ -205,18 +203,14 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   )
   
   
-  
-  
-  #########################################################
-  # set up model
-  #########################################################
+  ##########  set up model   ########## 
+
   
   SEIR_model = stan_model(modelPath)
   
   
-  #########################################################
-  # run model
-  #########################################################
+
+  ##########  run model    ########## 
   
     SEIR__fit = sampling(
       SEIR_model,
@@ -236,11 +230,9 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   write.csv(SEIR__fit_summary, file = paste0(filePath, "/posterior.csv"))
   
   
-  #########################################################
-  # diagnostics
-  #########################################################
-  
-  
+
+  ########## diagnostics   ########## 
+
   SEIR_fit_posterior = as.array(SEIR__fit)
   color_scheme_set("viridis")
   
@@ -254,10 +246,8 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   ggsave(param_pairs, file = paste0(filePath, "/param_pairs.jpg"))
   
   
-  #########################################################
-  # plot model and cases
-  ########################################################
-  
+
+  ##########  plot model and cases   ########## 
   
   # extract data from posterior
   SEIR_fit_posts =  rstan::extract(SEIR__fit)
@@ -345,7 +335,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   
 
   
-  #### plot reported incidence against data #########
+  ########## plot reported incidence against data  ########## 
   
   reportedIncidencePlot = ggplot(reportedIncidence, aes(x = Date, y = M_Variant_M)) +
     geom_point(shape = 19, size = 3, (aes(color = "M234I-A376T"))) +
@@ -393,7 +383,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   
   
   
-  ### compile data ###
+  ########## compile data  ########## 
   
  
   reportedIncidence[, -1] =  round(reportedIncidence[, -1])
@@ -419,7 +409,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   posteriorChains = data.frame(R0_chain_M,R0_chain_A,R0_chain_O,R0_chain_Al, beta_chain_A, beta_chain_M, beta_chain_O, beta_chain_Al,
                                rho_chain, omega1_chain, omega2_chain,k_chain, I0_chain_M, I0_chain_A, I0_chain_O, I0_chain_Al )
   
-  ####### Save plots and Data   #######
+  ########## Save plot and Data  ########## 
   ggsave(
     reportedIncidencePlot,
     file = paste0(filePath, "/reportedIncidencePlot.jpg"),
