@@ -123,8 +123,8 @@ functions {
   
     if (t < seed_M){
     I_M = y[3] ; 
-  } else if (t >= seed_M) {    //seed M when t hits correct date 
-  I_M = y[3] + I0_M;       // n.b. it says when t >= seed_m but have checked it only seeds once at time seed_M
+  } else if (t >= seed_M) {    // seed M when t hits correct date 
+  I_M = y[3] + I0_M;       
   }
   
   E_A = y[4] ;
@@ -150,7 +150,6 @@ functions {
 // testing and vaccine is time dependent 
 // vec is a vector which index by the first of each month for n_months + 1
 // this allows to sequence over time and extract the right N_PCR or N_Ag or vaccine rate for the rate month 
-// this for loop works when I test it outside of R, I thought it was working within Rstan but maybe its not
 
 
 index = 1;
@@ -200,10 +199,10 @@ index = 1;
   beta_Al = (1- omega) * theta[4];
   
   
-   N = S0 ;   // I tried to define N as the sum of all state variables, so that it increases when we add the late seeds of Al and M varaints but rstan won't work 
+   N = S0 ;   
    
  
-//  calculate p+ and pPCR. I assume this is redone at each step using the current values but can't be 100% certain. 
+//  calculate p+ and pPCR.
   
     p = (sigma * E_A + sigma * E_O + sigma * E_Al) / N ;
             
@@ -299,13 +298,7 @@ data {
   
   real seed_mean ;  // prior mean and SD for variant seeding (so can change betwen Veneto and Italy)
   real seed_sd ; 
-  real rho_a;
-  real rho_b;
-  
-  real   rel_tol ;
-  real    abs_tol ;
-  real   max_num_steps;
-  
+
 }
 
 transformed data {
@@ -342,17 +335,14 @@ transformed parameters{
   for (i in 1:n_days){
     p_daily[i] = ( sigma * y_hat[i,4]  +  sigma *y_hat[i,6] +  sigma *y_hat[i,8]) / (n_pop- n_recov);
 
-  // calculate daily pPCR - this is definitely correct as I can check the output 
+  // calculate daily pPCR 
     pPCR_daily[i] = (PCR_daily[i] - Ag_daily[i] * p_daily[i]) / (PCR_daily[i] + Ag_daily[i] * (1-p_daily[i])); 
     
     delta_C_daily[i] = rho * ( (phi_PCR * pPCR_daily[i] ) + (phi_Ag * (1 - pPCR_daily[i])) ) ; 
   
  
  }  
-  
 
-  
- 
   
 }
 
@@ -401,7 +391,7 @@ for (i in 1:n_months){
 }
 
 
- 
+
   y_hat_M = y_hat_monthly[index_M, 1]; 
   
   y_hat_A =  y_hat_monthly[index_A, 2]; 
@@ -411,7 +401,6 @@ for (i in 1:n_months){
   y_hat_Al =  y_hat_monthly[index_Al, 4]; 
   
     
-     
     
   // calculate pPCR in month i 
   
@@ -420,34 +409,30 @@ for (i in 1:n_months){
     
     delta_C[i] = rho * ( (phi_PCR * pPCR[i] ) + (phi_Ag * (1 - pPCR[i])) ) ; 
   }
-  
-    
-    
-    
 
   
   // variant specific mean parameters for likelihood  
 
  for (i in 1:n_data_M){  
-    lambda_M[i] = (rho  * pPCR[i+(n_months-n_data_M)] * phi_PCR  * sigma * y_hat_M[i]) / n_reported_M[i] * n_seq_M[i] + 0.0001;
+    lambda_M[i] = (rho  * pPCR[i+(n_months-n_data_M)] * phi_PCR  * sigma * y_hat_M[i]) / n_reported_M[i] * n_seq_M[i] + 0.000000001;
   }
   
   for (i in 1:n_data_A){  
-    lambda_A[i] = (delta_C[i + (n_months - n_data_A)] *  sigma * y_hat_A[i]) / n_reported_A[(i)] * n_seq_A[(i)]+ 0.0001;
+    lambda_A[i] = (delta_C[i + (n_months - n_data_A)] *  sigma * y_hat_A[i]) / n_reported_A[(i)] * n_seq_A[(i)]+ 0.000000001;
   }
   
   for (i in 1:n_data_O){  
-    lambda_O[i] = (delta_C[i + (n_months - n_data_O)] *  sigma * y_hat_O[i]) / n_reported_O[(i)] * n_seq_O[(i)]+ 0.0001;
+    lambda_O[i] = (delta_C[i + (n_months - n_data_O)] *  sigma * y_hat_O[i]) / n_reported_O[(i)] * n_seq_O[(i)]+ 0.000000001;
   }
   
   for (i in 1:n_data_Al){  
-    lambda_Al[i] = (delta_C[i + (n_months - n_data_Al)] * sigma * y_hat_Al[i]) / n_reported_Al[(i)] * n_seq_Al[(i)]+ 0.0001;
+    lambda_Al[i] = (delta_C[i + (n_months - n_data_Al)] * sigma * y_hat_Al[i]) / n_reported_Al[(i)] * n_seq_Al[(i)]+ 0.000000001;
   }
   
   
   // likelihood 
   
-  target += neg_binomial_2_lpmf(y_M | lambda_M, 1/ k);
+  target += neg_binomial_2_lpmf(y_M | lambda_M, 1/k);
 
   target += neg_binomial_2_lpmf(y_A | lambda_A,1/ k);
 
@@ -461,163 +446,18 @@ for (i in 1:n_months){
 // priors
 
   beta[1:4]  ~ normal(2,3);
-  rho        ~ beta(rho_a,rho_b);
-  omega[1:2] ~ beta(2,2); // uniform
+  rho        ~ beta(2,2);
+  omega[1:2] ~ beta(2,2); 
   I0[1:4]    ~ normal(seed_mean,seed_sd);
   k ~ exponential(0.01);
-
-
-// 
-// beta[1:4]  ~ lognormal(2,1);
-// rho        ~ beta(rho_a,rho_b);
-// omega[1:2] ~ beta(2,2); // uniform
-// I0[1:4]    ~ normal(seed_mean,seed_sd);
-// k ~ exponential(0.01);
-
 }
 
 
 
 generated quantities {
 
-
-// these values are estimated from posterior after discarding burn in 
-
-  real R_0[4];
   real reported_incidence[n_days,4];
-  real true_incidence [n_days,4];
-  real total_incidence[n_days];
-  real susceptible[n_days];
-  real recovered[n_days];
 
-
-
-
-
-
- 
-  // monthly concordant incidence, variant incidence, probability of a PCR test 
-  
-  real pm[n_months];                // monthly concordant incidence
-  real y_hat_monthly[n_months, 4];  // monthly  variant incidence
-  real pPCR[n_months];              // monthly probability of a PCR test 
-  
-  real delta_C[n_months];
-  
-// extract months to fit 
-  
-  real y_hat_M[n_data_M];
-  real y_hat_A[n_data_A];
-  real y_hat_O[n_data_O];
-  real y_hat_Al[n_data_Al];
-  
-  // poisson rate paramater 
-  
-  real lambda_M[n_data_M];
-  real lambda_A[n_data_A]; 
-  real lambda_O[n_data_O];
-  real lambda_Al[n_data_Al]; 
-  
-
-  // used for for loop
-  
-  int index;
-  int ind ; 
-  
-  // index by month for daily average of variant incidences and month average concordant incidence, in month i 
-   
-   
-   // calculate LL 
-
-
-  vector[(n_data_M + n_data_A + n_data_O + n_data_Al)] log_lik;
-   
-   
-     // recalculate lambda as not recognised from model block 
-   
-index = 1; 
-
-for (i in 1:n_months){ 
-  ind = index + 1;
-  pm[i] = mean(p_daily[month_index[index]:month_index[ind]-1]);
-  for (x in 1:4){
-    y_hat_monthly[i,x] =  mean( y_hat[month_index[index]:(month_index[ind]-1), (2 * x) ] ); 
-  }
-  index = index + 1;
-}
-
-
- 
-  y_hat_M = y_hat_monthly[index_M, 1]; 
-  
-  y_hat_A =  y_hat_monthly[index_A, 2]; 
-  
-  y_hat_O =  y_hat_monthly[index_O, 3];
-  
-  y_hat_Al =  y_hat_monthly[index_Al, 4]; 
-  
-    
-     
-    
-  // calculate pPCR in month i 
-  
-  for (i in 1:n_months){
-    pPCR[i] = (PCR[i] - Ag[i] * pm[i]) / (PCR[i] + Ag[i] * (1-pm[i])); 
-    
-    delta_C[i] = rho * ( (phi_PCR * pPCR[i] ) + (phi_Ag * (1 - pPCR[i])) ) ; 
-  }
-  
-    
-    
-    
-
-  
-  // variant specific mean parameters for likelihood  
-
- for (i in 1:n_data_M){  
-    lambda_M[i] = (rho  * pPCR[i+(n_months-n_data_M)] * phi_PCR  * sigma * y_hat_M[i]) / n_reported_M[i] * n_seq_M[i]+ 0.0001;
-  }
-  
-  for (i in 1:n_data_A){  
-    lambda_A[i] = (delta_C[i + (n_months - n_data_A)] *  sigma * y_hat_A[i]) / n_reported_A[(i)] * n_seq_A[(i)]+ 0.0001;
-  }
-  
-  for (i in 1:n_data_O){  
-    lambda_O[i] = (delta_C[i + (n_months - n_data_O)] *  sigma * y_hat_O[i]) / n_reported_O[(i)] * n_seq_O[(i)]+ 0.0001;
-  }
-  
-  for (i in 1:n_data_Al){  
-    lambda_Al[i] = (delta_C[i + (n_months - n_data_Al)] * sigma * y_hat_Al[i]) / n_reported_Al[(i)] * n_seq_Al[(i)]+ 0.0001;
-  }
-  
-  
-  
-  // log likelihood
-  
-  
-  
-  // LL
-  
-  
- for (i in 1:n_data_M){
-    log_lik[i] = neg_binomial_2_lpmf(y_M[i] | lambda_M[i], k);
-  }
-
-
-  for(i in (n_data_M+1):(n_data_M+n_data_A)){
-    log_lik[i] = neg_binomial_2_lpmf(y_A[(i- n_data_M)] | lambda_A[(i- n_data_M)], k);
-  }
-
-
-  for(i in (n_data_M+ n_data_A +1):(n_data_M+n_data_A + n_data_O)){
-    log_lik[i] = neg_binomial_2_lpmf(y_O [(i - n_data_M- n_data_A)] | lambda_O[(i-n_data_M-n_data_A)], k);
-  }
-  
-  
-  for(i in (n_data_M+ n_data_A + n_data_O +1):(n_data_M+n_data_A + n_data_O + n_data_Al)){
-    log_lik[i] = neg_binomial_2_lpmf(y_Al [(i - n_data_M - n_data_A - n_data_O)] | lambda_Al[(i-n_data_M - n_data_A - n_data_O)], k);
-  }
-  
   
   // generated quantities 
   
@@ -632,21 +472,9 @@ for (i in 1:n_months){
       reported_incidence[i,x] = y_hat[i,(2*x)] * sigma * delta_C_daily[i] ;  // A, O, Al variant reported incidence 
       
       }
-      
-      true_incidence[i,x] = y_hat[i,(2*x)] * sigma ;  // true (unseen) incidence of all variants  
-      
     } 
-    
-    
-    total_incidence[i] = true_incidence[i, 1] + true_incidence[i,2]  + true_incidence[i,3] + true_incidence[i,4];  // total incidence, not variant specific
-    susceptible[i] = y_hat[i,1];
-    recovered[i]  = y_hat[i,11];
   }
 
-
-for (i in 1:4){  
-  R_0[i] =  beta[i] * (1 - rho) / gamma ;
-}
 
 
 

@@ -15,8 +15,6 @@ config <- didehpc::didehpc_config(cores = 8,  parallel =T, cluster = "dideclusth
 # Create a queue within the context (/environment)
 obj <- didehpc::queue_didehpc(ctx, config)
 
-
-
 ################  Run NegBin Italy on cluster  ################  
 
 
@@ -43,7 +41,7 @@ I_V1 =  obj$enqueue(
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]" , "k" ),
     
-    filePath = "Results/Italy/SA",
+    filePath = "Results/Italy/main",
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),
              I0 = replicate(4, runif(1, 1,10000)),
@@ -51,8 +49,7 @@ I_V1 =  obj$enqueue(
              rho = runif(1,0.1,0.9),
              k = runif(1,0.01,5)
       )},
-    average_daily_vaccination =  c(0,0,0,0, 0,0,0,0,0,0.0003,0.0005, 0.0009 ,0.0014, 0.0029),
-    
+    average_daily_vaccination = read.csv("data/Vac_Italy_For_Month.csv")$prop_vac,
     average_daily_reported_incidence = read.csv("data/Dataset_Italy_A_v5.csv")$new_reported_cases_daily_new,
     daily_reported_incidence = read.csv("data/dailyReportedIncidence_italy.csv")$new_case ,
     daily_PCR = round(read.csv("data/Italy_daily_test_data.csv")$pcr_daily_average ) ,
@@ -67,14 +64,9 @@ I_V1 =  obj$enqueue(
     sigma = 1 / 5.1,
     gamma = 1 / 2.1 ,
     phi_PCR = 0.920,
-    phi_Ag = 0.875,
-    NB = TRUE,
-    AD = 0.99 , 
+    phi_Ag = 0.643,
     prior_seed_mean = 1000,
-    prior_seed_sd = 1000,
-    rho_a = 2,
-    rho_b = 2,
-    deaths = read.csv("data/Italy_deaths.csv")
+    prior_seed_sd = 1000
   )
 )
 
@@ -104,13 +96,13 @@ V_V1 = obj$enqueue(
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]"),
 
-    filePath = "Results/Veneto/SA" ,
+    filePath = "Results/Veneto/main" ,
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),
              I0 = replicate(4, runif(1, 1,1000)),
-             omega = replicate(2,runif(1,0.1,0.9)),
-             rho = runif(1,0.1,0.9),
-             k = runif(1,0.01,5)
+             omega = replicate(2,runif(1,0.2,0.8)),
+             rho = runif(1,0.2,0.8),
+             k = runif(1,0.01,2)
       )},
     average_daily_reported_incidence = read.csv("data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily,
     daily_reported_incidence = read.csv("data/dailyReportedIncidence.csv")$new_case ,
@@ -118,7 +110,7 @@ V_V1 = obj$enqueue(
     daily_Ag= round(read.csv("data/Veneto_daily_test_data.csv")$antigen_daily),
     monthly_PCR = round(read.csv("data/Veneto_monthly_test_data.csv")$pcr_daily_average),
     monthly_Ag = round(read.csv("data/Veneto_monthly_test_data.csv")$antigen_daily_average),
-    average_daily_vaccination =  c(0,0,0,0, 0,0,0,0,0,0.00043, 0.00039,0.00096,0.0018, 0.0028),
+    average_daily_vaccination =  read.csv("data/Vac_Veneto_For_Month.csv")$prop_vac,
     index_M = 8:14,
     index_A = c(5,7:14),
     index_O = c(5,7:9),
@@ -131,13 +123,8 @@ V_V1 = obj$enqueue(
     sigma = 1 / 5.1,
     gamma = 1 / 2.1 ,
     phi_PCR = 0.920,
-    phi_Ag = 0.875,
-    NB = TRUE,
-    AD = 0.95,
+    phi_Ag = 0.643, 
     prior_seed_mean = 1,
-    prior_seed_sd = 1000,
-    rho_a = 2,
-    rho_b = 2,
-    deaths = read.csv("data/Veneto_deaths.csv")
+    prior_seed_sd = 1000
   )
 )
