@@ -1,0 +1,1165 @@
+---
+title: "Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants"
+subtitle: "Supplementary Material: R code for Results, Figures and Tables"
+author: "Del Vecchio et al. (2021)"
+output:
+   rmdformats::material:
+    highlight: tango
+    self_contained: true
+    gallery: true
+    thumbnails: true
+    lightbox: true
+    code_folding: show
+    fig.width: 4
+    fig.height: 4
+date: "`r format(Sys.time(), '%d %B, %Y')`" 
+---
+ 
+ 
+Set-up
+======
+
+Load packages
+-------------
+```{r, message=FALSE}
+library(readxl)
+library(car)
+library(bdpv)
+library(kableExtra)
+library(mclust)
+```
+
+Define functions
+----------------
+```{r}
+PPV.fun <- function(sensitivity, specificity, prevalence)
+  sensitivity/(sensitivity + 
+                 (1-specificity)*(1-prevalence)/prevalence)
+
+NPV.fun <- function(sensitivity, specificity, prevalence)
+  specificity/(specificity + 
+                 (1-sensitivity)*prevalence/(1-prevalence))
+
+myplot = function(x, ylim=NULL, nm, add=FALSE, col="black", ...)
+{
+  p = unlist(x[,2])
+  n = unlist(x[,3])
+  mut = unlist(x[1,1]) 
+  if(!add)
+    plot(p, type="l", lwd=2, main=mut, xaxt="n", ylim=ylim, 
+         col=col, ...) else
+      lines(p, type="l", lwd=2, main=mut, xaxt="n", col=col)
+  points(p, col=col, pch=16)
+  axis(1, 1:nm, names(table(geneData$Date))[(12-nm+1):12], srt=45)
+  polygon(c(1:12,12:1), c(pmax(p - 2*sqrt(p*(1-p)/n),0), 
+                          pmin(rev(p + 2*sqrt(p*(1-p)/n)),1)), 
+          col=col, border=NA)
+  lines(p, lwd=2, col=col)
+}
+
+mycol <- rgb(c(255,0,0), c(0,255,0), c(0,0,255), max = 255, 
+             alpha = 75, names = c("red50", "green50","blue50"))
+
+`%notin%` <- Negate(`%in%`)
+```
+
+Import data
+-----------
+```{r, message=FALSE, warning=FALSE}
+
+SupplMaterial = "S2.xlsx"
+
+test2Data = data.frame(read_excel(SupplMaterial, 
+                                sheet="ANCOV and DNCOV"))
+names(test2Data)[c(3:4,8:9)] = c("AgeRange", "HospitalWard", "CtSgene", "CtORF1gene")
+
+test2Data$CtSgene[test2Data$CtSgene == "-"] = NA
+test2Data$CtSgene = as.numeric(test2Data$CtSgene)
+test2Data$CtORF1gene[test2Data$CtORF1gene == "-"] = NA
+test2Data$CtORF1gene = as.numeric(test2Data$CtORF1gene)
+
+test2Data$Symptoms[test2Data$Symptoms == "-"] = NA
+test2Data$Pneumonia[test2Data$Pneumonia == "-"] = NA
+
+test2Data$Sex[test2Data$Sex == "nd"] = NA
+test2Data$Sex = as.factor(test2Data$Sex)
+levels(test2Data$Sex) = c("Female", "Male")
+
+test2Data$AgeRange = as.factor(test2Data$AgeRange)
+test2Data$Age = test2Data$AgeRange
+
+
+levels(test2Data$Age) = 1:17
+test2Data$Age = cut(as.numeric(test2Data$Age), c(0,2,4,6,8,10,12,14,17),
+                  c("20-29","30-39","40-49","50-59","60-69",
+                    "70-79","80-89","90+"))
+
+test2Data_20 = test2Data
+test2Data_20$Age = as.factor(as.character(test2Data_20$Age))
+```
+
+```{r}
+geneData = data.frame(read_excel(SupplMaterial, 
+                                sheet="Monthly Prevalence of Mutations"))
+```
+
+```{r}
+test1Data = data.frame(read_excel(SupplMaterial, 
+                                sheet="ANCOV or DNCOV"))
+names(test1Data)[3:4] = c("AgeRange", "HospitalWard")
+
+test1Data$DNCOV[test1Data$DNCOV == "-"] = NA
+test1Data$ANCOV[test1Data$ANCOV == "-"] = NA
+
+test1Data$Sex = as.factor(test1Data$Sex)
+levels(test1Data$Sex) = c("Female", "Male")
+
+test1Data$AgeRange = as.factor(test1Data$AgeRange)
+test1Data$Age = test1Data$AgeRange
+
+levels(test1Data$Age) = 1:17
+test1Data$Age = cut(as.numeric(test1Data$Age), c(0,2,4,6,8,10,12,14,17),
+                      c("20-29","30-39","40-49","50-59","60-69",
+                      "70-79","80-89","90+"))
+
+test1Data_20 = test1Data
+test1Data_20$Age = as.factor(as.character(test1Data_20$Age))
+```
+
+Data pre-processing
+-------------------
+```{r}
+TPData = test2Data_20[with(test2Data_20, (ANCOV=="positive") | 
+                          (DNCOV=="positive")),]
+TPData = TPData[!((TPData$DNCOV=="negative") & 
+                        (TPData$ANCOV=="positive")),]
+
+TPData_tab = with(test2Data_20, table(DNCOV, ANCOV))
+
+TPData_tab_33_Sgene = TPData_tab
+TPData_tab_33_Sgene[2,] = with(TPData[TPData$CtSgene < 33,], 
+                                table(DNCOV, ANCOV))
+
+TPData_tab_33_ORF1gene = TPData_tab
+TPData_tab_33_ORF1gene[2,] = with(TPData[TPData$CtORF1gene < 33,], 
+                                   table(DNCOV, ANCOV))
+```
+
+```{r}
+gap = as.numeric(unlist(TPData[,12]))
+gap35 = cut(gap, c(0, 3, 5, max(gap, na.rm=TRUE)), 
+            include.lowest = TRUE)
+```
+
+```{r, warning=FALSE}
+geneData$Mut = factor(geneData$Mut, levels=geneData$Mut[1:9])
+
+geneData$Freq = as.numeric(geneData$Freq)
+geneData$TotSeq = as.numeric(geneData$TotSeq)
+geneData$Perc = as.numeric(geneData$Perc)
+
+Veneto = subset(geneData, Country=="Veneto")
+Veneto = Veneto[order(Veneto$Date),]
+Italy = subset(geneData, Country=="Italy")
+Italy = Italy[order(Italy$Date),]
+```
+
+```{r}
+allData = data.frame(
+  Sex = factor(c(test2Data$Sex,test1Data$Sex), labels=levels(test2Data$Sex)), 
+  Age = factor(c(test2Data$Age,test1Data$Age), labels=levels(test2Data$Age)),
+  Pneumonia = factor(c(test2Data$Pneumonia,test1Data$Pneumonia)),
+  DNCOV = factor(c(test2Data$DNCOV,test1Data$DNCOV),
+                 labels=c("Negative", "Positive")),
+  ANCOV = factor(c(test2Data$ANCOV,test1Data$ANCOV),
+                 labels=c("Negative", "Positive")),
+  HospitalWard = factor(c(test2Data$HospitalWard,test1Data$HospitalWard)),
+  type = factor(c(rep("both", nrow(test2Data)), 
+                                  rep("either", nrow(test1Data)))))
+levels(allData$Pneumonia) = c("No", "No", "Yes", "Yes")
+
+allData_20 = data.frame(
+  Sex = factor(c(test2Data_20$Sex,test1Data_20$Sex), labels=levels(test2Data_20$Sex)), 
+  Age = factor(c(test2Data_20$Age,test1Data_20$Age), labels=levels(test2Data_20$Age)),
+  Pneumonia = factor(c(test2Data_20$Pneumonia,test1Data_20$Pneumonia)),
+  DNCOV = factor(c(test2Data_20$DNCOV,test1Data_20$DNCOV),
+                 labels=c("Negative", "Positive")),
+  ANCOV = factor(c(test2Data_20$ANCOV,test1Data_20$ANCOV),
+                 labels=c("Negative", "Positive")),
+  HospitalWard = factor(c(test2Data_20$HospitalWard,test1Data_20$HospitalWard)),
+  type = factor(c(rep("both", nrow(test2Data_20)), 
+                                  rep("either", nrow(test1Data_20)))))
+levels(allData_20$Pneumonia) = c("No", "No", "Yes", "Yes")
+```
+
+
+RESULTS
+=======
+
+**Analysis of antigen assay perfomance**
+
+Sensitivities/specificities & PPVs/NPVs
+---------------------------------------
+
+**All data**
+
+```{r}
+CI <- matrix(c(TPData_tab[2,2], TPData_tab[2,1], 
+               TPData_tab[1,2], TPData_tab[1,1]), 
+             ncol=2)
+```
+
+*Sample prevalence*
+
+```{r}
+pr = with(test2Data_20, mean(DNCOV=="positive"))
+BDtest(xmat=CI, pr=pr, conf.level = 0.95)
+```
+
+*P = 0.005*
+
+```{r}
+BDtest(xmat=CI, pr=0.005, conf.level = 0.95)
+```
+
+*P = 0.001*
+
+```{r}
+BDtest(xmat=CI, pr=0.001, conf.level = 0.95)
+```
+
+**Ct S gene < 33**
+
+```{r}
+CI_33_S <- matrix(c(TPData_tab_33_Sgene[2,2], 
+                    TPData_tab_33_Sgene[2,1],
+                    TPData_tab_33_Sgene[1,2], 
+                    TPData_tab_33_Sgene[1,1]),
+                  ncol=2)
+```
+
+*Sample prevalence*
+
+```{r}
+pr = with(test2Data_20[test2Data_20$CtSgene < 33,], 
+          sum(DNCOV=="positive", na.rm=TRUE))/nrow(test2Data_20[test2Data_20$CtSgene < 33,])
+BDtest(xmat=CI_33_S, pr=pr, conf.level = 0.95)
+```
+
+*P = 0.005*
+
+```{r}
+BDtest(xmat=CI_33_S, pr=0.005, conf.level = 0.95)
+```
+
+*P = 0.001*
+
+```{r}
+BDtest(xmat=CI_33_S, pr=0.001, conf.level = 0.95)
+```
+
+**Ct ORF1 gene < 33**
+
+```{r}
+CI_33_ORF1 <- matrix(c(TPData_tab_33_ORF1gene[2,2], 
+                       TPData_tab_33_ORF1gene[2,1],
+                       TPData_tab_33_ORF1gene[1,2], 
+                       TPData_tab_33_ORF1gene[1,1]),
+                     ncol=2)
+```
+
+*Sample prevalence*
+
+```{r}
+pr = with(test2Data_20[test2Data_20$CtORF1gene < 33,], 
+          sum(DNCOV=="positive", na.rm=TRUE))/nrow(test2Data_20[test2Data_20$CtORF1gene < 33,])
+BDtest(xmat=CI_33_ORF1, pr=pr, conf.level = 0.95)
+```
+
+*P = 0.005*
+
+```{r}
+BDtest(xmat=CI_33_ORF1, pr=0.005, conf.level = 0.95)
+```
+
+*P = 0.001*
+
+```{r}
+BDtest(xmat=CI_33_ORF1, pr=0.001, conf.level = 0.95)
+```
+
+**Stratification of test performance**
+
+Stratification by age
+---------------------
+```{r}
+with(TPData, table(Age, Concordance))
+with(TPData, fisher.test(Age, Concordance))
+tmp = with(TPData, table(Age, Concordance))
+tmp = tmp[apply(tmp,1,sum) != 0,]
+prop.test(tmp[,1], apply(tmp, 1, sum))
+
+with(TPData, boxplot(CtSgene ~ Age, ylab="Ct S gene"))
+with(TPData, kruskal.test(CtSgene ~ Age))
+
+with(TPData, boxplot(CtORF1gene ~ Age, ylab="Ct ORF1 gene"))
+with(TPData, kruskal.test(CtORF1gene ~ Age))
+```
+
+Stratification by sex
+---------------------
+```{r}
+with(TPData, table(Sex, Concordance))
+with(TPData, fisher.test(Sex, Concordance))
+with(TPData, prop.test(table(Sex, Concordance)))
+
+with(TPData, boxplot(CtSgene ~ Sex, ylab="Ct S gene"))
+with(TPData, wilcox.test(CtSgene ~ Sex))
+
+with(TPData, boxplot(CtORF1gene ~ Sex, ylab="Ct ORF1 gene"))
+with(TPData, wilcox.test(CtORF1gene ~ Sex))
+```
+
+Stratification by pneumonia
+---------------------------
+```{r}
+with(TPData, table(Pneumonia, Concordance))
+with(TPData, fisher.test(Pneumonia, Concordance))
+with(TPData, prop.test(table(Pneumonia, Concordance)))
+
+with(TPData, boxplot(CtSgene ~ Pneumonia, ylab="Ct S gene"))
+with(TPData, wilcox.test(CtSgene ~ Pneumonia))
+
+with(TPData, boxplot(CtORF1gene ~ Pneumonia, ylab="Ct ORF1 gene"))
+with(TPData, wilcox.test(CtORF1gene ~ Pneumonia))
+```
+
+Association between viral load and time interval
+------------------------------------------------
+
+**Distribution and summary measures of time interval**
+
+```{r}
+with(TPData, boxplot(gap))
+with(TPData, summary(gap))
+```
+
+**Association with Ct S gene and Ct ORF1 gene**
+
+```{r}
+par(mfrow=c(1,2))
+
+with(TPData, plot(gap, CtSgene, xlab="time lag (in days)", ylab="Ct S gene"))
+abline(coef(lm(TPData$CtSgene ~ gap)))
+with(TPData, plot(gap, CtORF1gene, xlab="time lag (in days)", ylab="Ct ORF1 gene")) 
+abline(coef(lm(TPData$CtORF1gene ~ gap)))
+par(mfrow=c(1,1))
+
+cor.test(TPData$CtSgene, gap)
+cor.test(TPData$CtORF1gene, gap)
+```
+
+Association with symptomatology
+-------------------------------
+
+```{r}
+with(TPData, table(Symptoms))
+```
+
+**Sensitivity**
+
+*All patients*
+
+```{r}
+with(TPData, prop.test(sum(Concordance=="concordant"), 
+                         sum(!is.na(Concordance))))
+```
+
+*Asymptomatic patients*
+
+```{r}
+with(TPData[TPData$Symptoms=="Asymptomatic",], 
+     prop.test(sum(Concordance=="concordant"), sum(Symptoms=="Asymptomatic")))
+```
+
+*Symptomatic patients*
+
+```{r}
+with(TPData[TPData$Symptoms=="Symptomatic",], 
+     prop.test(sum(Concordance=="concordant"), sum(Symptoms=="Symptomatic")))
+```
+
+*Comparison between asymptomatic and symptomatic patients*
+
+```{r}
+with(TPData, 
+     prop.test(c(sum(Concordance[Symptoms=="Asymptomatic"]=="concordant", na.rm=TRUE),
+                 sum(Concordance[Symptoms=="Symptomatic"]=="concordant", na.rm=TRUE)),
+               table(Symptoms)))
+```
+
+**Association with Ct S gene**
+
+```{r}
+with(TPData, boxplot(CtSgene ~ Symptoms))
+with(TPData, tapply(CtSgene, Symptoms, range, na.rm=TRUE))
+with(TPData, wilcox.test(CtSgene ~ Symptoms))
+```
+
+**Association with ORF 1 gene**
+
+```{r}
+with(TPData, boxplot(CtORF1gene ~ Symptoms))
+with(TPData, tapply(CtORF1gene, Symptoms, range, na.rm=TRUE))
+with(TPData, wilcox.test(CtORF1gene ~ Symptoms))
+```
+
+
+FIGURES
+=======
+
+Figure 2
+--------
+
+**Logistic regression model for Ct S gene data**
+
+```{r}
+CtSdata = TPData[!is.na(TPData$CtSgene),]
+CtSdata = CtSdata[order(CtSdata$CtSgene),]
+
+sensSgene = vector("numeric", length=nrow(CtSdata))
+CtScounts = matrix(0, ncol=2, nrow=nrow(CtSdata))
+for(idx in 1:nrow(CtSdata))
+{   
+  tmp = CtSdata[CtSdata$CtSgene < CtSdata$CtSgene[idx],]
+  sensSgene[idx] = mean(tmp$ANCOV == "positive")
+  CtScounts[idx,] = c(sum(tmp$ANCOV == "positive"), 
+                      nrow(tmp)-sum(tmp$ANCOV == "positive"))
+}
+
+modSgene = glm(CtScounts ~ CtSdata$CtSgene, family=binomial)
+predSgene = predict(modSgene, type="response", se.fit=TRUE, interval="confidence")
+
+val_tmp = 20:38
+pred_tmp = cbind(sensitivity = predict(
+                  smooth.spline(CtSdata$CtSgene,predSgene$fit), x=val_tmp)$y,
+                 lower = predict(
+                   smooth.spline(CtSdata$CtSgene, predSgene$fit -                                              2*sqrt(predSgene$fit*(1-predSgene$fit) /
+                       1:length(CtSdata$CtSgene))), x=val_tmp)$y,
+                 upper = predict(
+                   smooth.spline(CtSdata$CtSgene, predSgene$fit + 
+                    2*sqrt(predSgene$fit*(1-predSgene$fit) /
+                       1:length(CtSdata$CtSgene))), x=val_tmp)$y)
+
+pred_tmp[pred_tmp > 1] = 1
+pred_tmp = round(pred_tmp, 3)*100
+pred_tmp = cbind(CtSgene = val_tmp, pred_tmp)
+
+predS_tab = pred_tmp
+```
+
+**Logistic regression model for ORF 1 gene data**
+
+```{r}
+CtORF1data = TPData[!is.na(TPData$CtORF1gene),]
+CtORF1data = CtORF1data[order(CtORF1data$CtORF1gene),]
+
+sensORF1gene = vector("numeric", length=nrow(CtORF1data))
+CtORF1counts = matrix(0, ncol=2, nrow=nrow(CtORF1data))
+for(idx in 1:nrow(CtORF1data))
+{   
+  tmp = CtORF1data[CtORF1data$CtORF1gene < CtORF1data$CtORF1gene[idx],]
+  sensORF1gene[idx] = mean(tmp$ANCOV == "positive")
+  CtORF1counts[idx,] = c(sum(tmp$ANCOV == "positive"), 
+                         nrow(tmp)-sum(tmp$ANCOV == "positive"))
+}
+
+modORF1gene = glm(CtORF1counts ~ CtORF1data$CtORF1gene, family=binomial)
+predORF1gene = predict(modORF1gene, type="response", se.fit=TRUE, interval="confidence")
+
+val_tmp = 20:38
+pred_tmp = cbind(sensitivity = predict(
+                  smooth.spline(CtORF1data$CtORF1gene,predORF1gene$fit), x=val_tmp)$y,
+                 lower = predict(
+                   smooth.spline(CtORF1data$CtORF1gene, predORF1gene$fit -                                              2*sqrt(predORF1gene$fit*(1-predORF1gene$fit) /
+                       1:length(CtORF1data$CtSgene))), x=val_tmp)$y,
+                 upper = predict(
+                   smooth.spline(CtORF1data$CtORF1gene, predORF1gene$fit + 
+                    2*sqrt(predORF1gene$fit*(1-predORF1gene$fit) /
+                       1:length(CtORF1data$CtSgene))), x=val_tmp)$y)
+
+pred_tmp[pred_tmp > 1] = 1
+pred_tmp = round(pred_tmp, 3)*100
+pred_tmp = cbind(CtORF1gene = val_tmp, pred_tmp)
+
+predORF1_tab = pred_tmp
+```
+
+**Figure 2**
+
+```{r, fig.align="center", fig.cap="Figure2: Sensitivity estimates (solid line) of ANCOV test for increasing Ct values of the S gene (left panel) and Ct ORF1 (right panel) gene as obtained from a logistic regression model. The dashed lines give the 95% confidence band for the fitted regression line. The dotted lines represent the 95% band for the fitted sensitivities."}
+
+par(mfrow=c(1,2), pty="s")
+
+plot(CtSdata$CtSgene, sensSgene, col="grey", main="logistic regression", 
+     ylab="sensitivity", xlab="Ct S gene", ylim=c(0.5,1))
+lines(CtSdata$CtSgene, predSgene$fit)
+lines(CtSdata$CtSgene, predSgene$fit-2*predSgene$se.fit, lty="dashed")
+lines(CtSdata$CtSgene, predSgene$fit+2*predSgene$se.fit, lty="dashed")
+#
+lines(CtSdata$CtSgene, 
+      predSgene$fit-2*sqrt(predSgene$fit*(1-predSgene$fit)/1:length(CtSdata$CtSgene)), 
+      lty="dotted")
+lines(CtSdata$CtSgene, 
+      predSgene$fit+2*sqrt(predSgene$fit*(1-predSgene$fit)/1:length(CtSdata$CtSgene)), 
+      lty="dotted")
+
+plot(CtORF1data$CtORF1gene, sensORF1gene, col="grey", main="logistic regression", 
+     ylab="sensitivity", xlab="Ct ORF1  gene", ylim=c(0.5,1))
+lines(CtORF1data$CtORF1gene, predORF1gene$fit)
+lines(CtORF1data$CtORF1gene, predORF1gene$fit-2*predORF1gene$se.fit, lty="dashed")
+lines(CtORF1data$CtORF1gene, predORF1gene$fit+2*predORF1gene$se.fit, lty="dashed")
+#
+lines(CtORF1data$CtORF1gene,
+      predORF1gene$fit - 2*sqrt(predORF1gene$fit*(1-predORF1gene$fit)/
+                                  1:length(CtORF1data$CtORF1gene)), lty="dotted")
+lines(CtORF1data$CtORF1gene, 
+      predORF1gene$fit + 2*sqrt(predORF1gene$fit*(1-predORF1gene$fit)/
+                                  1:length(CtORF1data$CtORF1gene)), lty="dotted")
+```
+
+Figure 3
+--------
+
+```{r, fig.align="center", fig.cap="Distribution of Ct values for concordant DNCOV+/ANCOV+ and discordant DNCOV+ / ANCOV- test results. Top row: Boxplots of Ct values for the S (left) and ORF1 (right) gene. Dotted line at Ct = 33 shows the critical value of sensitivity (95%) declared for the antigen test above which there is an expected drop and an unreliable result. DNCOV+/ANCOV+ (grey box), DNCOV+/ANCOV- below sensitive threshold (yellow box) DNCOV+/ANCOV- above sensitive threshold (blue box). Bottom row: Nonparametric density estimation for Ct values of the S (left) and ORF1(right) gene, with superimposed the two densities fitted using a two-component Gaussian mixture model. DNCOV+/ANCOV- below sensitive threshold (yellow line) DNCOV+/ANCOV- above sensitive threshold (blue line)."}
+
+par(mfrow=c(2,2))
+
+with(TPData, 
+     boxplot(CtSgene ~ Concordance, boxfill=NA, border=NA, horizontal=TRUE,
+             ylim=c(10,40), xlab="Ct S gene"))
+with(TPData[TPData$Concordance == "discordant",], 
+     boxplot(CtSgene[CtSgene < 33], at=2, add=TRUE,  boxfill="yellow", 
+             horizontal=TRUE))
+with(TPData[TPData$Concordance == "discordant",], 
+     boxplot(CtSgene[CtSgene >= 33], at=2, add=TRUE,  boxfill="blue", 
+             horizontal=TRUE))
+with(TPData[TPData$Concordance == "concordant",], 
+     boxplot(CtSgene, at=1, add=TRUE, boxfill="grey", horizontal=TRUE))
+abline(v=33, lty="dotted")
+
+with(TPData, 
+     boxplot(CtORF1gene ~ Concordance, boxfill=NA, border=NA, horizontal=TRUE,
+             ylim=c(10,40), xlab="Ct ORF1 gene" ))
+with(TPData[TPData$Concordance == "discordant",], 
+     boxplot(CtORF1gene[CtORF1gene < 33], at=2, add=TRUE,  boxfill="yellow", 
+             horizontal=TRUE))
+with(TPData[TPData$Concordance == "discordant",], 
+     boxplot(CtORF1gene[CtORF1gene >= 33], at=2, add=TRUE,  boxfill="blue",
+             horizontal=TRUE))
+with(TPData[TPData$Concordance == "concordant",], 
+     boxplot(CtORF1gene, at=1, add=TRUE, boxfill="grey", horizontal=TRUE))
+abline(v=33, lty="dotted")
+
+MCdata = TPData$CtSgene[TPData$Concordance == "discordant"]
+MCdata = MCdata[!is.na(MCdata)]
+mcl = densityMclust(MCdata, G=2)
+
+plot(mcl, what = "density", data = MCdata, xlab="Ct S gene", xlim=c(10,40),
+     hist.col="white", col="white")
+lines(seq(15,40,by=0.05), col="yellow", lwd=2,
+      dnorm(seq(15,40,by=0.05), mcl$parameters$mean[1],
+            sqrt(mcl$parameters$variance$sigmasq))*mcl$parameters$pro[1])
+lines(seq(15,40,by=0.05), col="blue", lwd=2, 
+      dnorm(seq(15,40,by=0.05), mcl$parameters$mean[2],
+            sqrt(mcl$parameters$variance$sigmasq))*mcl$parameters$pro[2])
+rug(MCdata, lwd=2)
+with(TPData[TPData$Concordance == "discordant",], 
+     lines(density(CtSgene, na.rm=TRUE), lwd=2))
+abline(v=33, lty="dotted")
+
+MCdata = TPData$CtORF1gene[TPData$Concordance == "discordant"]
+MCdata = MCdata[!is.na(MCdata)]
+mcl = densityMclust(MCdata, G=2)
+
+plot(mcl, what = "density", data = MCdata, xlab="Ct ORF1 gene" , xlim=c(10,40),
+     hist.col="white", col="white")
+lines(seq(15,40,by=0.05), col="yellow", lwd=2, 
+      dnorm(seq(15,40,by=0.05), mcl$parameters$mean[1],
+            sqrt(mcl$parameters$variance$sigmasq))*mcl$parameters$pro[1])
+lines(seq(15,40,by=0.05), col="blue", lwd=2, 
+      dnorm(seq(15,40,by=0.05), mcl$parameters$mean[2],
+            sqrt(mcl$parameters$variance$sigmasq))*mcl$parameters$pro[2])
+rug(MCdata, lwd=2)
+with(TPData[TPData$Concordance == "discordant",], 
+     lines(density(CtORF1gene, na.rm=TRUE), lwd=2))
+abline(v=33, lty="dotted")
+```
+
+Figure 4
+--------
+
+```{r, fig.align="center", fig.cap="Boxplots of Ct values of S (left panel) and ORF1 (right panel) gene recorded at increasing time intervals (in days) from symptoms onset to day of testing 0-3 days, 4-5 days and above 5 days. P-value for Kruskall-Wallis test is 0.004 for Ct of ORF1 gene and 0.018 for Ct of S gene."}
+
+par(mfrow=c(1,2))
+with(TPData, 
+     boxplot(CtSgene ~ gap35, ylab="Ct S gene", xlab="time lag (in days)"))
+with(TPData, 
+     boxplot(CtORF1gene ~ gap35, ylab="Ct ORF1 gene", xlab="time lag (in days)"))
+par(mfrow=c(1,1))
+```
+
+**Kruskal-Wallis test**
+
+```{r}
+with(TPData, kruskal.test(CtSgene ~ gap35))
+with(TPData, kruskal.test(CtORF1gene ~ gap35))
+```
+
+Figure 5
+--------
+
+```{r, fig.align="center", fig.cap="Boxplots of time interval (in days) between time of testing and day of symptom onset against different levels of Ct values Ct < 33 and Ct >= 33 for S (left panel) and Ct ORF1 (right panel) gene. P-value for two-sided Wilcoxon-Mann-Whitney test is 1.0 for Ct S gene and 0.2 for ORF1 gene."}
+
+par(mfrow=c(1,2))
+boxplot(gap[TPData$Concordance == "discordant"] ~ 
+          (TPData$CtSgene[TPData$Concordance == "discordant"] > 33),
+        xlab="S gene", ylab="time lag (in days)",xaxt="n")
+        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
+boxplot(gap[TPData$Concordance == "discordant"] ~ 
+          (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33),
+        xlab="ORF1 gene", ylab="time lag (in days)",xaxt="n")
+        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
+par(mfrow=c(1,1))
+```
+
+**Wilcoxon-Mann-Whitney test**
+
+```{r}
+wilcox.test(gap[TPData$Concordance == "discordant"] ~ 
+              (TPData$CtSgene[TPData$Concordance == "discordant"] > 33))
+wilcox.test(gap[TPData$Concordance == "discordant"]~ 
+              (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33))
+```
+
+Figure 7
+--------
+
+```{r, fig.align="center", fig.cap="Monthly prevalence (percentage over total sequences) of N variants generating discordant DNCOV+ / ANCOV- (left panels) and concordant DNCOV+ / ANCOV+ (right panels) result in molecular and antigen swab. Shaded areas show the 95% confidence bands for each different region. No sequence data are available for Veneto region in the months of January, February, July, and September."}
+
+par(mfcol=c(5,2), mar=c(2,3,3,1))
+#1
+myplot(Veneto[Veneto$Mut=="D348Y",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="D348Y",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#2
+myplot(Veneto[Veneto$Mut=="M234I-A376T",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="M234I-A376T",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#3
+myplot(Veneto[Veneto$Mut=="P365S",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="P365S",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#4
+myplot(Veneto[Veneto$Mut=="Q229H",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="Q229H",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#5
+myplot(Veneto[Veneto$Mut=="R209I",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="R209I",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#6
+myplot(Veneto[Veneto$Mut=="A220V",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="A220V",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#7
+x = Veneto[Veneto$Mut=="G204R",c(3,6,5)]
+p = unlist(x[,2])
+n = unlist(x[,3])
+mut = unlist(x[1,1])
+plot(p, type="l", lwd=2, main=mut, xaxt="n", ylim=c(0,1), col=mycol[1])
+points(p, col=mycol[1], pch=16)
+axis(1, 1:12, names(table(geneData$Date))[(12-12+1):12], srt=45)
+xx = c(pmax(p - 2*sqrt(p*(1-p)/n),0), 
+       pmin(rev(p + 2*sqrt(p*(1-p)/n)),1))
+polygon(c(3:6,6:3), xx[c(3:6,19:22)], col=mycol[1], border=NA)
+polygon(c(10:12,12:10), xx[10:15], col=mycol[1], border=NA)
+lines(p, lwd=2, col=mycol[1])
+myplot(Italy[Italy$Mut=="G204R",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"),
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#8
+x = Veneto[Veneto$Mut=="R203K",c(3,6,5)]
+p = unlist(x[,2])
+n = unlist(x[,3])
+mut = unlist(x[1,1])
+plot(p, type="l", lwd=2, main=mut, xaxt="n", 
+     ylim=c(0,1), col=mycol[1])
+points(p, col=mycol[1], pch=16)
+axis(1, 1:12, names(table(geneData$Date))[(12-12+1):12], srt=45)
+xx = c(pmax(p - 2*sqrt(p*(1-p)/n),0), 
+       pmin(rev(p + 2*sqrt(p*(1-p)/n)),1))
+polygon(c(3:6,6:3), xx[c(3:6,19:22)], col=mycol[1], border=NA)
+polygon(c(10:12,12:10), xx[10:15], col=mycol[1], border=NA)
+lines(p, lwd=2, col=mycol[1])
+myplot(Italy[Italy$Mut=="R203K",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+#9
+myplot(Veneto[Veneto$Mut=="T141I",c(3,6,5)], 
+       ylim=c(0,1), nm=12, las=1, col=mycol[1])
+myplot(Italy[Italy$Mut=="T141I",c(3,6,5)], 
+       ylim=c(0,1), nm=12, add=TRUE, col=mycol[3])
+legend(1, 0.9, c("Veneto", "Italy"), 
+       col=mycol[c(1,3,2)], lwd=2, cex=0.5)
+```
+
+
+TABLES
+======
+
+Table I
+-------
+
+**All data**
+
+```{r}
+#Sample prevalence:
+prevalenza = exp(diff(log(apply(TPData_tab, 1, sum))))
+#Sensitivity:
+sensibilita = prop.test(TPData_tab[2,2], sum(TPData_tab[2,]))$estimate*100
+#Specificity:
+specificita = prop.test(TPData_tab[1,1], sum(TPData_tab[1,]))$estimate*100
+#PPV:
+PPV = prop.test(TPData_tab[2,2], sum(TPData_tab[,2]))$estimate*100
+#NPV:
+NPV = prop.test(TPData_tab[1,1], sum(TPData_tab[,1]))$estimate*100
+
+mat = c(prevalenza, sensibilita, specificita, PPV, NPV)
+
+#P = 0.005, 0.001
+P.disease = c(0.005, 0.001)
+PPV.disease = round(PPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+NPV.disease = round(NPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+
+tmat = cbind(P.disease, rep(sensibilita,2), rep(specificita,2), 
+             PPV.disease, NPV.disease)
+mat = rbind(mat, tmat)
+mat = matrix(as.numeric(mat), nrow=3)
+mat[,1] = mat[,1]*100
+mat = round(mat, 1)
+```
+
+**Ct S gene < 33**
+
+```{r}
+#Sample prevalence:
+prevalenza = exp(diff(log(apply(TPData_tab_33_Sgene, 1, sum))))
+#Sensitivity:
+sensibilita = prop.test(TPData_tab_33_Sgene[2,2],
+                        sum(TPData_tab_33_Sgene[2,]))$estimate*100
+#Specificity:
+specificita = prop.test(TPData_tab_33_Sgene[1,1],
+                        sum(TPData_tab_33_Sgene[1,]))$estimate*100
+#PPV:
+PPV = prop.test(TPData_tab_33_Sgene[2,2], 
+                sum(TPData_tab_33_Sgene[,2]))$estimate*100
+#NPV:
+NPV = prop.test(TPData_tab_33_Sgene[1,1], 
+                sum(TPData_tab_33_Sgene[,1]))$estimate*100
+
+tmat = c(prevalenza, sensibilita, specificita, PPV, NPV)
+
+#P = 0.005, 0.001
+P.disease = c(0.005, 0.001)
+PPV.disease = round(PPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+NPV.disease = round(NPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+
+tmat = rbind(tmat, cbind(P.disease, rep(sensibilita,2), rep(specificita,2), 
+                         PPV.disease, NPV.disease))
+tmat = matrix(as.numeric(tmat), nrow=3)
+tmat[,1] = tmat[,1]*100
+tmat = round(tmat, 1)
+mat = rbind(mat, tmat)
+```
+
+**Ct ORF1 gene < 33**
+
+```{r}
+#Sample prevalence:
+prevalenza = exp(diff(log(apply(TPData_tab_33_ORF1gene, 1, sum))))
+#Sensitivity:
+sensibilita = prop.test(TPData_tab_33_ORF1gene[2,2],
+                        sum(TPData_tab_33_ORF1gene[2,]))$estimate*100
+#Specificity:
+specificita = prop.test(TPData_tab_33_ORF1gene[1,1],
+                        sum(TPData_tab_33_ORF1gene[1,]))$estimate*100
+#PPV:
+PPV = prop.test(TPData_tab_33_ORF1gene[2,2], 
+                sum(TPData_tab_33_ORF1gene[,2]))$estimate*100
+#NPV:
+NPV = prop.test(TPData_tab_33_ORF1gene[1,1], 
+                sum(TPData_tab_33_ORF1gene[,1]))$estimate*100
+
+tmat = c(prevalenza, sensibilita, specificita, PPV, NPV)
+
+#P = 0.005, 0.001
+P.disease = c(0.005, 0.001)
+PPV.disease = round(PPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+NPV.disease = round(NPV.fun(sensibilita/100, specificita/100, P.disease), 
+                    3)*100
+
+tmat = rbind(tmat, cbind(P.disease, rep(sensibilita,2), rep(specificita,2), 
+                         PPV.disease, NPV.disease))
+tmat = matrix(as.numeric(tmat), nrow=3)
+tmat[,1] = tmat[,1]*100
+tmat = round(tmat, 1)
+mat = rbind(mat, tmat)
+```
+
+**Table I**
+
+```{r}
+colnames(mat) = c("P", "sensitivity", "specificity", "PPV", "NPV")
+
+kbl(t(mat[,-1]), align = "c", row.names = TRUE, 
+      col.names = c(paste("sample P =", mat[1,1]), "P = 0.005", "P = 0.001",
+                    paste("sample P =", mat[4,1]), "P = 0.005", "P = 0.001",
+                    paste("sample P =", mat[7,1]), "P = 0.005", "P = 0.001"), 
+    caption = "Overall sensitivity/specificity and PPV/NPV for ANCOV test") %>%
+  kable_classic() %>%
+  add_header_above(c(" " = 1, "All data" = 3, "Ct S gene < 33" = 3, 
+                     "Ct ORF1 gene < 33" = 3))
+```
+
+Table II
+--------
+
+```{r}
+pred_tab = cbind(predS_tab, predORF1_tab)
+
+kbl(pred_tab, align="c", col.names=c("< value", "sensitivity", "lower 95% confidence bound", "upper 95% confidence bound", "< value", "sensitivity", "lower 95% confidence bound", "upper 95% confidence bound"), caption="Sensitivity estimates of ANCOV test for successively increasing Ct S gene values (on the left) and Ct ORF1 gene values (on the right) as obtained form a logistic regression model.") %>%
+  kable_classic() %>%
+  add_header_above(c("Ct S gene" = 4, "Ct ORF1 gene"  = 4))
+```
+
+Table III
+---------
+
+**CT S gene**
+
+*All test outcomes*
+
+```{r}
+with(TPData, t.test(CtSgene ~ Concordance))
+with(TPData, wilcox.test(CtSgene ~ Concordance))
+```
+
+*Ct S gene < 33*
+
+```{r}
+with(TPData[TPData$CtSgene < 33,], t.test(CtSgene ~ Concordance))
+with(TPData[TPData$CtSgene < 33,], wilcox.test(CtSgene ~ Concordance))
+```
+
+**CT ORF1 gene**
+
+*All test outcomes*
+
+```{r}
+with(TPData, t.test(CtORF1gene ~ Concordance))
+with(TPData, wilcox.test(CtORF1gene ~ Concordance))
+```
+
+*Ct ORF1 gene < 33*
+
+```{r,}
+with(TPData[TPData$CtORF1gene < 33,], t.test(CtORF1gene ~ Concordance))
+with(TPData[TPData$CtORF1gene < 33,], wilcox.test(CtORF1gene ~ Concordance))
+```
+
+Table IV
+--------
+
+```{r}
+table(gap35)
+
+tapply(TPData$Concordance, gap35, 
+       function(x) prop.test(sum(x=="concordant"), length(x)))
+with(TPData, 
+     prop.test(c(sum(Concordance[gap35=="[0,3]"]=="concordant", na.rm=TRUE),
+                 sum(Concordance[gap35=="(3,5]"]=="concordant", na.rm=TRUE),
+                 sum(Concordance[gap35=="(5,20]"]=="concordant", na.rm=TRUE)),
+               table(gap35)))
+```
+
+
+Selection bias
+==============
+
+Age
+---
+
+**Association between age and number of tests**
+
+```{r}
+# all age groups
+with(allData, chisq.test(table(type, Age)))
+
+#with(allData, chisq.test(table(type, Age)[,-c(1)]))
+#with(allData, chisq.test(table(type, Age)[,-c(1:2)]))
+#with(allData, chisq.test(table(type, Age)[,-c(1:3)]))
+#with(allData, chisq.test(table(type, Age)[,-c(1:4)]))
+
+# age groups >= 50
+with(allData, chisq.test(table(type, Age)[,-c(1:5)]))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+# age groups >= 20
+with(allData_20, chisq.test(table(type, Age)))
+with(allData_20, chisq.test(table(type, Age)[,-c(1)]))
+with(allData_20, chisq.test(table(type, Age)[,-c(1:2)]))
+with(allData_20, chisq.test(table(type, Age)[,-c(1:3)]))
+```
+
+**Age distribution by number of tests**
+
+```{r}
+# all age groups
+with(allData, round(prop.table(table(type, Age), mar=1), 2))
+with(allData, barplot(prop.table(table(type, Age), mar=1), 
+                      beside=TRUE, legend.text=c("both", "either"),
+                      main="Age distribution by number of tests"))
+```
+
+```{r}
+#age groups >= 20
+with(allData_20, round(prop.table(table(type, Age), mar=1), 2))
+with(allData_20, barplot(prop.table(table(type, Age), mar=1), 
+                      beside=TRUE, legend.text=c("both", "either"),
+                      main="Age distribution by number of tests"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:2],],
+     round(prop.table(table(type, Age)[,-c(1:2)], mar=1), 2))
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:2],],
+     barplot(prop.table(table(type, Age)[,-c(1:2)], mar=1), 
+             beside=TRUE, legend.text=c("both", "either"),
+            main="Age distribution by number of tests"))
+
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:3],],
+     round(prop.table(table(type, Age)[,-c(1:3)], mar=1), 2))
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:3],],
+     barplot(prop.table(table(type, Age)[,-c(1:3)], mar=1), 
+             beside=TRUE, legend.text=c("both", "either"),
+             main="Age distribution by number of tests"))
+```
+
+**Number of tests by Age**
+
+```{r, fig.dim=c(10,6)}
+with(allData, round(prop.table(table(type, Age), mar=2), 2))
+with(allData, barplot(prop.table(table(type, Age), mar=2), 
+                      beside=FALSE, legend.text=c("both", "either"),
+                      main="Number of tests by Age"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(allData_20, round(prop.table(table(type, Age), mar=2), 2))
+with(allData_20, barplot(prop.table(table(type, Age), mar=2), 
+                      beside=TRUE, legend.text=c("both", "either"),
+                      main="Number of tests by Age"))
+```
+
+**Age distribution by test type**
+
+```{r}
+tmp = rep(NA, nrow(test1Data))
+tmp[!is.na(test1Data$DNCOV)] = "DNCOV"
+tmp[!is.na(test1Data$ANCOV)] = "ANCOV"
+test1Data$which = tmp
+
+with(test1Data, round(prop.table(table(which, Age), mar=1), 2))
+with(test1Data, barplot(prop.table(table(which, Age), mar=1), 
+                      beside=TRUE, legend.text=c("ANCOV", "DNCOV"),
+                      main="Age distribution by test type"))
+```
+
+```{r}
+tmp = rep(NA, nrow(test1Data_20))
+tmp[!is.na(test1Data_20$DNCOV)] = "DNCOV"
+tmp[!is.na(test1Data_20$ANCOV)] = "ANCOV"
+test1Data_20$which = tmp
+```
+```{r, eval=FALSE, echo=FALSE}
+with(test1Data_20, round(prop.table(table(which, Age), mar=1), 2))
+with(test1Data_20, barplot(prop.table(table(which, Age), mar=1), 
+                      beside=TRUE, legend.text=c("ANCOV", "DNCOV"),
+                      main="Age distribution by test type"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(test1Data_20[test1Data_20$Age %notin% levels(test1Data_20$Age)[1:2],],
+     round(prop.table(table(which, Age)[,-c(1:2)], mar=1), 2))
+with(test1Data_20[test1Data_20$Age %notin% levels(test1Data_20$Age)[1:2],],
+     barplot(prop.table(table(which, Age)[,-c(1:2)], mar=1), 
+             beside=TRUE, legend.text=c("ANCOV", "DNCOV"),
+             main="Age distribution by test type"))
+
+with(test1Data_20[test1Data_20$Age %notin% levels(test1Data_20$Age)[1:3],],
+     round(prop.table(table(which, Age)[,-c(1:3)], mar=1), 2))
+with(test1Data_20[test1Data_20$Age %notin% levels(test1Data_20$Age)[1:3],],
+     barplot(prop.table(table(which, Age)[,-c(1:3)], mar=1), 
+             beside=TRUE, legend.text=c("ANCOV", "DNCOV"),
+             main="Age distribution by test type"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(allData_20, round(prop.table(table(which, Age), mar=1), 2))
+with(allData_20, barplot(prop.table(table(which, Age), mar=1), 
+                      beside=TRUE, legend.text=c("ANCOV", "both", "DNCOV"),
+                      main="Age distribution by number of tests/test type"))
+
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:2],],
+     round(prop.table(table(which, Age)[,-c(1:2)], mar=1), 2))
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:2],],
+     barplot(prop.table(table(which, Age)[,-c(1:2)], mar=1), 
+             beside=TRUE, legend.text=c("ANCOV", "both", "DNCOV"),
+             main="Age distribution by number of tests/test type"))
+
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:3],],
+     round(prop.table(table(which, Age)[,-c(1:3)], mar=1), 2))
+with(allData_20[allData_20$Age %notin% levels(allData_20$Age)[1:3],],
+     barplot(prop.table(table(which, Age)[,-c(1:3)], mar=1), 
+             beside=TRUE, legend.text=c("ANCOV", "both", "DNCOV"),
+             main="Age distribution by number of tests/test type"))
+```
+
+
+**Distribution of test type by Age**
+
+```{r, fig.dim=c(10,6)}
+with(test1Data, round(prop.table(table(which, Age), mar=2), 2))
+with(test1Data, barplot(prop.table(table(which, Age), mar=2), 
+                      beside=FALSE, legend.text=c("ANCOV", "DNCOV"),
+                      main="Distribution of test type by Age"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(test1Data_20, round(prop.table(table(which, Age), mar=2), 2))
+with(test1Data_20, barplot(prop.table(table(which, Age), mar=2), 
+                      beside=TRUE, legend.text=c("ANCOV", "DNCOV"),
+                      main="Distribution of test type by Age"))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(allData_20, round(prop.table(table(which, Age), mar=2), 2))
+with(allData_20, barplot(prop.table(table(which, Age), mar=2), 
+                      beside=TRUE, legend.text=c("ANCOV", "both", "DNCOV"),
+                      main="Distribution of testing by Age"))
+```
+
+DNCOV
+-----
+
+```{r}
+with(allData_20[!is.na(allData_20$DNCOV),], table(type, DNCOV))
+with(allData_20[!is.na(allData_20$DNCOV),], 
+     round(prop.table(table(type, DNCOV), mar=1), 3))
+with(allData_20[!is.na(allData_20$DNCOV),], 
+     barplot(prop.table(table(type, DNCOV), mar=1), beside=TRUE,
+             legend.text=c("both","either")))
+with(allData_20[!is.na(allData_20$DNCOV),], prop.test(table(type, DNCOV)))
+```
+
+ANCOV
+-----
+
+```{r}
+with(allData_20[!is.na(allData_20$ANCOV),], table(type, ANCOV))
+with(allData_20[!is.na(allData_20$ANCOV),], 
+     round(prop.table(table(type, ANCOV), mar=1), 3))
+with(allData_20[!is.na(allData_20$ANCOV),], 
+     barplot(prop.table(table(type, ANCOV), mar=1), beside=TRUE,
+             legend.text=c("both","either")))
+with(allData_20[!is.na(allData_20$ANCOV),], prop.test(table(type, ANCOV)))
+```
+
+
+```{r}
+0.031/0.689
+0.026/0.689
+```
+Sex
+---
+
+```{r}
+with(allData_20, round(prop.table(table(type, Sex), mar=1), 2))
+with(allData_20, prop.test(table(type, Sex)))
+```
+
+Hospital Ward
+-------------
+
+```{r}
+with(allData_20, table(type, HospitalWard))
+with(allData_20, round(prop.table(table(type, HospitalWard), mar=1), 2))
+with(allData_20, barplot(prop.table(table(type, HospitalWard), mar=1), 
+                      beside=TRUE, legend.text=c("both","either")))
+with(allData_20, chisq.test(table(type, HospitalWard)))
+```
+
+Pneumonia
+---------
+(available only for positive test outcomes)
+
+```{r}
+with(allData_20, round(prop.table(table(type, Pneumonia), mar=1), 2))
+with(allData_20, prop.test(table(type, Pneumonia)))
+```
+
+```{r}
+with(test1Data_20, round(prop.table(table(which, Pneumonia), mar=1), 2))
+with(test1Data_20, prop.test(table(which, Pneumonia)))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+tmp = rep(NA, nrow(allData_20))
+tmp[allData_20$type == "both"] = "both"
+tmp[(allData_20$type == "either") & (!is.na(allData_20$DNCOV)] = "DNCOV"
+tmp[(allData_20$type == "either") & (!is.na(allData_20$ANCOV)] = "ANCOV"
+allData_20$which = tmp
+```
+
+```{r, eval=FALSE, echo=FALSE}
+with(allData_20, round(prop.table(table(which, Pneumonia), mar=1), 2))
+with(allData_20, prop.test(table(which, Pneumonia)))
+```
+
