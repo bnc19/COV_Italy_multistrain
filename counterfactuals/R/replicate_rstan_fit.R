@@ -1,4 +1,6 @@
-
+####################################################################
+# Functions to run multivariant models assuming fixed parameters
+####################################################################
 
 replicate_rstan_fixed = function(posterior,
                                  n_difeq,
