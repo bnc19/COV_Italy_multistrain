@@ -14,10 +14,10 @@ This repository is divided into 2 sections:
 #### Data
 
 * *Dataset_Italy_A_v5.csv*, *Dataset_Italy_Alpha_v1.csv*, *Dataset_Italy_M_v5.csv*, *Dataset_Italy_O_v1.csv*: 
-For Italy excluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
+For Italy excluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data on the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
 
 * *Dataset_Veneto_A_v5.csv*, *Dataset_Veneto_Alpha_v1.csv*, *Dataset_Veneto_M_v5.csv*, *Dataset_Veneto_O_v1.csv*:
-For Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
+For Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data on the total monthly reported incidence and mean daily reported incidence in month M, obtained from the Civil Protection (2).  
 
 * *Italy_daily_test_data.csv*, *Italy_monthly_test_data.csv*: 
 For Italy excluding Veneto, data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month M, obtained from the Civil Protection (2). 
