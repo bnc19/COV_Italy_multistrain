@@ -1,6 +1,8 @@
-#########################################################################
-# Function to calculate prob variant detection if PCR / Ag
-#########################################################################
+############################################################################################
+# Function to calculate proportion of variant detected by genomic surveillance,  
+# based on % samples sequenced and alternative antigen and molecular based testing strategies
+############################################################################################
+
 
 calc_variant_detection_prob_AN_or_DN = function( 
                          sens_C ,
