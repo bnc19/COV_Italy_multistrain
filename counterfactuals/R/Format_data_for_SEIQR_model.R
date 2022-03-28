@@ -1,6 +1,6 @@
-#################################################################################################
-# Function to format posterior chains, variant and epidemiological data to run SEIQR model      #
-#################################################################################################
+##################################################################################################################################
+# Function to format posterior chains and genomic and epidemiological data to run multivariant models assuming fixed parameters.      
+##################################################################################################################################
 
 format_data_for_SEIQR_model = function(
                           daily_reported_incidence,
