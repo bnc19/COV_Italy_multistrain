@@ -9,35 +9,43 @@ This repository is divided into 2 sections:
 
 ### model_fitting
 
-This folder contains
+**This folder contains**
 
-Data
+#### Data
 
 * *Dataset_Italy_A_v5.csv*, *Dataset_Italy_Alpha_v1.csv*, *Dataset_Italy_M_v5.csv*, *Dataset_Italy_O_v1.csv* : 
-For Italy, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month m, obtained obtained from the Civil Protection (2).  
+For Italy exluding Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month m, obtained obtained from the Civil Protection (2).  
 
 * *Dataset_Veneto_A_v5.csv*, *Dataset_Veneto_Alpha_v1.csv*, *Dataset_Veneto_M_v5.csv*, *Dataset_Veneto_O_v1.csv*:
 For Veneto, data on the number of sequences tested, the number of sequences testing positive by variant, obtained from the GISAID databank (1), data only the total monthly reported incidence and mean daily reported incidence in month m, obtained obtained from the Civil Protection (2).  
 
 * *Italy_daily_test_data.csv*, *Italy_monthly_test_data.csv* : 
-For Italy,  data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month m, obtained from the Civil Protection (2). 
+For Italy exluding Veneto,  data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month m, obtained from the Civil Protection (2). 
 
 * *Veneto_daily_test_data.csv*, *Veneto_monthly_test_data.csv* : 
 For Veneto,  data on the daily reported number of antigen and molecular tests and mean daily reported number of antigen and molecular tests in month m, obtained from the Civil Protection (2). 
 
 * *dailyReportedIncidence_italy.csv* :
-For Italy, data on the daily reported incidence, obtained obtained from the Civil Protection (2).  
+For Italy exluding Veneto, data on the daily reported incidence, obtained obtained from the Civil Protection (2).  
 
 * *dailyReportedIncidence_veneto.csv* :
 For Veneto, data on the daily reported incidence, obtained obtained from the Civil Protection (2).  
 
 * *Vac_Italy_For_Month.csv*
-For Italy, data on the mean daily per-capita number of second doses administered obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
+For Italy exluding Veneto, data on the mean daily per-capita number of second doses administered obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
 * *Vac_Veneto_For_Month.csv*
 For Veneto, data on the mean daily per-capita number of second doses administered obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
+#### Scripts 
+* fit_SEIR_model_on_cluster.R is the main script to to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
 
+#### Model 
+* *neg_bin_sens.stan* R stan model to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy, assuming a negative binomial likelihood. 
+
+#### R
+The R folder contains the function used by the main script
+ * *run_testing_rstan_sens.R* 
 
 ### References 
 (1) Elbe, S. & Buckland‐Merrett, G. Data, disease and diplomacy: GISAID’s innovative contribution to global health. Global challenges 1, 33-46 (2017).
