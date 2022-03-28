@@ -1,6 +1,6 @@
-#############################################################
-#### Function to format variant  data to run SEIQR model ####
-#############################################################
+########################################################################################################
+# Function to format variant-specific genomic data to run multivariant models assuming fixed parameters.
+########################################################################################################
 
 Format_variant_data = function(index_M ,
                                        index_A ,
