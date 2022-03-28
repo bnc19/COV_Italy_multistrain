@@ -1,8 +1,8 @@
 
-#########################################################################
+############################################################################################
 # Function to calculate PPV/NPV, p(T+) based on test sensitivity and
-# and specificity and proportion of antigen vs. molecular tests conducted
-#########################################################################
+# and specificity and  alternative antigen and molecular based testing strategies
+############################################################################################
 
 calc_test_met = function(C_D_prev, 
                          PCR_sens = 0.92 ,
