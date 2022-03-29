@@ -596,52 +596,6 @@ with(TPData[TPData$Concordance == "discordant",],
 abline(v=33, lty="dotted")
 ```
 
-Figure S8
---------
-
-```{r, fig.align="center", fig.cap="Boxplots of Ct values of S (left panel) and ORF1 (right panel) gene recorded at increasing time intervals (in days) from symptoms onset to day of testing 0-3 days, 4-5 days and above 5 days. P-value for Kruskall-Wallis test is 0.004 for Ct of ORF1 gene and 0.018 for Ct of S gene."}
-
-par(mfrow=c(1,2))
-with(TPData, 
-     boxplot(CtSgene ~ gap35, ylab="Ct S gene", xlab="time lag (in days)"))
-with(TPData, 
-     boxplot(CtORF1gene ~ gap35, ylab="Ct ORF1 gene", xlab="time lag (in days)"))
-par(mfrow=c(1,1))
-```
-
-**Kruskal-Wallis test**
-
-```{r}
-with(TPData, kruskal.test(CtSgene ~ gap35))
-with(TPData, kruskal.test(CtORF1gene ~ gap35))
-```
-
-Figure S10
---------
-
-```{r, fig.align="center", fig.cap="Boxplots of time interval (in days) between time of testing and day of symptom onset against different levels of Ct values Ct < 33 and Ct >= 33 for S (left panel) and Ct ORF1 (right panel) gene. P-value for two-sided Wilcoxon-Mann-Whitney test is 1.0 for Ct S gene and 0.2 for ORF1 gene."}
-
-par(mfrow=c(1,2))
-boxplot(gap[TPData$Concordance == "discordant"] ~ 
-          (TPData$CtSgene[TPData$Concordance == "discordant"] > 33),
-        xlab="S gene", ylab="time lag (in days)",xaxt="n")
-        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
-boxplot(gap[TPData$Concordance == "discordant"] ~ 
-          (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33),
-        xlab="ORF1 gene", ylab="time lag (in days)",xaxt="n")
-        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
-par(mfrow=c(1,1))
-```
-
-**Wilcoxon-Mann-Whitney test**
-
-```{r}
-wilcox.test(gap[TPData$Concordance == "discordant"] ~ 
-              (TPData$CtSgene[TPData$Concordance == "discordant"] > 33))
-wilcox.test(gap[TPData$Concordance == "discordant"]~ 
-              (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33))
-```
-
 Figure S5
 --------
 
@@ -734,6 +688,53 @@ legend(1, 0.9, c("Veneto", "Italy"),
        col=mycol[c(1,3,2)], lwd=2, cex=0.5)
 ```
 
+
+
+Figure S9
+--------
+
+```{r, fig.align="center", fig.cap="Boxplots of Ct values of S (left panel) and ORF1 (right panel) gene recorded at increasing time intervals (in days) from symptoms onset to day of testing 0-3 days, 4-5 days and above 5 days. P-value for Kruskall-Wallis test is 0.004 for Ct of ORF1 gene and 0.018 for Ct of S gene."}
+
+par(mfrow=c(1,2))
+with(TPData, 
+     boxplot(CtSgene ~ gap35, ylab="Ct S gene", xlab="time lag (in days)"))
+with(TPData, 
+     boxplot(CtORF1gene ~ gap35, ylab="Ct ORF1 gene", xlab="time lag (in days)"))
+par(mfrow=c(1,1))
+```
+
+**Kruskal-Wallis test**
+
+```{r}
+with(TPData, kruskal.test(CtSgene ~ gap35))
+with(TPData, kruskal.test(CtORF1gene ~ gap35))
+```
+
+Figure S10
+--------
+
+```{r, fig.align="center", fig.cap="Boxplots of time interval (in days) between time of testing and day of symptom onset against different levels of Ct values Ct < 33 and Ct >= 33 for S (left panel) and Ct ORF1 (right panel) gene. P-value for two-sided Wilcoxon-Mann-Whitney test is 1.0 for Ct S gene and 0.2 for ORF1 gene."}
+
+par(mfrow=c(1,2))
+boxplot(gap[TPData$Concordance == "discordant"] ~ 
+          (TPData$CtSgene[TPData$Concordance == "discordant"] > 33),
+        xlab="S gene", ylab="time lag (in days)",xaxt="n")
+        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
+boxplot(gap[TPData$Concordance == "discordant"] ~ 
+          (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33),
+        xlab="ORF1 gene", ylab="time lag (in days)",xaxt="n")
+        axis(1, at = 1:2, labels = c("Ct < 33", "Ct >= 33"))
+par(mfrow=c(1,1))
+```
+
+**Wilcoxon-Mann-Whitney test**
+
+```{r}
+wilcox.test(gap[TPData$Concordance == "discordant"] ~ 
+              (TPData$CtSgene[TPData$Concordance == "discordant"] > 33))
+wilcox.test(gap[TPData$Concordance == "discordant"]~ 
+              (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33))
+```
 
 TABLES
 ======
