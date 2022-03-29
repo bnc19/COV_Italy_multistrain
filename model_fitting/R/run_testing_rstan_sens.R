@@ -406,7 +406,7 @@ run_SEIR_stan_Italy_sens = function(Al_data,
   
   
   
-  posteriorChains = data.frame(R0_chain_M,R0_chain_A,R0_chain_O,R0_chain_Al, beta_chain_A, beta_chain_M, beta_chain_O, beta_chain_Al,
+  posteriorChains = data.frame( beta_chain_A, beta_chain_M, beta_chain_O, beta_chain_Al,
                                rho_chain, omega1_chain, omega2_chain,k_chain, I0_chain_M, I0_chain_A, I0_chain_O, I0_chain_Al )
   
   ########## Save plot and Data  ########## 
