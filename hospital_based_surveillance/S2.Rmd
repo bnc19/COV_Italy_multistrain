@@ -418,7 +418,7 @@ with(TPData, wilcox.test(CtORF1gene ~ Symptoms))
 FIGURES
 =======
 
-Figure 2
+Figure S3
 --------
 
 **Logistic regression model for Ct S gene data**
@@ -495,9 +495,9 @@ pred_tmp = cbind(CtORF1gene = val_tmp, pred_tmp)
 predORF1_tab = pred_tmp
 ```
 
-**Figure 2**
+**Figure S3**
 
-```{r, fig.align="center", fig.cap="Figure2: Sensitivity estimates (solid line) of ANCOV test for increasing Ct values of the S gene (left panel) and Ct ORF1 (right panel) gene as obtained from a logistic regression model. The dashed lines give the 95% confidence band for the fitted regression line. The dotted lines represent the 95% band for the fitted sensitivities."}
+```{r, fig.align="center", fig.cap="Sensitivity estimates (solid line) of ANCOV test for increasing Ct values of the S gene (left panel) and Ct ORF1 (right panel) gene as obtained from a logistic regression model. The dashed lines give the 95% confidence band for the fitted regression line. The dotted lines represent the 95% band for the fitted sensitivities."}
 
 par(mfrow=c(1,2), pty="s")
 
@@ -528,7 +528,7 @@ lines(CtORF1data$CtORF1gene,
                                   1:length(CtORF1data$CtORF1gene)), lty="dotted")
 ```
 
-Figure 3
+Figure S4
 --------
 
 ```{r, fig.align="center", fig.cap="Distribution of Ct values for concordant DNCOV+/ANCOV+ and discordant DNCOV+ / ANCOV- test results. Top row: Boxplots of Ct values for the S (left) and ORF1 (right) gene. Dotted line at Ct = 33 shows the critical value of sensitivity (95%) declared for the antigen test above which there is an expected drop and an unreliable result. DNCOV+/ANCOV+ (grey box), DNCOV+/ANCOV- below sensitive threshold (yellow box) DNCOV+/ANCOV- above sensitive threshold (blue box). Bottom row: Nonparametric density estimation for Ct values of the S (left) and ORF1(right) gene, with superimposed the two densities fitted using a two-component Gaussian mixture model. DNCOV+/ANCOV- below sensitive threshold (yellow line) DNCOV+/ANCOV- above sensitive threshold (blue line)."}
@@ -596,7 +596,7 @@ with(TPData[TPData$Concordance == "discordant",],
 abline(v=33, lty="dotted")
 ```
 
-Figure 4
+Figure S8
 --------
 
 ```{r, fig.align="center", fig.cap="Boxplots of Ct values of S (left panel) and ORF1 (right panel) gene recorded at increasing time intervals (in days) from symptoms onset to day of testing 0-3 days, 4-5 days and above 5 days. P-value for Kruskall-Wallis test is 0.004 for Ct of ORF1 gene and 0.018 for Ct of S gene."}
@@ -616,7 +616,7 @@ with(TPData, kruskal.test(CtSgene ~ gap35))
 with(TPData, kruskal.test(CtORF1gene ~ gap35))
 ```
 
-Figure 5
+Figure S10
 --------
 
 ```{r, fig.align="center", fig.cap="Boxplots of time interval (in days) between time of testing and day of symptom onset against different levels of Ct values Ct < 33 and Ct >= 33 for S (left panel) and Ct ORF1 (right panel) gene. P-value for two-sided Wilcoxon-Mann-Whitney test is 1.0 for Ct S gene and 0.2 for ORF1 gene."}
@@ -642,7 +642,7 @@ wilcox.test(gap[TPData$Concordance == "discordant"]~
               (TPData$CtORF1gene[TPData$Concordance == "discordant"] > 33))
 ```
 
-Figure 7
+Figure S5
 --------
 
 ```{r, fig.align="center", fig.cap="Monthly prevalence (percentage over total sequences) of N variants generating discordant DNCOV+ / ANCOV- (left panels) and concordant DNCOV+ / ANCOV+ (right panels) result in molecular and antigen swab. Shaded areas show the 95% confidence bands for each different region. No sequence data are available for Veneto region in the months of January, February, July, and September."}
@@ -738,7 +738,7 @@ legend(1, 0.9, c("Veneto", "Italy"),
 TABLES
 ======
 
-Table I
+Table 1
 -------
 
 **All data**
@@ -842,7 +842,7 @@ tmat = round(tmat, 1)
 mat = rbind(mat, tmat)
 ```
 
-**Table I**
+**Table 1**
 
 ```{r}
 colnames(mat) = c("P", "sensitivity", "specificity", "PPV", "NPV")
@@ -857,7 +857,7 @@ kbl(t(mat[,-1]), align = "c", row.names = TRUE,
                      "Ct ORF1 gene < 33" = 3))
 ```
 
-Table II
+Table S1
 --------
 
 ```{r}
@@ -868,7 +868,7 @@ kbl(pred_tab, align="c", col.names=c("< value", "sensitivity", "lower 95% confid
   add_header_above(c("Ct S gene" = 4, "Ct ORF1 gene"  = 4))
 ```
 
-Table III
+Table S2
 ---------
 
 **CT S gene**
@@ -903,7 +903,7 @@ with(TPData[TPData$CtORF1gene < 33,], t.test(CtORF1gene ~ Concordance))
 with(TPData[TPData$CtORF1gene < 33,], wilcox.test(CtORF1gene ~ Concordance))
 ```
 
-Table IV
+Table S7
 --------
 
 ```{r}
