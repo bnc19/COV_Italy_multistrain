@@ -1,5 +1,21 @@
 
-################  Set up to run on HPC ################  
+################################         READ ME         ################################   
+# 
+# This script fits a multivariant model to epidemiological and genomic data from Veneto 
+# or the rest of Italy. The model can be run on a high performance cluster (HPC) or
+# locally. Currently, each model runs 3 chains for  200 iterations, discarding the first 
+# 100 as burnin. Initial values are close to the posterior means. This is to demo the
+# models ~ quickly (12 hours on a normal computer). In order to obtain the results 
+# provided in the manuscript, 3 chains with more diffuse starting points were run for
+# 2000 iterations, discarding the first 1000 iterations as burnin. This takes ~48-72 
+# hours to run on the HPC. 
+#
+################################                         ################################   
+
+
+
+
+################################    Set up to run on HPC ################################   
 # # rm(list = ls())
 # # root = "Q:/testing_SARS-CoV-2_variants/model_fitting"
 # # setwd("Q:/testing_SARS-CoV-2_variants/model_fitting")
@@ -15,35 +31,35 @@
 # # Create a queue within the context (/environment)
 # obj <- didehpc::queue_didehpc(ctx, config)
 
-################  Run NegBin Italy on cluster  ################  
+################################    Run NegBin Italy on cluster  ################################    
 
 
 I_V1 =  obj$enqueue(
   run_SEIR_stan_Italy_sens (
-    A_data = read.csv("data/Dataset_Italy_A_v5.csv")$Freq_new,
+    A_data = read.csv("data/Dataset_Italy_A_v5.csv")$Freq_new,  # Genomic data 
     M_data = read.csv("data/Dataset_Italy_M_v5.csv")$Freq_new,
     O_data = read.csv("data/Dataset_Italy_O_v1.csv")$Freq_new,
     Al_data = read.csv("data/Dataset_Italy_Alpha_v1.csv") $Freq_new,
     n_seq = read.csv("data/Dataset_Italy_A_v5.csv")$TotSeq_new,
-    n_difeq = 11,
+    n_difeq = 11,   
     n_pop = (59257566 - 4847026 ),
     n_recov = (1482377 - 93401),
     index_M = 6:14,
     index_A = 3:14,
     index_O =  3:9,
     index_Al = 9:14,
-    modelPath = "model/new_neg_bin_sens.stan",
+    modelPath = "model/new_neg_bin_sens.stan",  
     Location = "Italy",
     n_chains =3,
-    n_warmups =1000,
-    n_iter = 2000,
+    n_warmups =100,
+    n_iter = 200,
     n_thin = 1,
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]" , "k" ),
     
     filePath = "Results/Italy/SA",
     ini_1_SEIR = function(){
-      list(  beta = replicate(4,runif(1,1,3)),
+      list(  beta = replicate(4,runif(1,1,3)),   
              I0 = replicate(4, runif(1, 1,10000)),
              omega = replicate(2,runif(1,0.1,0.9)),
              rho = runif(1,0.1,0.9),
@@ -61,7 +77,7 @@ I_V1 =  obj$enqueue(
     time_intervention = c("07-11-2020" , "15-03-2021"),
     time_seed_alpha = "01-11-2020",
     time_seed_M = "01-08-2020",
-    sigma = 1 / 5.1,
+    sigma = 1 / 5.1,   
     gamma = 1 / 2.1 ,
     phi_PCR = 0.920,
     phi_Ag = 0.875,
@@ -89,8 +105,8 @@ V_V1 = obj$enqueue(
     modelPath = "model/new_neg_bin_sens.stan",
     Location = "Veneto",
     n_chains =3,
-    n_warmups =1000,
-    n_iter = 2000,
+    n_warmups =100,
+    n_iter = 200,
     n_thin = 1,
     
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
@@ -100,8 +116,8 @@ V_V1 = obj$enqueue(
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),
              I0 = replicate(4, runif(1, 1,1000)),
-             omega = replicate(2,runif(1,0.2,0.8)),
-             rho = runif(1,0.2,0.8),
+             omega = replicate(2,runif(1,0.1,0.9)),
+             rho = runif(1,0.1,0.9),
              k = runif(1,0.01,2)
       )},
     average_daily_reported_incidence = read.csv("data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily,
@@ -133,7 +149,7 @@ V_V1 = obj$enqueue(
 
 
 
-################  Run NegBin Italy on Locally  ################  
+################  Run NegBin Italy Locally  ################  
 
 
 I_V1 = run_SEIR_stan_Italy_sens (
@@ -152,8 +168,8 @@ I_V1 = run_SEIR_stan_Italy_sens (
     modelPath = "model/new_neg_bin_sens.stan",
     Location = "Italy",
     n_chains =3,
-    n_warmups =1000,
-    n_iter = 2000,
+    n_warmups =100,
+    n_iter = 200,
     n_thin = 1,
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]" , "k" ),
@@ -204,8 +220,8 @@ V_V1 = run_SEIR_stan_Italy_sens (
     modelPath = "model/new_neg_bin_sens.stan",
     Location = "Veneto",
     n_chains =3,
-    n_warmups =1000,
-    n_iter = 2000,
+    n_warmups =100,
+    n_iter = 200,
     n_thin = 1,
     
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
@@ -215,8 +231,8 @@ V_V1 = run_SEIR_stan_Italy_sens (
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),
              I0 = replicate(4, runif(1, 1,1000)),
-             omega = replicate(2,runif(1,0.2,0.8)),
-             rho = runif(1,0.2,0.8),
+             omega = replicate(2,runif(1,0.1,0.9)),
+             rho = runif(1,0.1,0.9),
              k = runif(1,0.01,2)
       )},
     average_daily_reported_incidence = read.csv("data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily,
