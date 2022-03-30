@@ -3,9 +3,6 @@
 
 ################  Set up ################  
 # rm(list = ls())
-# setwd("Q:/testing_SARS-CoV-2_variants")
-
-# rm(list = ls())
 
 library(tidyverse)
 library(ggpubr)

@@ -4,8 +4,6 @@
 ################  Set up ################  
 
 # rm(list = ls())
-#  setwd("Q:/COV_Italy_multistrain/model_fitting")
-
 
 library(tidyverse)
 library(Hmisc)

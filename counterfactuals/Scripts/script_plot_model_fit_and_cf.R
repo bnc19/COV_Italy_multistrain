@@ -3,8 +3,6 @@
 
 ################    Set up ################   
 
-# setwd("Q:/COV_Italy_multistrain")
-
 # rm(list = ls())
 
 library("wesanderson")

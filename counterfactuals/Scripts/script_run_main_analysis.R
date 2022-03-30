@@ -5,7 +5,6 @@
 
 ################   Set up  ################  
 
-# setwd("Q:/testing_SARS-CoV-2_variants")
 
 # rm(list = ls())
 

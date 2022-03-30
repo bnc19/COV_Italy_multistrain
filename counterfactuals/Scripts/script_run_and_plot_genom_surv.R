@@ -7,7 +7,7 @@
 
 
 # rm(list = ls())
-# setwd("Q:/testing_SARS-CoV-2_variants")
+
 
 library(tidyverse)
 library(cowplot)
