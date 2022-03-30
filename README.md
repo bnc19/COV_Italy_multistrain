@@ -147,10 +147,12 @@ The R folder contains the function used by the scripts
 
 * *replicate_rstan_fit.R* Functions to run multivariant models assuming fixed parameters. Required to run *script_run_main_analysis.R*.
 
-* *plot_PPV_NPV_p_t+.R* # Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
+* *plot_PPV_NPV_p_t+.R*  Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
 
-* *plot_variant_detection_prob.R* # Function to calculate proportion of variant detected by genomic surveillance, dependent on % samples sequenced, test sensitivity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
+* *plot_variant_detection_prob.R*  Function to calculate proportion of variant detected by genomic surveillance, dependent on % samples sequenced, test sensitivity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
 
+### Results 
+Results from running *script_run_main_analysis.R*  and *script_sample_posterior.R* 
 
 
 ## References 
