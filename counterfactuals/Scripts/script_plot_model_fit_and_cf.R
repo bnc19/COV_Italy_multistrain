@@ -3,7 +3,7 @@
 
 ################    Set up ################   
 
-# setwd("Q:/testing_SARS-CoV-2_variants")
+# setwd("Q:/COV_Italy_multistrain")
 
 # rm(list = ls())
 
