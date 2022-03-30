@@ -12,13 +12,17 @@
 #
 ################################                         ################################   
 
+# create folders 
 
+dir.create("model_fitting/Results")
+dir.create("model_fitting/Results/Italy")
+dir.create("model_fitting/Results/Veneto")
 
 
 ################################    Set up to run on HPC ################################   
 # # rm(list = ls())
-# # root = "Q:/testing_SARS-CoV-2_variants/model_fitting"
-# # setwd("Q:/testing_SARS-CoV-2_variants/model_fitting")
+# # root = "Q:/COV_Italy_multistrain/model_fitting"
+# # setwd("Q:/COV_Italy_multistrain/model_fitting")
 # 
 # 
 # ctx <- context::context_save(root, packages=c("dplyr", "ggplot2", "rstan", "bayesplot", "Hmisc", "BH", "RcppEigen"),
@@ -57,7 +61,7 @@ I_V1 =  obj$enqueue(
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]" , "k" ),
     
-    filePath = "Results/Italy/SA",
+    filePath = "Results/Italy",
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),   
              I0 = replicate(4, runif(1, 1,10000)),
@@ -80,7 +84,7 @@ I_V1 =  obj$enqueue(
     sigma = 1 / 5.1,   
     gamma = 1 / 2.1 ,
     phi_PCR = 0.920,
-    phi_Ag = 0.875,
+    phi_Ag = 0.875, # 0.643 - change antigen sensitivity 
     prior_seed_mean = 1000,
     prior_seed_sd = 1000
   )
@@ -112,7 +116,7 @@ V_V1 = obj$enqueue(
     pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
              , "I0[1]", "I0[2]", "I0[3]", "I0[4]"),
     
-    filePath = "Results/Veneto/SA" ,
+    filePath = "Results/Veneto" ,
     ini_1_SEIR = function(){
       list(  beta = replicate(4,runif(1,1,3)),
              I0 = replicate(4, runif(1, 1,1000)),
@@ -139,7 +143,7 @@ V_V1 = obj$enqueue(
     sigma = 1 / 5.1,
     gamma = 1 / 2.1 ,
     phi_PCR = 0.920,
-    phi_Ag = 0.875, 
+    phi_Ag = 0.875,  # 0.643 - change antigen sensitivity 
     prior_seed_mean = 1,
     prior_seed_sd = 1000
   )
@@ -174,7 +178,7 @@ I_V1 = run_SEIR_stan_Italy_sens (
   pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
            , "I0[1]", "I0[2]", "I0[3]", "I0[4]" , "k" ),
   
-  filePath = "Results/Italy/SA",
+  filePath = "Results/Italy",
   ini_1_SEIR = function(){
     list(  beta = replicate(4,runif(1,1,3)),
            I0 = replicate(4, runif(1, 1,10000)),
@@ -197,7 +201,7 @@ I_V1 = run_SEIR_stan_Italy_sens (
   sigma = 1 / 5.1,
   gamma = 1 / 2.1 ,
   phi_PCR = 0.920,
-  phi_Ag = 0.875,
+  phi_Ag = 0.875,  # 0.643 - change antigen sensitivity 
   prior_seed_mean = 1000,
   prior_seed_sd = 1000
 )
@@ -227,7 +231,7 @@ V_V1 = run_SEIR_stan_Italy_sens (
   pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", "rho"  , "omega[1]"  , "omega[2]"
            , "I0[1]", "I0[2]", "I0[3]", "I0[4]"),
   
-  filePath = "Results/Veneto/SA" ,
+  filePath = "Results/Veneto" ,
   ini_1_SEIR = function(){
     list(  beta = replicate(4,runif(1,1,3)),
            I0 = replicate(4, runif(1, 1,1000)),
@@ -254,7 +258,7 @@ V_V1 = run_SEIR_stan_Italy_sens (
   sigma = 1 / 5.1,
   gamma = 1 / 2.1 ,
   phi_PCR = 0.920,
-  phi_Ag = 0.875, 
+  phi_Ag = 0.875,  # 0.643 - change antigen sensitivity 
   prior_seed_mean = 1,
   prior_seed_sd = 1000
 )
