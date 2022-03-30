@@ -4,7 +4,7 @@
 ################  Set up ################  
 
 # rm(list = ls())
-#  setwd("Q:/testing_SARS-CoV-2_variants/model_fitting")
+#  setwd("Q:/COV_Italy_multistrain/model_fitting")
 
 
 library(tidyverse)
@@ -36,7 +36,6 @@ formated_data_italy  = format_data_for_SEIQR_model(
   c(0,0,0,0, 0,0,0,0,0,0.0003,0.0005, 0.0009 ,0.0014, 0.002),
   round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$pcr_daily_average),
   round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("model_fitting/data/Italy_deaths.csv") ,
   round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$pcr_daily) ,
   round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$antigen_daily),
   start_date = "01-05-2020",
@@ -106,11 +105,10 @@ recovered_ven =  93401
 # convert dates into date format and format daily data to match 
 
 formated_data_Veneto  = format_data_for_SEIQR_model(
-  read.csv("model_fitting/data/dailyReportedIncidence.csv")$new_case,
+  read.csv("model_fitting/data/dailyReportedIncidence_veneto.csv")$new_case,
   c(0,0,0,0, 0,0,0,0,0,0.00043, 0.00039,0.00096,0.0018, 0.0028),
   round(read.csv("model_fitting/data/Veneto_monthly_test_data.csv")$pcr_daily_average),
   round(read.csv("model_fitting/data/Veneto_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("model_fitting/data/Veneto_deaths.csv") ,
   round(read.csv("model_fitting/data/Veneto_daily_test_data.csv")$pcr_daily) ,
   round(read.csv("model_fitting/data/Veneto_daily_test_data.csv")$antigen_daily),
   start_date = "01-07-2020",
@@ -152,11 +150,10 @@ x_i_data_Veneto = c(
 ################ italy testing in veneto #######################
 
 formated_data_Veneto_I_test  = format_data_for_SEIQR_model(
-  read.csv("model_fitting/data/dailyReportedIncidence.csv")$new_case,
+  read.csv("model_fitting/data/dailyReportedIncidence_veneto.csv")$new_case,
   c(0,0,0,0, 0,0,0,0,0,0.00043, 0.00039,0.00096,0.0018, 0.0028),
   round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$pcr_daily_average),
   round(read.csv("model_fitting/data/Italy_monthly_test_data.csv")$antigen_daily_average),
-  read.csv("model_fitting/data/Veneto_deaths.csv") ,
   round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$pcr_daily) ,
   round(read.csv("model_fitting/data/Italy_daily_test_data.csv")$antigen_daily),
   start_date = "01-07-2020",

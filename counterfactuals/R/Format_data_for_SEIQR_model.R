@@ -7,7 +7,6 @@ format_data_for_SEIQR_model = function(
                           average_monthly_vaccination,
                           monthly_PCR,
                           monthly_Ag,
-                          deaths,
                           daily_PCR ,
                           daily_Ag,
                           start_date,
@@ -63,8 +62,7 @@ format_data_for_SEIQR_model = function(
   
   daily_Ag_i = daily_Ag[(length(daily_Ag) - n_days + 1):length(daily_Ag)]
   
-  deaths_i = deaths$cum_deaths[(length(deaths$cum_deaths) - n_days + 1):length(deaths$cum_deaths)]
-  # 
+ 
   # 
   # average_daily_vaccination$date.of.vaccination = as.Date.character(average_daily_vaccination$date.of.vaccination, format = "%Y-%m-%d")
   # average_daily_vaccination2 = left_join(data.frame(date.of.vaccination = daily_date), average_daily_vaccination)
@@ -79,7 +77,6 @@ format_data_for_SEIQR_model = function(
   
   external_data = data.frame(
     daily_date,
-    deaths_i,
     daily_Ag_i,
     daily_PCR_i,
     daily_reported_incidence_i
