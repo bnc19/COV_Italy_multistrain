@@ -6,6 +6,7 @@ This repository is divided into 3 sections:
 * *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto (between July 2020-May 2021) and the rest of Italy (between May 2020-2021), separately. 
 * *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures 1,5,6,7S7 and S8 from the manuscript. 
 
+* **N.B. *fit_SEIR_model_on_cluster.R*, *script_run_main_analysis.R* and *script_run_and_plot_sensitivity_analysis.R* require Rstan installation to run. See instructions: https://mc-stan.org/users/interfaces/rstan** 
 
 ## hospital_based_surveillance
 
@@ -45,7 +46,7 @@ For Italy excluding Veneto, data on the mean daily per-capita number of second d
 For Veneto, data on the mean daily per-capita number of second doses administered in month M, obtained from the Extraordinary Commissioner for the Covid-19 emergency (3).
 
 ### Scripts 
-* fit_SEIR_model_on_cluster.R is the main script to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
+* *fit_SEIR_model_on_cluster.R* is the main script to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. 
 
 ### Model 
 * *neg_bin_sens.stan* Rstan model to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy, assuming a negative binomial likelihood. 
