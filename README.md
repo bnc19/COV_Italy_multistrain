@@ -2,7 +2,7 @@
 
 This repository is divided into 3 sections: 
 
-* *hospital_based_surveillance* - code to analyse antigen assay performance observed during hospital surveillance in Veneto. Also includes code to produce figures from the manuscript. 
+* *hospital_based_surveillance* - code to analyse antigen assay performance observed during hospital surveillance in Veneto. Also includes code to produce figures S3, S4, S5, S9 and S10, and tables 1, S1 and S2 from the manuscript. 
 * *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto (between July 2020-May 2021) and the rest of Italy (between May 2020-2021), separately. 
 * *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures 1,5,6,7S7 and S8 from the manuscript. 
 
@@ -147,10 +147,12 @@ The R folder contains the function used by the scripts
 
 * *replicate_rstan_fit.R* Functions to run multivariant models assuming fixed parameters. Required to run *script_run_main_analysis.R*.
 
-* *plot_PPV_NPV_p_t+.R* # Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
+* *plot_PPV_NPV_p_t+.R*  Function to calculate PPV/NPV, p(T+), dependent on test sensitivity and specificity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_test_performance.R*. 
 
-* *plot_variant_detection_prob.R* # Function to calculate proportion of variant detected by genomic surveillance, dependent on % samples sequenced, test sensitivity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
+* *plot_variant_detection_prob.R*  Function to calculate proportion of variant detected by genomic surveillance, dependent on % samples sequenced, test sensitivity, variant prevalence, and alternative antigen and molecular based testing strategies. Required to run *script_run_and_plot_genom_surv.R*. 
 
+### Results 
+Results from running *script_run_main_analysis.R*  and *script_sample_posterior.R* 
 
 
 ## References 
