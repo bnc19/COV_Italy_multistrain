@@ -114,8 +114,8 @@ write.csv(posterior_samples_italy_sens, "counterfactuals/Italy/100_posterior_sam
 
 
 
-write.csv(Veneto_post_est, "counterfactuals/Veneto/Veneto_post_est.csv")
-write.csv(Italy_post_est, "counterfactuals/Italy/Italy_post_est.csv")
-write.csv(Veneto_post_est_sens, "counterfactuals/Veneto/Veneto_post_est_sens.csv")
-write.csv(Italy_post_est_sens, "counterfactuals/Italy/Italy_post_est_sens.csv")
+write.csv(Veneto_post_est, "counterfactuals/Results/Veneto_post_est.csv")
+write.csv(Italy_post_est, "counterfactuals/Results/Italy_post_est.csv")
+write.csv(Veneto_post_est_sens, "counterfactuals/Results/Veneto_post_est_sens.csv")
+write.csv(Italy_post_est_sens, "counterfactuals/Results/Italy_post_est_sens.csv")
 
