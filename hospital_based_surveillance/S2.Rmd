@@ -904,7 +904,6 @@ with(TPData[TPData$CtORF1gene < 33,], t.test(CtORF1gene ~ Concordance))
 with(TPData[TPData$CtORF1gene < 33,], wilcox.test(CtORF1gene ~ Concordance))
 ```
 
-Table S7
 --------
 
 ```{r}
