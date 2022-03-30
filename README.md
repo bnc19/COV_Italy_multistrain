@@ -1,4 +1,4 @@
-Available as a pre-print (not peer-reviewed) at: https://www.researchsquare.com/article/rs-1481444/v1
+Claudia Del Vecchio, Bethan Cracknell Daniels, Giuseppina Brancaccio et al. Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants, 28 March 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-1481444/v1]
 
 # Repository structure
 
