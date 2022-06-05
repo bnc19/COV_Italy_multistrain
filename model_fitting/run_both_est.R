@@ -100,7 +100,8 @@ n_warmups =2000
 n_iter = 4000
 n_thin = 1
 pars = c("lp__", "beta[1]", "beta[2]","beta[3]","beta[4]", 
-         "rho_it" , "rho_ven" , "omega[1]"  , "omega[2]"
+         "rho_it" , "rho_ven" ,
+         "omega[1]"  , "omega[2]" #, "omega[3]"  , "omega[4]"
          , "I0_it[1]", "I0_it[2]", "I0_it[3]", "I0_it[4]",
          "I0_ven[1]", "I0_ven[2]", "I0_ven[3]", "I0_ven[4]",
          "R0_it", "R0_ven")
@@ -109,7 +110,7 @@ ini_1_SEIR = function(){
   list(  beta = replicate(4,runif(1,0,3)),
          I0_it = replicate(4, runif(1, 1,20)),
          I0_ven = replicate(4, runif(1, 1,20)),
-         omega = replicate(4,runif(1,0.2,0.8)),
+         omega = replicate(2,runif(1,0.2,0.8)),
          rho_it = runif(1,0.2,0.8),
          rho_ven = runif(1,0.2,0.8),
          k = runif(1,0.01,2)

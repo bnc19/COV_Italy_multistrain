@@ -91,7 +91,7 @@ parameters {
   real<lower = 0, upper = 1>  rho_ven;      // probability of reporting 
   real<lower = 0>             I0_it[n_var];    // seed
   real<lower = 0, upper = 1>  rho_it;      // probability of reporting 
-  real<lower = 0, upper = 1>  omega[4]; // reduction in transmission
+  real<lower = 0, upper = 1>  omega[2]; // reduction in transmission
   real<lower = 0>             k;        // overdispersion parameter 
 
 }   
@@ -184,7 +184,7 @@ transformed parameters{
  }  
  
  for(t in  time_switch2_it :  n_ts_it) {
-   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[2]) *beta[i];
+   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[1]) *beta[i];
  }  
  
 
@@ -196,11 +196,11 @@ transformed parameters{
  } 
  
  for(t in time_switch1_ven :  (time_switch2_ven-1)) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[3]) *beta[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[2]) *beta[i];
  }  
  
  for(t in  time_switch2_ven :  n_ts_ven) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[4]) *beta[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[2]) *beta[i];
  }  
  
 
