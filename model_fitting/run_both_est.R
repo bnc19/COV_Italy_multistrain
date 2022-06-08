@@ -1,6 +1,6 @@
 rm(list = ls())
-setwd("Q:/COV_Italy_multistrain/model_fitting")
-modelPath = "model/new_neg_bin_sens_estimate_new_likelihood_presymp_both.stan"
+setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/model_fitting")
+modelPath = "model/est_test_asymp.stan"
 
 # Load packages ----------------------------------------------------------------
 library(bayesplot)
