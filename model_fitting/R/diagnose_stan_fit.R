@@ -45,11 +45,11 @@ diagnose_stan_fit = function(
   
   
   # save files 
-  write.csv(param_sum, file=paste0(file_path,"param_sum.csv"))
+  write.csv(param_sum, file=paste0(file_path,"/param_sum.csv"))
   
   ggsave(
     markov_trace,
-    file =  paste0(file_path, "trace_plot.png"),
+    file =  paste0(file_path, "/trace_plot.png"),
     height = 20,
     width = 50,
     unit = "cm",
@@ -58,7 +58,7 @@ diagnose_stan_fit = function(
   
   ggsave(
     bivar,
-    file =  paste0(file_path,"bivar_plot.png"),
+    file =  paste0(file_path,"/bivar_plot.png"),
     height = 20,
     width = 50,
     unit = "cm",
@@ -68,7 +68,7 @@ diagnose_stan_fit = function(
   
   ggsave(
     uni,
-    file =  paste0(file_path,"uni_plot.png"),
+    file =  paste0(file_path,"/uni_plot.png"),
     height = 20,
     width = 50,
     unit = "cm",

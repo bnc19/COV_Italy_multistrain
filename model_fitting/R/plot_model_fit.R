@@ -1,5 +1,5 @@
 
-plot_stan_fit = function(stan_fit,
+plot_stan_fit = function(fit,
                          file_path,
                          varaints = c("M234I-A376T", "A220V", "Other", "Alpha"),
                          # initial conditions
@@ -148,7 +148,7 @@ Italy_fit  = SEIR__fit_ext$incidence_it %>% as.data.frame.table() %>%
   theme_bw() + theme(text = element_text(size = 16), legend.position = "none") +
   scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
   ggtitle("Italy")+
-  ylim(c(0,150))
+  ylim(c(0,180))
 
 
 
@@ -210,7 +210,7 @@ veneto_fit  = SEIR__fit_ext$incidence_ven %>% as.data.frame.table() %>%
                      legend.position = c(0.12,0.86)) +
   scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
   ggtitle("Veneto") + 
-  ylim(c(0,150))
+  ylim(c(0,180))
 
 #  Save Veneto and Italy fits --------------------------------------------------
 
@@ -219,7 +219,7 @@ rep_inc_plot = plot_grid(veneto_fit, Italy_fit)
 
 ggsave(
   rep_inc_plot,
-  file =  paste0(file_path,"reportedIncidencePlotp.jpg"),
+  file =  paste0(file_path,"/rep_inc_plot.jpg"),
   height = 20,
   width = 50,
   unit = "cm",
