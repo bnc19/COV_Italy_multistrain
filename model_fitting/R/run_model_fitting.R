@@ -18,19 +18,13 @@ run_model_fitting = function(file_path,
                              
                              # index data Veneto
                              index_M_veneto = 8:14,
-                             index_A_veneto = c(5, 7:14),
-                             index_O_veneto = c(5, 7:9),
+                             index_A_veneto = c(5,7:14),
+                             index_O_veneto = c(5,7:9),
                              index_Al_veneto = 9:14,
-                             
-                             #5.1 days = incubation period (no symptoms)
-                             epsilon = 1 / 2.8,
-                             ## mean of values given in Vo table S5 assuming R0 = 2.7
-                             
-                             # 1/ sigma = 5.1 - 2.8
-                             sigma = 1 / (5.1 - 2.8),
+                             epsilon = 1 / 1.31,
+                             sigma = 1 / (5.1 - 1.31),
                              gamma = 1 / 2.1 ,
                              mu = 0.59 ,
-                             # probability symptomatic
                              phi_PCR = 0.920,
                              phi_Ag =  0.643,
                              
@@ -54,8 +48,8 @@ run_model_fitting = function(file_path,
                              time_vac_veneto = "27-12-2020",
                              # date first vaccine (first datapoint),
                              n_chains = 4,
-                             n_warmups = 2000,
-                             n_iter = 4000,
+                             n_warmups = 500,
+                             n_iter = 1000,
                              n_thin = 1,
                              pars = c("lp__",
                                       "beta",

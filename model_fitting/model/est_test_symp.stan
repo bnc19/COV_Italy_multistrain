@@ -427,9 +427,132 @@ model {
 
 
 generated quantities {
-  real R0_it[n_var];
-  real R0_ven[n_var];
+
+  vector[sum(n_data_it) + sum(n_data_ven)] log_lik;
   
- for(i in 1:n_var)  R0_it[i] = (beta[i]* (1-rho_it) )/ gamma;
- for(i in 1:n_var)  R0_ven[i] = (beta[i]* (1-rho_ven) )/ gamma;
+  
+// Define Italy model param ----------------------------------------------------
+
+  real monthly_incidence_it[n_months_it, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_it[n_data_it[1]];
+  real lambda_A_it[n_data_it[2]]; 
+  real lambda_O_it[n_data_it[3]];
+  real lambda_Al_it[n_data_it[4]]; 
+  
+
+  // used for for loop
+  
+  int index_it;
+  int ind_it ; 
+  
+  
+// Define veneto model param ---------------------------------------------------
+  real monthly_incidence_ven[n_months_ven, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_ven[n_data_ven[1]];
+  real lambda_A_ven[n_data_ven[2]]; 
+  real lambda_O_ven[n_data_ven[3]];
+  real lambda_Al_ven[n_data_ven[4]]; 
+  
+
+  // used for for loop
+  
+  int index_ven;
+  int ind_ven ; 
+ 
+
+// Italy  model ----------------------------------------------------------------
+
+  // index by month for daily average of variant incidences and month average 
+  // concordant incidence, in month i 
+   
+ index_it = 1; 
+ 
+ for (m in 1:n_months_it){ 
+   ind_it = index_it + 1;
+   for (i in 1:n_var){
+     monthly_incidence_it[m,i] =  
+     mean( incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
+  
+   index_it = index_it + 1;
+ }
+ 
+   // variant specific mean parameters for likelihood  
+  lambda_M_it = monthly_incidence_it[index_M_it, 1] ; 
+  
+  lambda_A_it =  monthly_incidence_it[index_A_it, 2] ;
+  
+  lambda_O_it =  monthly_incidence_it[index_O_it, 3];
+  
+  lambda_Al_it =  monthly_incidence_it[index_Al_it, 4] ;
+ 
+
+// Veneto model ----------------------------------------------------------------
+
+ // index by month for daily average of variant incidences and month average 
+ // concordant incidence, in month i 
+   
+ index_ven= 1; 
+ 
+ for (m in 1:n_months_ven){ 
+   ind_ven = index_ven + 1;
+   for (i in 1:n_var){
+     monthly_incidence_ven[m,i] =  
+     mean( incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+   index_ven = index_ven + 1;
+ }
+ 
+  // variant specific mean parameters for likelihood  
+
+  lambda_M_ven = monthly_incidence_ven[index_M_ven, 1] ; 
+  
+  lambda_A_ven =  monthly_incidence_ven[index_A_ven, 2] ;
+  
+  lambda_O_ven =  monthly_incidence_ven[index_O_ven, 3];
+  
+  lambda_Al_ven =  monthly_incidence_ven[index_Al_ven, 4] ;
+  
+  
+
+ for (i in 1:n_data_it[1]){
+    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_it [i] | lambda_M_it [i], k);
+  }
+  
+ for (i in (n_data_it[1] + 1): (n_data_it[1] + n_data_it[2])){
+    log_lik[i] = neg_binomial_2_lpmf(y_A_it [(i-n_data_it[1])] | lambda_A_it[(i-n_data_it[1])], k);
+  }
+
+ for (i in (n_data_it[1] + n_data_it[2]+1): (n_data_it[1] + n_data_it[2] + n_data_it[3])){
+    log_lik[i] = neg_binomial_2_lpmf(y_O_it [(i-n_data_it[1] - n_data_it[2])] | lambda_O_it[(i-n_data_it[1] - n_data_it[2])], k);
+  }
+
+ for (i in (n_data_it[1] + n_data_it[2] + n_data_it[3]+1): (sum(n_data_it))){
+    log_lik[i] = neg_binomial_2_lpmf(y_Al_it [(i-n_data_it[1] - n_data_it[2] - n_data_it[3])] | 
+    lambda_Al_it[(i-n_data_it[1] - n_data_it[2] - n_data_it[3])], k);
+  }
+
+ for (i in ( sum(n_data_it) +1):(sum(n_data_it) + n_data_ven[1] )){
+    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_ven [(i-sum(n_data_it))] | lambda_M_ven[(i-sum(n_data_it))], k);
+  }
+
+ for (i in ( sum(n_data_it) + n_data_ven[1]+1):(sum(n_data_it) + n_data_ven[1] + n_data_ven[2] )){
+    log_lik[i] = neg_binomial_2_lpmf(y_A_ven [(i-sum(n_data_it) -  n_data_ven[1])] | 
+    lambda_A_ven[(i-sum(n_data_it)- n_data_ven[1])], k);
+  }
+  
+ for (i in ( sum(n_data_it) + n_data_ven[1]+ n_data_ven[2]+1):(sum(n_data_it) + n_data_ven[1] + n_data_ven[2]+ n_data_ven[3] )){
+    log_lik[i] = neg_binomial_2_lpmf(y_O_ven [(i-sum(n_data_it) -  n_data_ven[1]-  n_data_ven[2])] | 
+    lambda_O_ven[(i-sum(n_data_it)- n_data_ven[1] -  n_data_ven[2])], k);
+  }  
+  
+   for (i in ( sum(n_data_it) + n_data_ven[1]+ n_data_ven[2]+n_data_ven[3]+1):(sum(n_data_it) + sum(n_data_ven) )){
+    log_lik[i] = neg_binomial_2_lpmf(y_Al_ven [(i-sum(n_data_it) -  n_data_ven[1]-  n_data_ven[2] - n_data_ven[3])] | 
+    lambda_Al_ven[(i-sum(n_data_it)- n_data_ven[1] -  n_data_ven[2]  - n_data_ven[3])], k);
+  }  
+
 }

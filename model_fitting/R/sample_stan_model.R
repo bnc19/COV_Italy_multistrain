@@ -108,6 +108,10 @@ sample_stan_model = function(
     model,
     data = stan_data,
     init = list_of_inits,
+    chains =n_chains ,
+    warmup = n_warmups,
+    iter =n_iter ,
+    thin =n_thin,
     control = list(
       adapt_delta = 0.85, 
       max_treedepth = 12
