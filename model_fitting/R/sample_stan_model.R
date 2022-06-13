@@ -12,6 +12,18 @@ draw_init_values = function(seed=1){
          k = runif(1,0.01,2)
   )}
 
+draw_init_values_prev = function(seed=1){
+  
+  set.seed(seed)
+  list(  beta = replicate(4,runif(1,0,3)),
+         I0_it = replicate(4, runif(1, 1,20)),
+         I0_ven = replicate(4, runif(1, 1,20)),
+         omega = replicate(4,runif(1,0.2,0.8)),
+         rho_it = runif(1,0.2,0.8),
+         rho_ven = runif(1,0.2,0.8),
+         k = runif(1,0.01,2),
+         tau = runif(1,0.5,0.9)
+  )}
 
 sample_stan_model = function(
   modelPath,
@@ -51,7 +63,8 @@ sample_stan_model = function(
   time_intervention_veneto, 
   time_seed_alpha_veneto,
   time_seed_M_veneto,
-  time_vac_veneto
+  time_vac_veneto,
+  prev
 ){
   
   library(rstan)
@@ -62,10 +75,15 @@ sample_stan_model = function(
   
   list_of_inits = list()
   
+  if (prev==F){
   for(i in 1:n_chains)  {
     list_of_inits[[i]] =  draw_init_values(seed = seed_values[i]
     )}
-  
+  } else {
+    for(i in 1:n_chains)  {
+      list_of_inits[[i]] =  draw_init_values_prev(seed = seed_values[i]
+      )}
+  }
 
   model = stan_model(paste(modelPath))
   

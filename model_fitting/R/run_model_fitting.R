@@ -60,7 +60,8 @@ run_model_fitting = function(file_path,
                                       "I0_it",
                                       "I0_ven",
                                       "kappa"),
-                             seed_values = c(1, 4, 5, 97)
+                             seed_values = c(1, 4, 5, 97),
+                             prev 
                                    ){
   
 # Create file to save folder 
@@ -128,7 +129,8 @@ run_model_fitting = function(file_path,
                        n_iter=n_iter ,
                        n_thin=n_thin ,
                        pars=pars ,
-                       seed_values=seed_values)
+                       seed_values=seed_values,
+                       prev = prev)
   
 
 # Plot 
