@@ -28,7 +28,8 @@ format_stan_data= function(
   time_intervention_veneto, 
   time_seed_alpha_veneto,
   time_seed_M_veneto,
-  time_vac_veneto
+  time_vac_veneto,
+  scale_time_step
 ){
   
 
@@ -204,7 +205,7 @@ format_stan_data= function(
   
   model_data_real = list(
     # Shared data 
-    
+    scale_time_step = scale_time_step,
     gamma = gamma ,
     sigma = sigma ,
     mu = mu, 
@@ -225,16 +226,16 @@ format_stan_data= function(
     n_days_it = length(all_dates_it),
     n_recov_it = n_recov_it,
     n_months_it = n_months_it,
-    n_ts_it =length(all_dates_it),
+    n_ts_it =(length(all_dates_it) * scale_time_step),
     
     y_M_it = round(n_reported_M_it / (n_pop_it-n_recov_it) * 100000),
     y_A_it = round(n_reported_A_it / (n_pop_it-n_recov_it) * 100000),
     y_O_it = round(n_reported_O_it /  (n_pop_it-n_recov_it) * 100000),
     y_Al_it = round(n_reported_Al_it/  (n_pop_it-n_recov_it) * 100000),
     
-    Ag_daily_it  = daily_Ag_i_it,
-    PCR_daily_it = daily_PCR_i_it,
-    vac_it = average_daily_vaccination_i_it,
+    Ag_daily_it  = round(rep(daily_Ag_i_it / scale_time_step, each = scale_time_step)),
+    PCR_daily_it = round(rep(daily_PCR_i_it / scale_time_step, each = scale_time_step)),
+    vac_it = round(rep(average_daily_vaccination_i_it / scale_time_step, each = scale_time_step)),
     
     time_switch1_it = index_switch1_it,
     time_switch2_it =index_switch2_it,
@@ -255,16 +256,16 @@ format_stan_data= function(
     n_days_ven= length(all_dates_veneto),
     n_recov_ven= n_recov_veneto,
     n_months_ven= n_months_veneto,
-    n_ts_ven=length(all_dates_veneto),
+    n_ts_ven=(length(all_dates_veneto)*scale_time_step),
     
     y_M_ven= round(n_reported_M_veneto/ (n_pop_veneto-n_recov_veneto) * 100000),
     y_A_ven= round(n_reported_A_veneto/ (n_pop_veneto-n_recov_veneto) * 100000),
     y_O_ven= round(n_reported_O_veneto/  (n_pop_veneto-n_recov_veneto) * 100000),
     y_Al_ven= round(n_reported_Al_veneto/  (n_pop_veneto-n_recov_veneto) * 100000),
     
-    Ag_daily_ven = daily_Ag_i_veneto,
-    PCR_daily_ven= daily_PCR_i_veneto,
-    vac_ven= average_daily_vaccination_i_veneto,
+    Ag_daily_ven = round(rep(daily_Ag_i_veneto / scale_time_step, each = scale_time_step)),
+    PCR_daily_ven= round(rep(daily_PCR_i_veneto / scale_time_step, each = scale_time_step)),
+    vac_ven = round(rep(average_daily_vaccination_i_veneto / scale_time_step, each = scale_time_step)), 
     
     time_switch1_ven= index_switch1_veneto,
     time_switch2_ven=index_switch2_veneto,
