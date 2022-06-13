@@ -109,7 +109,7 @@ transformed parameters{
   real R_it[(n_ts_it +1)];
   
   real FOI_it[n_ts_it, n_var]; 
-  real incidence_it[n_ts_it,n_var];
+  real daily_incidence_it[n_ts_it,n_var];
   
   // 
   real pPCR_daily_it[n_ts_it];     // daily probability of PCR test
@@ -130,7 +130,7 @@ transformed parameters{
   real R_ven[(n_ts_ven +1)];
   
   real FOI_ven[n_ts_ven, n_var]; 
-  real incidence_ven[n_ts_ven,n_var];
+  real daily_incidence_ven[n_ts_ven,n_var];
   
   // 
   real pPCR_daily_ven[n_ts_ven];     // daily probability of PCR test
@@ -210,7 +210,7 @@ transformed parameters{
    IS_it[time_seed_M_it+1,1] = I0_it[1];
    IS_it[time_seed_alpha_it+1,4] = I0_it[4];
 
-   p_daily_it[t] = (sigma * sum(E_it[t,2:4])) / S0_it;
+   p_daily_it[t] = (epsilon * sum(E_it[t,2:4])) / S0_it;
    
    pPCR_daily_it[t] = 
    (PCR_daily_it[t] - Ag_daily_it[t] * p_daily_it[t]) / 
@@ -246,7 +246,7 @@ transformed parameters{
    + gamma * sum(IA_it[t,]) + vac_it[t] * S_it[t];
    
    
-   for(i in 1:n_var) incidence_it[t,i] = 
+   for(i in 1:n_var) daily_incidence_it[t,i] = 
    (delta_it[t,i]*mu*sigma*PS_it[t,i]) / S0_it * 100000  ;
  }
  
@@ -258,7 +258,7 @@ transformed parameters{
    IS_ven[time_seed_M_ven+1,1] = I0_ven[1];
    IS_ven[time_seed_alpha_ven+1,4] = I0_ven[4];
 
-   p_daily_ven[t] = (sigma * sum(E_ven[t,2:4])) / S0_ven;
+   p_daily_ven[t] = (epsilon * sum(E_ven[t,2:4])) / S0_ven;
    pPCR_daily_ven[t] = 
    (PCR_daily_ven[t] - Ag_daily_ven[t] * p_daily_ven[t]) / 
    (PCR_daily_ven[t] + Ag_daily_ven[t] * (1-p_daily_ven[t]));
@@ -294,7 +294,7 @@ transformed parameters{
    + gamma * sum(IA_ven[t,]) + vac_ven[t] * S_ven[t];
    
    
-   for(i in 1:n_var) incidence_ven[t,i] =
+   for(i in 1:n_var) daily_incidence_ven[t,i] =
    (delta_ven[t,i]*mu*sigma*PS_ven[t,i]) / S0_ven * 100000  ;
  }
   
@@ -352,7 +352,7 @@ model {
    ind_it = index_it + 1;
    for (i in 1:n_var){
      monthly_incidence_it[m,i] =  
-     mean( incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
   
    index_it = index_it + 1;
  }
@@ -387,7 +387,7 @@ model {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
    index_ven = index_ven + 1;
  }
  
@@ -422,6 +422,7 @@ model {
   I0_it   ~ normal(1,200);
   I0_ven  ~ normal(1,200);
   k       ~ exponential(0.01);
+  k       ~ normal(1,1);
 }
 
 
@@ -477,7 +478,7 @@ generated quantities {
    ind_it = index_it + 1;
    for (i in 1:n_var){
      monthly_incidence_it[m,i] =  
-     mean( incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
   
    index_it = index_it + 1;
  }
@@ -503,7 +504,7 @@ generated quantities {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
    index_ven = index_ven + 1;
  }
  
