@@ -22,11 +22,12 @@ diagnose_stan_fit = function(
            "I0_ven[1]", "I0_ven[2]","I0_ven[3]","I0_ven[4]",
            "k"),
   file_path
-  ){
+){
   
   # required package 
   library(bayesplot)
-
+  library(loo)
+  
   
   stan_fit_post= as.array(fit)
   
@@ -34,15 +35,11 @@ diagnose_stan_fit = function(
   markov_trace = mcmc_trace(stan_fit_post, pars=c("lp__", pars))
   
   # bivariate marginal posterior distributions
-  bivar = pairs(fit, pars = pars, cex.labels=1.5, font.labels=9, condition = "accept_stat__")  
-  
-  # univariate marginal posterior distributions 
-  uni = mcmc_dens_overlay(fit, pars=pars)
-
+  bivar = pairs(fit, pars = pars[1:round(length(pars)/2)], cex.labels=1.5, font.labels=9, condition = "accept_stat__")  
+  bivar2 = pairs(fit, pars = pars[(round(length(pars)/2)+1):length(pars)], cex.labels=1.5, font.labels=9, condition = "accept_stat__")  
   
   # summary of parameter values, effective sample size and Rhat 
   param_sum = summary(fit, pars = pars)$summary
-  
   
   # save files 
   write.csv(param_sum, file=paste0(file_path,"/param_sum.csv"))
@@ -67,13 +64,26 @@ diagnose_stan_fit = function(
   
   
   ggsave(
-    uni,
-    file =  paste0(file_path,"/uni_plot.png"),
+    bivar2,
+    file =  paste0(file_path,"/bivar2_plot.png"),
     height = 20,
     width = 50,
     unit = "cm",
     dpi = 720
   )
-  return(list(markov_trace, bivar,uni, param_sum))
+  
+  
+  # WAIC and LOO
+  
+  log_lik= extract_log_lik(fit)
+  waic = waic(log_lik)
+  print(waic)
+  # loo
+  loo =loo(fit, save_psis = TRUE)
+  
+  print(loo)
+  
+
+  return(list(markov_trace, bivar, param_sum))
   
 }
