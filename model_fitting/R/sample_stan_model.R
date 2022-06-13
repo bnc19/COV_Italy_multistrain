@@ -22,6 +22,7 @@ sample_stan_model = function(
   pars ,
   seed_values,
   n_pop_it ,
+  scale_time_step,
   n_recov_it,
   index_M_it ,
   index_A_it ,
@@ -70,6 +71,7 @@ sample_stan_model = function(
   
   
   stan_data = format_stan_data(
+    scale_time_step = scale_time_step,
     n_pop_it = n_pop_it,
     n_recov_it=n_recov_it,
     index_M_it = index_M_it,

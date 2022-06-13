@@ -123,7 +123,7 @@ dataConfDf_it  = bind_rows(dataConf_it )
 dataDay_it  = left_join(data.frame(Date = all_dates_it ),dataConfDf_it )
 
 
-Italy_fit  = SEIR__fit_ext$incidence_it %>% as.data.frame.table() %>%
+Italy_fit  = SEIR__fit_ext$daily_incidence_it %>% as.data.frame.table() %>%
   rename(ni = iterations, time = Var2, variant = Var3, value = Freq) %>%
   dplyr::mutate(ni = as.numeric(ni),
                 time = as.numeric(time)) %>%
@@ -184,7 +184,7 @@ dataConfDf_veneto  = bind_rows(dataConf_veneto )
 dataDay_veneto  = left_join(data.frame(Date = all_dates_veneto ),dataConfDf_veneto )
 
 
-veneto_fit  = SEIR__fit_ext$incidence_ven %>% as.data.frame.table() %>%
+veneto_fit  = SEIR__fit_ext$daily_incidence_ven %>% as.data.frame.table() %>%
   rename(ni = iterations, time = Var2, variant = Var3, value = Freq) %>%
   dplyr::mutate(ni = as.numeric(ni),
                 time = as.numeric(time)) %>%

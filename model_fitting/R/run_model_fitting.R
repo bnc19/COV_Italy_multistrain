@@ -2,6 +2,7 @@
 
 run_model_fitting = function(file_path,
                              model_path,
+                             scale_time_step = 1,
                              # initial conditions
                              n_pop_it = 59257566 - 4847026,
                              n_recov_it = 1482377 - 93401,
@@ -89,7 +90,9 @@ run_model_fitting = function(file_path,
   
   
 # Run model 
-  fit = sample_stan_model(modelPath=model_path,
+  fit = sample_stan_model(
+                       modelPath=model_path,
+                       scale_time_step = scale_time_step,
                        n_pop_it = n_pop_it,
                        n_recov_it=n_recov_it,
                        index_M_it = index_M_it,
@@ -127,11 +130,11 @@ run_model_fitting = function(file_path,
                        pars=pars ,
                        seed_values=seed_values)
   
-# Diagnostics 
-  diagnostics = diagnose_stan_fit(fit=fit,file_path = file_path)
-  
+
 # Plot 
   plot = plot_stan_fit(fit=fit,file_path =file_path)
-  
+
+  # Diagnostics 
+  diagnostics = diagnose_stan_fit(fit=fit,file_path = file_path)  
   return(list(fit,diagnostics,plot))
 }
