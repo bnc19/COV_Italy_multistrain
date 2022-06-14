@@ -133,7 +133,7 @@ sample_stan_model = function(
     iter =n_iter ,
     thin =n_thin,
     control = list(
-      adapt_delta = 0.85, 
+      adapt_delta = 0.99, 
       max_treedepth = 12
     )
   ) 
