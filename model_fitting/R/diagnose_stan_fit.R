@@ -53,37 +53,13 @@ diagnose_stan_fit = function(
     dpi = 720
   )
   
-  ggsave(
-    bivar,
-    file =  paste0(file_path,"/bivar_plot.png"),
-    height = 20,
-    width = 50,
-    unit = "cm",
-    dpi = 720
-  )
-  
-  
-  ggsave(
-    bivar2,
-    file =  paste0(file_path,"/bivar2_plot.png"),
-    height = 20,
-    width = 50,
-    unit = "cm",
-    dpi = 720
-  )
-  
-  
   # WAIC and LOO
   
   log_lik= extract_log_lik(fit)
   waic = waic(log_lik)
   print(waic)
-  # loo
-  loo =loo(fit, save_psis = TRUE)
-  
-  print(loo)
   
 
-  return(list(markov_trace, bivar, param_sum))
+  return(list(markov_trace, bivar,bivar2, param_sum))
   
 }
