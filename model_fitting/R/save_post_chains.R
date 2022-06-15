@@ -1,6 +1,6 @@
 
 
-save_post_chains = function(fit){
+save_post_chains = function(fit,file_path){
   
   
   # extract data from posterior

@@ -390,7 +390,7 @@ model {
   
   // likelihood 
   
-  target += neg_binomial_2_lpmf(y_M_it | lambda_M_it, 1/k);
+  target += 10 * neg_binomial_2_lpmf(y_M_it | lambda_M_it, 1/k);
 
   target += neg_binomial_2_lpmf(y_A_it | lambda_A_it, 1/k);
 
@@ -437,7 +437,7 @@ model {
   
   // likelihood 
   
-  target += neg_binomial_2_lpmf(y_M_ven | lambda_M_ven, 1 / k);
+  target += 10 * neg_binomial_2_lpmf(y_M_ven | lambda_M_ven, 1 / k);
 
   target += neg_binomial_2_lpmf(y_A_ven | lambda_A_ven, 1 / k);
 

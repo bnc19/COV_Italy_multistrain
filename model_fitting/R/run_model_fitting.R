@@ -37,14 +37,13 @@ run_model_fitting = function(file_path,
                              n_warmups = 500,
                              n_iter = 1000,
                              n_thin = 1,
-                             pars = c("lp__",
-                                      "beta",
-                                      "rho_it" ,
-                                      "rho_ven" ,
-                                      "omega",
-                                      "I0_it",
-                                      "I0_ven",
-                                      "kappa"),
+                             pars = c("lp__", 
+                                      "beta[1]","beta[2]","beta[3]","beta[4]",
+                                      "rho_it" , "rho_ven" ,
+                                      "omega[1]", "omega[2]","omega[3]","omega[4]",
+                                      "I0_it[1]", "I0_it[2]","I0_it[3]","I0_it[4]",
+                                      "I0_ven[1]", "I0_ven[2]","I0_ven[3]","I0_ven[4]",
+                                      "k"),
                              seed_values = c(1, 4, 5, 97),
                              prev 
                                    ){
@@ -125,13 +124,10 @@ run_model_fitting = function(file_path,
   
   # Save posterior 
   
-  save_post_chains(fit)
+  save_post_chains(fit,file_path = file_path)
 
   # Diagnostics 
   
-  diagnostics = diagnose_stan_fit(fit=fit,file_path = file_path)  
+  diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
   
-  
-  
-  return(list(fit,diagnostics,plot))
 }

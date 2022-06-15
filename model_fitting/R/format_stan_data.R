@@ -34,12 +34,12 @@ format_stan_data= function(
   
 
   # Import Italy data ------------------------------------------------------------
-  A_data_it = read.csv("data/Dataset_italy_A_v5.csv")$Freq 
-  M_data_it  = read.csv("data/Dataset_italy_M_v5.csv")$Freq 
-  O_data_it  = read.csv("data/Dataset_italy_O_v1.csv")$Freq 
-  Al_data_it  = read.csv("data/Dataset_italy_Alpha_v1.csv")$Freq 
-  n_seq_it  = read.csv("data/Dataset_italy_A_v5.csv")$TotSeq
-  avg_daily_rep_inc_it  = read.csv("data/Dataset_italy_A_v5.csv")$new_reported_cases_daily
+  A_data_it = read.csv("data/Dataset_italy_A_v5.csv")$Freq_new 
+  M_data_it  = read.csv("data/Dataset_italy_M_v5.csv")$Freq_new 
+  O_data_it  = read.csv("data/Dataset_italy_O_v1.csv")$Freq_new 
+  Al_data_it  = read.csv("data/Dataset_italy_Alpha_v1.csv")$Freq_new 
+  n_seq_it  = read.csv("data/Dataset_italy_A_v5.csv")$TotSeq_new
+  avg_daily_rep_inc_it  = read.csv("data/Dataset_italy_A_v5.csv")$new_reported_cases_daily_new
   daily_PCR_it  = round(read.csv("data/Italy_daily_test_data.csv")$pcr_daily)
   daily_Ag_it = round(read.csv("data/Italy_daily_test_data.csv")$antigen_daily)
   average_daily_vaccination_it  =  read.csv("data/data_vac_italy_day.csv")$prop_vac
