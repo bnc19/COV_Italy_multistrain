@@ -21,15 +21,11 @@ obj <- didehpc::queue_didehpc(ctx, config)
 
 # 
 source("R/run_model_fitting.R")
-
-obj$task_get("83a4ee0fa9540d43d77bd871e5516ca6")$log()
+source("R/diagnose_stan_fit.R")
+obj$task_get("10dd0db1c9d6c834fd4e9146a632dfc2")$log()
 
 
 # Global parameters ------------------------------------------------------------
-
-n_iter = 1000
-n_warmups = round(n_iter/2)
-scale_time_step = 2
 
 
 dir.create(paste0("Results/scale", scale_time_step))
@@ -43,7 +39,7 @@ dir.create(paste0("Results/scale", scale_time_step,"/prev"))
 file_path_inc = paste0("Results/scale", scale_time_step, "/inc")
 
 # Run model with testing of symptomatic only -----------------------------------
-test_symp =  obj$enqueue(
+test_symp2 =  obj$enqueue(
   run_model_fitting(
     file_path=  paste0(file_path_inc,"/symp_test"),
     model_path = "model/est_test_symp.stan",
@@ -55,13 +51,13 @@ test_symp =  obj$enqueue(
 )
 
 test_symp$log()
-# 9310d258dbdbd72505c635531d4fd86f
+# f97022895f5d62f9139c71ac39ae279a
 
 test_symp2 $log()
-# 71a2e95e5cf7b6eb8db5f16f9181e49d
+# b7f60fceb3d5d394ba52c03e1214eb41
 
 # Run model with testing of asymptomatic plus all symptomatic isolate ----------
-test_asymp =  obj$enqueue(
+test_asymp2 =  obj$enqueue(
   run_model_fitting(
     file_path= paste0(file_path_inc,"/asymp_test"),
     model_path = "model/est_test_asymp.stan", 
@@ -74,14 +70,14 @@ test_asymp =  obj$enqueue(
 
 
 test_asymp$log()
-# 7e63ee4b0dbf8ba616a2950029e78335
+# 49ea207c56135704f5df31f8c4a89263
 
 test_asymp2$log()
 
-# 84467ed3a1a44dc99c3c83898509396c
+# d57a018949494a880ae5e0cec30421a0
 
 # Run model with same level of asymp and symp testing --------------------------
-test_asymp_and_symp =  obj$enqueue(
+test_asymp_and_symp2 =  obj$enqueue(
   run_model_fitting(
     file_path= paste0(file_path_inc,"/asymp_and_symp_test"),
     model_path = "model/est_test_asymp_and_symp.stan",
@@ -94,14 +90,18 @@ test_asymp_and_symp =  obj$enqueue(
 
 
 test_asymp_and_symp$log()
-# 0d80c1439437e55211fceac07178d832
+# d864226d68bb0504b3a1565a2ce71387
 
 
 test_asymp_and_symp2$log()
-# 6bd50e7be79a1b1f256b5827f9b7e329
+# a089e577aa8e7e6730a7af89ce08c835
 
 
 ############################# Fit models to prevalence ##########################
+
+n_iter = 1000
+n_warmups = round(n_iter/2)
+scale_time_step = 2
 
 # Add Tau 
 pars = c("lp__", 
@@ -112,13 +112,14 @@ pars = c("lp__",
          "I0_ven[1]", "I0_ven[2]","I0_ven[3]","I0_ven[4]",
          "k", "tau")
 
-file_path_prev  = paste0("Results/scale", scale_time_step, "/prev")
+dir.create(paste0("Results/scale", scale_time_step,"/prev/LN_tau"))
+file_path_prev  = paste0("Results/scale", scale_time_step, "/prev/LN_tau")
 
 
 
 # Run model with testing of symptomatic only -----------------------------------
 
-test_symp_prev =  obj$enqueue(
+test_symp_prev_80=  obj$enqueue(
   run_model_fitting(
     file_path= paste0(file_path_prev,"/symp_test"),
     model_path = "model/est_test_symp_prev.stan",
@@ -126,21 +127,22 @@ test_symp_prev =  obj$enqueue(
     n_warmups = n_warmups,
     pars = pars,
     prev = TRUE,
-    scale_time_step = scale_time_step
+    scale_time_step = scale_time_step,
+    adapt_delta = 0.8
   )
 )
 
 test_symp_prev$log()
-#  9d29bd36c1c80cf6cd427b21e746c486
+test_symp_prev_result = test_symp_prev$result()
+diagnostics = diagnose_stan_fit(fit=test_symp_prev_result,pars=pars,file_path = file_path)
 
-
-test_symp_prev2$log()
-#  70b532c86ad975626d2d1b3454b9f233
-
+test_symp_prev_99$log()
+test_symp_prev_80$log()
+test_symp_prev_99_s5$log()
 
 # Run model with testing of asymptomatic plus all symptomatic isolate ----------
 
-test_asymp_prev =  obj$enqueue(
+test_asymp_prev_80 =  obj$enqueue(
   run_model_fitting(
     file_path= paste0(file_path_prev,"/asymp_test"),
     model_path = "model/est_test_asymp_prev.stan",
@@ -148,20 +150,20 @@ test_asymp_prev =  obj$enqueue(
     n_warmups = n_warmups,
     pars = pars,
     scale_time_step = scale_time_step,
-    prev = TRUE
+    prev = TRUE,
+    adapt_delta = 0.80
     
   )
 )
 
-test_asymp_prev$log()
-# 157b812d61c524a2e6a6a6f8be8b1207
 
-test_asymp_prev2$log()
 
-# 24be56c409253d91212d35a55f99c788
+test_asymp_prev_99$log()
+test_asymp_prev_80$log()
+test_asymp_prev_99_s5$log()
 
 # Run model with same level of asymp and symp testing --------------------------
-test_asymp_and_symp_prev =  obj$enqueue(
+test_asymp_and_symp_prev_80 =  obj$enqueue(
   run_model_fitting(
     file_path= paste0(file_path_prev,"/asymp_and_symp_test"),
     model_path = "model/est_test_asymp_and_symp_prev.stan",
@@ -169,15 +171,11 @@ test_asymp_and_symp_prev =  obj$enqueue(
     n_warmups = n_warmups,
     pars = pars,
     prev = T,
-    scale_time_step = scale_time_step
+    scale_time_step = scale_time_step,
+    adapt_delta = 0.80
   )
   )
 
-test_asymp_and_symp_prev$log() 
-
-# 6d26c448b7ada5c69e7b4c656fa2557f
-
-
-test_asymp_and_symp_prev2$log()
-
-#  6dd9783506377d89255ec32c5d295a98
+test_asymp_and_symp_prev_99$log() 
+test_asymp_and_symp_prev_80$log()
+test_asymp_and_symp_prev_99_sc5$log()
