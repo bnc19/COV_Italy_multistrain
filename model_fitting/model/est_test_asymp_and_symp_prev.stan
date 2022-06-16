@@ -4,7 +4,7 @@ data {
   
   int<lower=1> n_var; 
   int scale_time_step;
-  
+
   real gamma;
   real sigma;
   real mu;
@@ -97,14 +97,14 @@ parameters {
   real<lower = 0, upper = 1>  rho_it;      // probability of reporting 
   real<lower = 0, upper = 1>  omega[4]; // reduction in transmission
   real<lower = 0>             k;        // overdispersion parameter 
-  real<lower = gamma>         tau; 
+  real<lower = gamma>         tau;
 
 }   
 
 transformed parameters{
   
-  real beta2[n_var] ;
-  real tau2 = tau/scale_time_step;
+ real beta2[n_var] ;  
+ real tau2 = tau / scale_time_step;
   
 // Define Italy param ----------------------------------------------------------
   
@@ -146,16 +146,17 @@ transformed parameters{
 
   real beta2_ven[n_ts_ven,n_var]; 
   
-  
-// Scale beta 
+   // Scale beta 
 
   for(i in 1:n_var) beta2[i] = beta[i] / scale_time_step;
+  
 // Initial values  Italy 
 
   S_it[1] = S0_it - I0_it[2] - I0_it[3] ;
 
  for(i in 1:n_var) E_it[1,i] = 0 ;
- for(i in 1:n_var) PS_it[1,i] = 0;
+ for(i in 1:n_var) PS_it[1,i] = 0 ;
+
 
   I_it[1,1] = 0 ;
   I_it[1,2] = I0_it[2] ;
@@ -171,7 +172,7 @@ transformed parameters{
 
  for(i in 1:n_var) E_ven[1,i] = 0 ;
  for(i in 1:n_var) PS_ven[1,i] = 0 ;
-
+  
   I_ven[1,1] = 0 ;
   I_ven[1,2] = I0_ven[2] ;
   I_ven[1,3] = I0_ven[3] ;
@@ -188,11 +189,11 @@ transformed parameters{
  } 
  
  for(t in time_switch1_it :  (time_switch2_it-1)) {
-   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[1]) *beta2[i];
+   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[1]) * beta2[i];
  }  
  
- for(t in  time_switch2_it :  n_ts_it) {
-   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[2]) *beta2[i];
+ for(t in  time_switch2_it :  n_ts_it) { 
+   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[2]) * beta2[i];
  }  
  
 
@@ -204,11 +205,11 @@ transformed parameters{
  } 
  
  for(t in time_switch1_ven :  (time_switch2_ven-1)) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[3]) *beta2[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[3]) * beta2[i];
  }  
  
  for(t in  time_switch2_ven :  n_ts_ven) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[4]) *beta2[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[4]) * beta2[i];
  }  
  
 
@@ -240,24 +241,29 @@ transformed parameters{
    for(i in 1:n_var) PS_it[t+1,i] = 
    PS_it[t,i] + epsilon2 * E_it[t,i] - sigma2 * PS_it[t,i];
    
-   for(i in 1:n_var) I_it[t+1,i] = 
-   I_it[t,i] + sigma2 * PS_it[t,i] - (delta_it[t,i] * tau2 * I_it[t,i] )
-   - ((1-delta_it[t,i]) * gamma2 * I_it[t,i]); 
 
+    for(i in 1:n_var) I_it[t+1,i] = 
+   I_it[t,i] + sigma2 * PS_it[t,i] - delta_it[t,i] * tau2 *  I_it[t,i] 
+   - (1-delta_it[t,i]) * gamma2 * I_it[t,i];
    
-   Q_it[t+1] =  Q_it[t] + (delta_it[t,1] * tau2 * I_it[t,1])
-   + (delta_it[t,2] * tau2 * sum(I_it[t,2:4])) - gamma2 * Q_it[t];
+   Q_it[t+1] = 
+   Q_it[t] + (delta_it[t,1] * tau2 * I_it[t,1]) 
+   + (delta_it[t,2] * tau2 * sum(I_it[t,2:4])) 
+   - gamma2 * Q_it[t];
    
    R_it[t+1] = 
-   R_it[t] + gamma2 * Q_it[t] + ((1-delta_it[t,1]) * gamma2 * I_it[t,1])  
-   + ((1-delta_it[t,2]) * gamma2 * sum(I_it[t,2:4])) +  vac_it[t] * S_it[t];
+   R_it[t] + gamma2 * Q_it[t] +  gamma2  * (1-delta_it[t,1])  * I_it[t,1]
+   +  gamma2  * (1-delta_it[t,2])  * sum(I_it[t,2:4])  + vac_it[t] * S_it[t];
    
-
-   for(i in 1:n_var) incidence_it[t,i] =  delta_it[t,i] * tau2 * I_it[t,i] / S0_it * 100000  ;
+   
+   for(i in 1:n_var) incidence_it[t,i] = 
+  ( (delta_it[t,i] * tau2 * I_it[t,i]) ) / S0_it * 100000  ;
  }
  
+ 
+ 
 // Simulate Veneto -------------------------------------------------------------
-    for (t in 1:(n_ts_ven)){
+   for (t in 1:(n_ts_ven)){
    
    I_ven[time_seed_M_ven+1,1] = I0_ven[1];
    I_ven[time_seed_alpha_ven+1,4] = I0_ven[4];
@@ -284,23 +290,32 @@ transformed parameters{
    for(i in 1:n_var) PS_ven[t+1,i] = 
    PS_ven[t,i] + epsilon2 * E_ven[t,i] - sigma2 * PS_ven[t,i];
    
-   for(i in 1:n_var) I_ven[t+1,i] = 
-   I_ven[t,i] + sigma2 * PS_ven[t,i] - (delta_ven[t,i] * tau2 * I_ven[t,i])
-   - ((1-delta_ven[t,i]) * gamma2 * I_ven[t,i]); 
 
-  
-   Q_ven[t+1] =  Q_ven[t] + (delta_ven[t,1] * tau2 * I_ven[t,1])
-   + (delta_ven[t,2] * tau2 * sum(I_ven[t,2:4])) - gamma2 * Q_ven[t];
+    for(i in 1:n_var) I_ven[t+1,i] = 
+   I_ven[t,i] + sigma2 * PS_ven[t,i] - delta_ven[t,i] * tau2 *  I_ven[t,i] 
+   - (1-delta_ven[t,i]) * gamma2 * I_ven[t,i];
+   
+   Q_ven[t+1] = 
+   Q_ven[t] + (delta_ven[t,1] * tau2 * I_ven[t,1]) 
+   + (delta_ven[t,2] * tau2 * sum(I_ven[t,2:4])) 
+   - gamma2 * Q_ven[t];
    
    R_ven[t+1] = 
-   R_ven[t] + gamma2 * Q_ven[t] + ((1-delta_ven[t,1]) * gamma2 * I_ven[t,1])  
-   + ((1-delta_ven[t,2]) * gamma2 * sum(I_ven[t,2:4])) +  vac_ven[t] * S_ven[t];
+   R_ven[t] + gamma2 * Q_ven[t] +  gamma2  * (1-delta_ven[t,1])  * I_ven[t,1]
+   +  gamma2  * (1-delta_ven[t,2])  * sum(I_ven[t,2:4])  + vac_ven[t] * S_ven[t];
    
-
-   for(i in 1:n_var) incidence_ven[t,i] =  delta_ven[t,i] * tau2 * I_ven[t,i] / S0_ven * 100000  ;
+   
+   for(i in 1:n_var) incidence_ven[t,i] = 
+  ( (delta_ven[t,i] * tau2 * I_ven[t,i])) / S0_ven * 100000  ;
  }
+ 
+ 
+ 
+  
   
 }
+
+
 
 
 
@@ -448,7 +463,7 @@ model {
   I0_it   ~ normal(1,200);
   I0_ven  ~ normal(1,200);
   k       ~ exponential(0.01);
-  tau     ~ normal(1,2);
+  tau     ~ lognormal(1,1);
 }
 
 

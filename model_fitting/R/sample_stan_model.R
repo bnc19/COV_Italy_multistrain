@@ -64,7 +64,8 @@ sample_stan_model = function(
   time_seed_alpha_veneto,
   time_seed_M_veneto,
   time_vac_veneto,
-  prev
+  prev,
+  adapt_delta
 ){
   
   library(rstan)
@@ -133,7 +134,7 @@ sample_stan_model = function(
     iter =n_iter ,
     thin =n_thin,
     control = list(
-      adapt_delta = 0.99, 
+      adapt_delta = adapt_delta, 
       max_treedepth = 12
     )
   ) 

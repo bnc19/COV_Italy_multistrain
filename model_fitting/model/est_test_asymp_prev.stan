@@ -5,7 +5,6 @@ data {
   int<lower=1> n_var; 
   int scale_time_step;
 
-  
   real gamma;
   real sigma;
   real mu;
@@ -24,7 +23,7 @@ data {
   int index_Al_it[n_data_it[4]];
   
   int<lower = 1> n_months_it; 
-  int<lower = 1> n_days_it;      
+  int<lower = 1> n_days_it;    // number of months fitted, accounting for initial seed
   int<lower = 1> n_pop_it;       // population
   int<lower = 1> n_recov_it;     // seropositive 
 
@@ -47,7 +46,6 @@ data {
   int time_seed_M_it;
   int time_seed_alpha_it;
 
-
  // Veneto data 
  
  int<lower = 1> n_data_ven[n_var];      // number of months observed 
@@ -58,7 +56,7 @@ data {
   int index_Al_ven[n_data_ven[4]];
   
   int<lower = 1> n_months_ven; 
-  int<lower = 1> n_days_ven;    
+  int<lower = 1> n_days_ven;    // number of months fitted, accounting for initial seed
   int<lower = 1> n_pop_ven;       // population
   int<lower = 1> n_recov_ven;     // seropositive 
 
@@ -80,7 +78,8 @@ data {
   
   int time_seed_M_ven;
   int time_seed_alpha_ven;
-  }
+
+}
 
 transformed data {
   int S0_it = n_pop_it-n_recov_it;
@@ -88,8 +87,7 @@ transformed data {
   real gamma2 = gamma / scale_time_step; 
   real sigma2 = sigma / scale_time_step; 
   real epsilon2 = epsilon / scale_time_step; 
-
-  }
+}
 
 parameters {
   real<lower = 0>             beta[n_var];  // transmission parameter 
@@ -99,14 +97,14 @@ parameters {
   real<lower = 0, upper = 1>  rho_it;      // probability of reporting 
   real<lower = 0, upper = 1>  omega[4]; // reduction in transmission
   real<lower = 0>             k;        // overdispersion parameter 
-  real<lower = gamma>         tau; 
+  real<lower = gamma>         tau;
 
 }   
 
 transformed parameters{
   
-  real beta2[n_var] ;
-  real tau2 = tau/scale_time_step;
+ real beta2[n_var] ;  
+ real tau2 = tau / scale_time_step;
   
 // Define Italy param ----------------------------------------------------------
   
@@ -149,8 +147,8 @@ transformed parameters{
 
 
   real beta2_ven[n_ts_ven,n_var]; 
-
-  // Scale beta 
+  
+   // Scale beta 
 
   for(i in 1:n_var) beta2[i] = beta[i] / scale_time_step;
   
@@ -159,8 +157,8 @@ transformed parameters{
   S_it[1] = S0_it - I0_it[2] - I0_it[3] ;
 
  for(i in 1:n_var) E_it[1,i] = 0 ;
- for(i in 1:n_var) PS_it[1,i] = 0;
- for(i in 1:n_var) IS_it[1,i] = 0; 
+ for(i in 1:n_var) PS_it[1,i] = 0 ;
+ for(i in 1:n_var) IS_it[1,i] = 0 ;
 
   IA_it[1,1] = 0 ;
   IA_it[1,2] = I0_it[2] ;
@@ -176,9 +174,8 @@ transformed parameters{
 
  for(i in 1:n_var) E_ven[1,i] = 0 ;
  for(i in 1:n_var) PS_ven[1,i] = 0 ;
- for(i in 1:n_var) IS_ven[1,i] = 0; 
-
-
+ for(i in 1:n_var) IS_ven[1,i] = 0 ; 
+  
   IA_ven[1,1] = 0 ;
   IA_ven[1,2] = I0_ven[2] ;
   IA_ven[1,3] = I0_ven[3] ;
@@ -222,8 +219,8 @@ transformed parameters{
 // Simulate Italy --------------------------------------------------------------
  for (t in 1:(n_ts_it)){
    
-   IA_it[time_seed_M_it+1,1] = I0_it[1];
-   IA_it[time_seed_alpha_it+1,4] = I0_it[4];
+   IA_it[time_seed_M_it+1, 1] = I0_it[1];
+   IA_it[time_seed_alpha_it+1, 4] = I0_it[4];
 
    p_daily_it[t] = (epsilon2 * sum(E_it[t,2:4])) / S0_it;
    
@@ -236,7 +233,7 @@ transformed parameters{
    rho_it * (phi_PCR * pPCR_daily_it[t] + phi_Ag * (1 - pPCR_daily_it[t]));
 
    for(i in 1:n_var) FOI_it[t,i] =
-   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i] ) / S0_it;
+   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i]) / S0_it;
    
    S_it[t+1] = 
    S_it[t] - S_it[t]*sum(FOI_it[t,]) - vac_it[t]*S_it[t];
@@ -248,24 +245,27 @@ transformed parameters{
    PS_it[t,i] + epsilon2 * E_it[t,i] - sigma2 * PS_it[t,i];
    
    for(i in 1:n_var) IA_it[t+1,i] = 
-   IA_it[t,i] + (1-mu) * sigma2 * PS_it[t,i] - 
-   delta_it[t,i] * tau2 * IA_it[t,i] - (1-delta_it[t,i]) * gamma2 * IA_it[t,i];
+   IA_it[t,i] + (1-mu) * sigma2 * PS_it[t,i] 
+   - gamma2  * (1-delta_it[t,i])  * IA_it[t,i] - tau2 * delta_it[t,i] * IA_it[t,i];
 
- for(i in 1:n_var) IS_it[t+1,i] = 
-   IS_it[t,i] + mu * sigma2 * PS_it[t,i] - tau2 * IS_it[t,i];
-
+   for(i in 1:n_var) IS_it[t+1,i] = 
+   IS_it[t,i] + mu * sigma2 * PS_it[t,i] - tau2 *  IS_it[t,i] ;
    
    Q_it[t+1] = 
-   Q_it[t] +  tau2 * sum(IS_it[t,]) +  (delta_it[t,1] * tau2 * IA_it[t,1])
-   + (delta_it[t,2] * tau2 * sum(IA_it[t,2:4])) - gamma2 * Q_it[t];
+   Q_it[t] + (delta_it[t,1] * tau2 * IA_it[t,1]) 
+   + (delta_it[t,2] * tau2 * sum(IA_it[t,2:4])) 
+   + tau2 * sum(IS_it[t,]) - gamma2 * Q_it[t];
    
    R_it[t+1] = 
-   R_it[t] + gamma2 * Q_it[t] + ((1-delta_it[t,1] )* gamma2 * IA_it[t,1])
-   + (1-delta_it[t,2] * gamma2 * sum(IA_it[t,2:4])) + vac_it[t] * S_it[t];
+   R_it[t] + gamma2 * Q_it[t] +  gamma2  * (1-delta_it[t,1])  * IA_it[t,1]
+   +  gamma2  * (1-delta_it[t,2])  * sum(IA_it[t,2:4])  + vac_it[t] * S_it[t];
    
    
-   for(i in 1:n_var) incidence_it[t,i] = tau2 * IS_it[t,i] + delta_it[t,i] * tau2 * IA_it[t,i] / S0_it * 100000  ;
+   for(i in 1:n_var) incidence_it[t,i] = 
+  ( (delta_it[t,i] * tau2 * IA_it[t,i])  + (tau2 * IS_it[t,i]) ) / S0_it * 100000  ;
  }
+ 
+ 
  
 // Simulate Veneto -------------------------------------------------------------
   for (t in 1:(n_ts_ven)){
@@ -284,7 +284,7 @@ transformed parameters{
    rho_ven * (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
 
    for(i in 1:n_var) FOI_ven[t,i] =
-   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + IS_ven[t,i] ) / S0_ven;
+   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + IS_ven[t,i]) / S0_ven;
    
    S_ven[t+1] = 
    S_ven[t] - S_ven[t]*sum(FOI_ven[t,]) - vac_ven[t]*S_ven[t];
@@ -296,27 +296,32 @@ transformed parameters{
    PS_ven[t,i] + epsilon2 * E_ven[t,i] - sigma2 * PS_ven[t,i];
    
    for(i in 1:n_var) IA_ven[t+1,i] = 
-   IA_ven[t,i] + (1-mu) * sigma * PS_ven[t,i] - 
-   delta_ven[t,i] * tau2 * IA_ven[t,i] - (1-delta_ven[t,i]) * gamma * IA_ven[t,i];
+   IA_ven[t,i] + (1-mu) * sigma2 * PS_ven[t,i] 
+   - gamma2  * (1-delta_ven[t,i])  * IA_ven[t,i] - tau2 * delta_ven[t,i] * IA_ven[t,i];
 
- for(i in 1:n_var) IS_ven[t+1,i] = 
-   IS_ven[t,i] + mu * sigma * PS_ven[t,i] - tau2 * IS_ven[t,i];
-
+    for(i in 1:n_var) IS_ven[t+1,i] = 
+   IS_ven[t,i] + mu * sigma2 * PS_ven[t,i] - tau2 *  IS_ven[t,i] ;
    
    Q_ven[t+1] = 
-   Q_ven[t] +  tau2 * sum(IS_ven[t,]) +  (delta_ven[t,1] * tau2 * IA_ven[t,1])
-   + (delta_ven[t,2] * tau2 * sum(IA_ven[t,2:4])) - gamma * Q_ven[t];
+   Q_ven[t] + (delta_ven[t,1] * tau2 * IA_ven[t,1]) 
+   + (delta_ven[t,2] * tau2 * sum(IA_ven[t,2:4])) 
+   + tau2 * sum(IS_ven[t,]) - gamma2 * Q_ven[t];
    
    R_ven[t+1] = 
-   R_ven[t] + gamma * Q_ven[t] + ((1-delta_ven[t,1] )* gamma * IA_ven[t,1])
-   + (1-delta_ven[t,2] * gamma * sum(IA_ven[t,2:4])) + vac_ven[t] * S_ven[t];
+   R_ven[t] + gamma2 * Q_ven[t] +  gamma2  * (1-delta_ven[t,1])  * IA_ven[t,1]
+   +  gamma2  * (1-delta_ven[t,2])  * sum(IA_ven[t,2:4])  + vac_ven[t] * S_ven[t];
    
    
-   for(i in 1:n_var) incidence_ven[t,i] = tau2 * IS_ven[t,i] + delta_ven[t,i] * 
-   tau2 * IA_ven[t,i] / S0_ven * 100000  ;
-  }  
+   for(i in 1:n_var) incidence_ven[t,i] = 
+  ( (delta_ven[t,i] * tau2 * IA_ven[t,i]) + tau2 * IS_ven[t,i] ) / S0_ven * 100000  ;
+ }
+ 
+ 
+  
   
 }
+
+
 
 
 
@@ -464,7 +469,7 @@ model {
   I0_it   ~ normal(1,200);
   I0_ven  ~ normal(1,200);
   k       ~ exponential(0.01);
-  tau     ~ normal(1,2);
+  tau     ~ lognormal(1,1);
 }
 
 

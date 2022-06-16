@@ -45,7 +45,8 @@ run_model_fitting = function(file_path,
                                       "I0_ven[1]", "I0_ven[2]","I0_ven[3]","I0_ven[4]",
                                       "k"),
                              seed_values = c(1, 4, 5, 97),
-                             prev 
+                             prev ,
+                             adapt_delta = 0.8
                                    ){
   
 # Create file to save folder 
@@ -115,7 +116,8 @@ run_model_fitting = function(file_path,
                        n_thin=n_thin ,
                        pars=pars ,
                        seed_values=seed_values,
-                       prev = prev)
+                       prev = prev,
+                       adapt_delta=adapt_delta)
   
 
   # Plot 
@@ -128,6 +130,7 @@ run_model_fitting = function(file_path,
 
   # Diagnostics 
   
-  diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
+ # diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
   
+  return(fit)
 }

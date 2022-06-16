@@ -14,7 +14,8 @@
 
 diagnose_stan_fit = function(
   fit,
-  file_path
+  file_path,
+  pars
 ){
   
   # required package 
