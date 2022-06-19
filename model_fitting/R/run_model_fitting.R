@@ -119,6 +119,10 @@ run_model_fitting = function(file_path,
                        prev = prev,
                        adapt_delta=adapt_delta)
   
+  
+  
+  warnings(fit)
+  
 
   # Plot 
   
@@ -127,10 +131,17 @@ run_model_fitting = function(file_path,
   # Save posterior 
   
   save_post_chains(fit,file_path = file_path)
+  
+  
 
   # Diagnostics 
+  
+  
+  check_divergences(fit)
+  
   
  # diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
   
   return(fit)
+  
 }
