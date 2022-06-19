@@ -3,26 +3,26 @@
 draw_init_values = function(seed=1){
   
   set.seed(seed)
-  list(  beta = replicate(4,runif(1,0,3)),
-         I0_it = replicate(4, runif(1, 1,20)),
-         I0_ven = replicate(4, runif(1, 1,20)),
+  list(  beta = replicate(4,runif(1,0,1)),
+         I0_it = replicate(4, runif(1, 1,100)),
+         I0_ven = replicate(4, runif(1, 1,100)),
          omega = replicate(4,runif(1,0.2,0.8)),
          rho_it = runif(1,0.2,0.8),
          rho_ven = runif(1,0.2,0.8),
-         k = runif(1,0.01,2)
+         k = runif(1,0.01,1)
   )}
 
 draw_init_values_prev = function(seed=1){
   
   set.seed(seed)
-  list(  beta = replicate(4,runif(1,0,3)),
-         I0_it = replicate(4, runif(1, 1,20)),
-         I0_ven = replicate(4, runif(1, 1,20)),
+  list(  beta = replicate(4,runif(1,0,1)),
+         I0_it = replicate(4, runif(1, 1,100)),
+         I0_ven = replicate(4, runif(1, 1,100)),
          omega = replicate(4,runif(1,0.2,0.8)),
          rho_it = runif(1,0.2,0.8),
          rho_ven = runif(1,0.2,0.8),
          k = runif(1,0.01,2),
-         tau = runif(1,0.5,0.9)
+         tau = runif(1,1,2)
   )}
 
 sample_stan_model = function(
@@ -142,6 +142,9 @@ sample_stan_model = function(
   time.end = Sys.time()
   
   print(time.end - time.start)
+  
+  
+  check_divergences(fit)
 
   return(fit)
 
