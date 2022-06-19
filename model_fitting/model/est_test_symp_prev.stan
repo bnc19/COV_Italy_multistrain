@@ -472,15 +472,14 @@ model {
 
 // priors ----------------------------------------------------------------------
 
-
-  beta    ~ lognormal(0.5,0.8);
+  beta    ~ normal(1,1);
   rho_it  ~ beta(1,1);
   rho_ven ~ beta(1,1);
   omega   ~ beta(1,1); 
   I0_it   ~ normal(1,200);
   I0_ven  ~ normal(1,200);
   k       ~ exponential(0.01);
-  tau     ~ lognormal(1,1);
+  tau     ~ normal(2,1);
 }
 
 
