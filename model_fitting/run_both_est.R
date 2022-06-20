@@ -2,8 +2,8 @@
 
 #  Set up to run on HPC  -------------------------------------------------------
 rm(list = ls())
-root = "Q:/COV_Italy_multistrain2/model_fitting"
-setwd("Q:/COV_Italy_multistrain2/model_fitting")
+root = "Q:/COV_Italy_multistrain/model_fitting"
+setwd("Q:/COV_Italy_multistrain/model_fitting")
 
 
 ctx <- context::context_save(root, packages=c("tidyverse", "rstan", "bayesplot", "Hmisc", 
@@ -27,19 +27,17 @@ obj$task_get("8ba38475681fb6d61b3fb9fa560e369f")$log()
 
 # Global parameters ------------------------------------------------------------
 
-n_iter = 1000
+n_iter = 2000
 n_warmups = round(n_iter/2)
 scale_time_step = 5
 
 
-dir.create(paste0("Results/not_log"))
-dir.create(paste0("Results/not_log/scale", scale_time_step))
-dir.create(paste0("Results/not_log/scale", scale_time_step,"/inc"))
-dir.create(paste0("Results/not_log/scale", scale_time_step,"/prev"))
+dir.create(paste0("Results" ,"/inc"))
+dir.create(paste0("Results", "/prev"))
 
 
 ############################# Fit models to incidence ##########################
-file_path_inc = paste0("Results/not_log/scale", scale_time_step, "/inc")
+file_path_inc = paste0("Results","/inc")
 
 # Run model with testing of symptomatic only -----------------------------------
 test_symp =  obj$enqueue(
@@ -55,6 +53,17 @@ test_symp =  obj$enqueue(
 
 test_symp$log()
 
+test_symp_fit=test_symp$result()
+
+symp_diag = 
+  obj$enqueue(diagnose_stan_fit(
+    fit =test_symp_fit ,
+    pars = pars,
+    file_path = paste0(file_path_inc,"/symp_test")
+  ))
+
+symp_diag$log()
+
 # Run model with testing of asymptomatic plus all symptomatic isolate ----------
 test_asymp =  obj$enqueue(
   run_model_fitting(
@@ -69,6 +78,17 @@ test_asymp =  obj$enqueue(
 
 
 test_asymp$log()
+test_asymp_fit=test_asymp$result()
+
+asymp_diag = 
+  obj$enqueue(diagnose_stan_fit(
+    fit =test_asymp_fit ,
+    pars = pars,
+    file_path = paste0(file_path_inc,"/symp_test")
+  ))
+
+asymp_diag$log()
+
 
 # Run model with same level of asymp and symp testing --------------------------
 test_asymp_and_symp =  obj$enqueue(
@@ -78,15 +98,12 @@ test_asymp_and_symp =  obj$enqueue(
     n_iter = n_iter,
     n_warmups = n_warmups,
     prev = F,
-    scale_time_step = scale_time_step
+    scale_time_step = scale_time_step,
+    adapt_delta = 0.85
   )
 )
 
-
-test_asymp_and_symp$log()
-
-
-
+test_asymp_and_symp$log()  # 10 div
 ############################# Fit models to prevalence ##########################
 
 
@@ -99,7 +116,7 @@ pars = c("lp__",
          "I0_ven[1]", "I0_ven[2]","I0_ven[3]","I0_ven[4]",
          "k", "tau")
 
-file_path_prev  = paste0("Results/not_log/scale", scale_time_step, "/prev")
+file_path_prev  = paste0("Results", "/prev")
 
 
 
@@ -122,11 +139,11 @@ test_symp_prev$log()
 
 ## diag 
 
-fit_symp = obj$task_get("b42507cb0fd2ea7eed154f41f389742e")$result()
+fit_symp_prev = obj$task_get("b42507cb0fd2ea7eed154f41f389742e")$result()
 
-symp_diag = 
+symp_prev_diag = 
   obj$enqueue(diagnose_stan_fit(
-    fit =fit_symp ,
+    fit =fit_symp_prev ,
     pars = pars,
     file_path = paste0(file_path_prev,"/symp_test")
   ))
@@ -150,22 +167,21 @@ test_asymp_prev =  obj$enqueue(
   )
 )
 
-
 test_asymp_prev$log()
 
 ## diag  
 
 
-fit_asymp =  obj$task_get("cff8091ccbad7869c9bc95a0d5df284a")$result()
+fit_asymp_prev =  obj$task_get("cff8091ccbad7869c9bc95a0d5df284a")$result()
 
-asymp_diag = 
+asymp_prev_diag = 
   obj$enqueue(diagnose_stan_fit(
-  fit =fit_asymp ,
+  fit =fit_asymp_prev  ,
   pars = pars,
   file_path = paste0(file_path_prev, "/asymp_test")
 ))
 
-asymp_diag$log()
+asymp_prev_diag$log()
 
 
 # Run model with same level of asymp and symp testing --------------------------
@@ -189,13 +205,13 @@ test_asymp_and_symp_prev$log()
 ## diag 
 
 
-fit_asymp_and_symp =obj$task_get("3f13a3f65869f8f508e9a7a37a2c89f5")$result()
+fit_asymp_and_symp_prev  =obj$task_get("3f13a3f65869f8f508e9a7a37a2c89f5")$result()
 
-asymp_symp_diag = 
+asymp_symp_prev_diag = 
   obj$enqueue(diagnose_stan_fit(
-    fit =fit_asymp_and_symp ,
+    fit =fit_asymp_and_symp_prev  ,
     pars = pars,
     file_path = paste0(file_path_prev, "/asymp_and_symp_test")
   ))
 
-asymp_symp_diag$log()
+asymp_symp_prev_diag$log()
