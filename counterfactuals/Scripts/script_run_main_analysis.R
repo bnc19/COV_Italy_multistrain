@@ -1,209 +1,88 @@
 
-################  Run all models and counterfactuals ################  
-
-
-
-################   Set up  ################  
+# Set up -----------------------------------------------------------------------
 
 
 # rm(list = ls())
+
+setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
 library(tidyverse)
 library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
-source("counterfactuals/R/replicate_rstan_fit.R")
+source("R/sample_posterior_chains.R")
+source("R/run_cf.R")
 
 
-################   Define values  ################  
+posterior_chains = read.csv(
+  "C:/Users/bnc19/Desktop/COV_Italy_multistrain/model_fitting/Results/scale2/inc/symp_test/posterior_chains.csv"
+)
 
-number_of_samples =100
+file_path = "main"
+# Sample from posterior distribution -------------------------------------------
 
-n_difeq = 11
-gamma = 1/2.1
-sigma = 1/5.1
-phi_PCR = 0.92
-phi_Ag = 0.643
+posterior_samples = sample_posterior_chains(
+  posterior_chains = posterior_chains,
+  number_of_samples = 100
+)
 
-n_pop = 4847026
-n_recov = 93401
-n_pop_italy = (59257566 - 4847026 )
-n_recov_italy = (1482377 - 93401)
-
-
-R0_scales = c(".8", "1", "1.2","1.4", "1.6")
+# Run model across posterior samples -------------------------------------------
 
 
-################   Import data  ################  
+model_posts = sapply(1:nrow(posterior_samples), function(i) {
+  replicate_rstan_fixed(model_path = "models/est_test_symp_cf.stan",
+                        posterior_sample_row = posterior_samples[i, ])
+})
+
+Italy_posts = sapply(1:nrow(posterior_samples), function(i) {
+  extract_fit_results(posts = model_posts[, i],
+                      location = "Italy")
+}, simplify = "array")
 
 
-daily_Ag_i_italy = read.csv("counterfactuals/Italy/daily_Ag_i_italy.csv")[, 2]
-daily_PCR_i_italy = read.csv("counterfactuals/Italy/daily_PCR_i_italy.csv")[, 2]
-average_daily_vaccination_i_italy  = read.csv("counterfactuals/Italy/average_daily_vaccination_i_italy.csv")[, 2]
-x_i_data_italy  = read.csv("counterfactuals/Italy/x_i_data_italy.csv")[, 2]
+Veneto_posts = sapply(1:nrow(posterior_samples), function(i) {
+  extract_fit_results(posts = model_posts[, i],
+                      location = "Veneto")
+}, simplify = "array")
 
-daily_Ag_i = read.csv("counterfactuals/Veneto/daily_Ag_i.csv")[, 2]
-daily_PCR_i = read.csv("counterfactuals/Veneto/daily_PCR_i.csv")[, 2]
-average_daily_vaccination_i = read.csv("counterfactuals/Veneto/average_daily_vaccination_i.csv")[, 2]
-x_i_data = read.csv("counterfactuals/Veneto/x_i_data.csv")[, 2]
+# summarise results and plot ---------------------------------------------------
 
-x_i_data_italy_test = read.csv("counterfactuals/Veneto/x_i_data_Veneto_italy_test.csv")[, 2]
-daily_Ag_i_Itest = read.csv("counterfactuals/Veneto/daily_Ag_i_Itest.csv")[, 2]
-daily_PCR_i_Itest = read.csv("counterfactuals/Veneto/daily_PCR_i.csv")[, 2]
+Veneto_post_df = summarise_results(Veneto_posts,
+                                   start_date = "01-07-2020",
+                                   end_date = "31-05-2021")
 
+Italy_post_df = summarise_results(Italy_posts,
+                                  start_date = "01-05-2020",
+                                  end_date = "31-05-2021")
 
-n_months = x_i_data[1]
-n_days = x_i_data[(3 * n_months + 5)]
+Veneto_plot = plot_model_fit(
+  Veneto_post_df,
+  start_date = "01-07-2020",
+  end_date = "31-05-2021",
+  location = "Veneto"
+)
 
-n_months_italy  = x_i_data_italy[1]
-n_days_italy  =  x_i_data_italy[(3 * n_months_italy + 5)]
-
-# rstan model
-SEIR_model = stan_model("counterfactuals/Models/stan_model.stan")
-SEIR_model_pPCR_0 = stan_model("counterfactuals/Models/stan_model_pPCR_0.stan")
-SEIR_model_PCR_after_ag = stan_model("counterfactuals/Models/stan_model_PCR_after_ag.stan")
-
-
-# posterior samples 
-
-posterior_samples = read.csv( "counterfactuals/Veneto/100_posterior_samples_veneto.csv")[,-1]
-posterior_samples_italy = read.csv("counterfactuals/Italy/100_posterior_samples_italy.csv")[,-1]
-
-
-
-################   Define column names for output  ################  
-
-
-col_names = c(
-  "M_fit_M",
-  "A_fit_M" ,
-  "O_fit_M",
-  "Al_fit_M",
-  "T_M_fit_M",
-  "T_A_fit_M" ,
-  "T_O_fit_M",
-  "T_Al_fit_M",
-  "total_M",
-  "total_rep_M",
-
-  
- "M_R0_M",
- "A_R0_M" ,
- "O_R0_M",
- "Al_R0_M",
- "pPCR_M",
-  
-  "M_fit_L",
-  "A_fit_L" ,
-  "O_fit_L",
-  "Al_fit_L",
-  "T_M_fit_L",
-  "T_A_fit_L" ,
-  "T_O_fit_L",
-  "T_Al_fit_L",
-  "total_L",
- "total_rep_L",
-
-
- 
- "M_R0_L",
- "A_R0_L" ,
- "O_R0_L",
- "Al_R0_L",
- "pPCR_L",
-  
-  "M_fit_U",
-  "A_fit_U" ,
-  "O_fit_U",
-  "Al_fit_U",
-  "T_M_fit_U",
-  "T_A_fit_U" ,
-  "T_O_fit_U",
-  "T_Al_fit_U",
-  "total_U",
- "total_rep_U",
-
- "M_R0_U",
- "A_R0_U" ,
- "O_R0_U",
- "Al_R0_U",
- "pPCR_U"
-  
+Italy_plot = plot_model_fit(
+  Italy_post_df,
+  start_date = "01-07-2020",
+  end_date = "31-05-2021",
+  location = "Veneto"
 )
 
 
+Veneto_ratio = calculate_ratio_reported(Veneto_posts)
 
+Italy_ratio = calculate_ratio_reported(Italy_posts)
 
-################## Model 1: baseline scenario ################## 
+# ------------------------------------------------------------------------------
 
-#### apply function across 1000 bootstrap samples of posterior estimates
-
-
-##  TAKES 1-2 MINUTES TO RUN ##
-
-modelfit1  = sapply(1:number_of_samples, function(i) {
-  replicate_rstan_fixed(
-    posterior_samples[i, ],
-    n_difeq,
-    n_pop ,
-    n_recov ,
-    n_months,
-    gamma,
-    sigma,
-    phi_PCR,
-    phi_Ag,
-    n_days,
-    daily_Ag_i,
-    daily_PCR_i,
-    average_daily_vaccination_i,
-    x_i_data,
-    SEIR_model
-  )
-}, simplify = "array")
-
-## model fit 
-  
-mean1  = data.frame(apply(modelfit1, c(1, 2),  mean))
-lower1 = data.frame(apply(modelfit1, c(1, 2), quantile, probs = 0.025))
-upper1 = data.frame(apply(modelfit1, c(1, 2), quantile, probs = 0.975))
-
-modelfit1_df = data.frame(mean1, lower1, upper1)
-colnames(modelfit1_df) = col_names
-
-
-write.csv(modelfit1_df, "counterfactuals/Results/modelfit1_df_veneto.csv")
-
-## cumulative incidence 
-cuminc1  = data.frame(apply (modelfit1, 2, colSums))
-
-
-
-mean(9538  /  cuminc1$total_incidence   * 100) # calculate IFR from baseline scenario as internal check  
-
-
-cuminc1 = cuminc1 %>%  
-  mutate(Rep_M = fit_SEIR_M/  true_SEIR_M , 
-         Rep_A = fit_SEIR_A/  true_SEIR_A , 
-         Rep_O = fit_SEIR_O/  true_SEIR_O , 
-         Rep_Al = fit_SEIR_Al/  true_SEIR_Al ,
-         Rep_tot = total_reported_incidence/total_incidence)
-
-mean_cum1 = data.frame(sapply(cuminc1, mean))
-lower_cum1 = data.frame(sapply(cuminc1, quantile, probs = 0.025))
-upper_cum1 = data.frame(sapply(cuminc1, quantile, probs = 0.975))
-
-
-cuminc1_df = data.frame(t(cbind(mean_cum1, lower_cum1, upper_cum1)))
-rownames(cuminc1_df) = c("mean", "lower", "upper")
-
-write.csv(cuminc1_df, "counterfactuals/Results/cuminc1_veneto.csv")
 
 
 
 ##################  Model 2: baseline testing, scale B_M ##################
 
-
+R0_scales = c(".8", "1", "1.2", "1.4", "1.6")
 
 posterior_samples.8 = posterior_samples
 posterior_samples.1.2 = posterior_samples
