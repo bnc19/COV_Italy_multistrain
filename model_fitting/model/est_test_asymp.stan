@@ -443,8 +443,7 @@ model {
 
 
 // priors ----------------------------------------------------------------------
-
-  beta    ~ lognormal(0.5,0.8);
+  beta    ~ normal(1,1);
   rho_it  ~ beta(1,1);
   rho_ven ~ beta(1,1);
   omega   ~ beta(1,1); 
