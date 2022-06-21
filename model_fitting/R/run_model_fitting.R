@@ -67,7 +67,7 @@ run_model_fitting = function(file_path,
   library(bayesplot)
   library(tidyverse)
   library(Hmisc)
-  library(cowplot)
+  library(loo)
   
 # Source function 
   source("R/sample_stan_model.R")
@@ -140,8 +140,19 @@ run_model_fitting = function(file_path,
   check_divergences(fit)
   
   
+  
+  log_lik= extract_log_lik(fit)
+  write.csv(log_lik,  paste0(file_path, "/log_lik.csv"))
+  
+  
+  # # summary of parameter values, effective sample size and Rhat 
+  # param_sum = summary(fit, pars = pars)$summary
+  # 
+  # # save files 
+  # write.csv(param_sum, file=paste0(file_path,"/param_sum.csv"))
+  
  # diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
   
-  return(fit)
+ return(fit)
   
 }
