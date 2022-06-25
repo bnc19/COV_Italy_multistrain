@@ -3,12 +3,12 @@
 draw_init_values = function(seed=1){
   
   set.seed(seed)
-  list(  beta = replicate(4,runif(1,0,1)),
+  list(  beta = replicate(4,runif(1,0,3)),
          I0_it = replicate(4, runif(1, 1,100)),
          I0_ven = replicate(4, runif(1, 1,100)),
          omega = replicate(4,runif(1,0.2,0.8)),
          rho_it = runif(1,0.2,0.8),
-         rho_ven = runif(1,0.2,0.8),
+         #rho_ven = runif(1,0.2,0.8),
          k = runif(1,0.01,1)
   )}
 

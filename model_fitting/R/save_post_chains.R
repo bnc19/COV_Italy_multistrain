@@ -21,16 +21,16 @@ save_post_chains = function(fit,file_path){
   omega_v1 =  fit_posts$omega[,3]
   omega_v2 =  fit_posts$omega[,4]
   
-  I0_i_M =  fit_posts$I0_it[,1]
-  I0_i_A =  fit_posts$I0_it[,2]
-  I0_i_O =  fit_posts$I0_it[,3]
-  I0_i_Al =  fit_posts$I0_it[,4]
+  I0_i_M =  fit_posts$I0_it_M
+  I0_i_A =  fit_posts$I0_it_A
+  I0_i_O =  fit_posts$I0_it_O
+  I0_i_Al =  fit_posts$I0_it_Al
   
   
-  I0_v_M =  fit_posts$I0_ven[,1]
-  I0_v_A =  fit_posts$I0_ven[,2]
-  I0_v_O =  fit_posts$I0_ven[,3]
-  I0_v_Al =  fit_posts$I0_ven[,4]
+  I0_v_M =  fit_posts$I0_ven_M
+  I0_v_A =  fit_posts$I0_ven_A
+  I0_v_O =  fit_posts$I0_ven_O
+  I0_v_Al =  fit_posts$I0_ven_Al
   
   
   k = fit_posts$k
