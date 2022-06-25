@@ -26,7 +26,7 @@ obj$task_get("ef76a48dcbe4660b208316eafff53cea")$log()
 
 # Global parameters ------------------------------------------------------------
 
-n_iter = 100
+n_iter = 1000
 n_warmups = round(n_iter/2)
 
 
@@ -111,7 +111,7 @@ test_asymp =  obj$enqueue(
               "I0_it_M", "I0_it_A","I0_it_O","I0_it_Al",
               "I0_ven_M", "I0_ven_A","I0_ven_O","I0_ven_Al",
               "k"),
-    adapt_delta = 0.85
+    adapt_delta = 0.90
   )
 )
 
