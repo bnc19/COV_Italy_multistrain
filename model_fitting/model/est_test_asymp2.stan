@@ -90,28 +90,20 @@ transformed data {
 }
 
 parameters {
-  real<lower = 0>             beta[n_var];  // transmission parameter 
-  real<lower = 0, upper = 1>  rho_ven;      // probability of reporting 
-
-  real<lower = 0  >          I0_ven_M;    // seed
-  real<lower = 0  >          I0_ven_A;    // seed
-  real<lower = 0  >          I0_ven_O;    // seed
-  real<lower = 0  >         I0_ven_Al;    // seed
-  
-  real<lower = I0_ven_M>             I0_it_M; // seed
-  real<lower = I0_ven_A>             I0_it_A; // seed
-  real<lower = I0_ven_O>             I0_it_O; // seed
-  real<lower = I0_ven_Al>            I0_it_Al; // seed
-  
-  real<lower = 0, upper = 1>  rho_it;       // probability of reporting 
-  real<lower = 0, upper = 1>  omega[4];     // reduction in transmission
-  real<lower = 0>             k;            // overdispersion parameter 
+  real<lower = 0>              beta[n_var];  // transmission parameter 
+//real<lower = 0, upper = 1>   rho_ven;      // probability of reporting 
+  real<lower = 0, upper = 1>   rho_it;       // probability of reporting
+  real<lower = 0, upper = 100> I0_ven[4];    // seed
+  real<lower = 0, upper = 100> I0_it[4] ;        // seed
+  real<lower = 0, upper = 1>   omega[4];     // reduction in transmission
+  real<lower = 0>              k;            // overdispersion parameter 
   
 
 }   
 
 transformed parameters{
   
+ real <lower = 0, upper = 1>  rho_ven = rho_it ; 
  real beta2[n_var] ;  
   
 // Define Italy param ----------------------------------------------------------
@@ -136,6 +128,11 @@ transformed parameters{
 
   real beta2_it[n_ts_it,n_var]; 
   
+  real I0_it_M = I0_it[1] * S0_it / 100000;
+  real I0_it_A = I0_it[2] * S0_it / 100000;
+  real I0_it_O = I0_it[3] * S0_it / 100000;
+  real I0_it_Al = I0_it[4] * S0_it / 100000;
+  
 // Define Veneto param ---------------------------------------------------------
   
   real S_ven[(n_ts_ven +1)];
@@ -156,6 +153,12 @@ transformed parameters{
   real deltaS_ven[n_ts_ven, n_var];
 
   real beta2_ven[n_ts_ven,n_var]; 
+  
+  
+  real I0_ven_M = I0_ven[1] * S0_ven / 100000;
+  real I0_ven_A = I0_ven[2] * S0_ven / 100000;
+  real I0_ven_O = I0_ven[3] * S0_ven / 100000;
+  real I0_ven_Al = I0_ven[4] * S0_ven / 100000;
   
    // Scale beta 
 
@@ -202,11 +205,11 @@ transformed parameters{
  } 
  
  for(t in time_switch1_it :  (time_switch2_it-1)) {
-   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[1]) *beta2[i];
+   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[1])  *beta2[i];
  }  
  
  for(t in  time_switch2_it :  n_ts_it) {
-   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[2]) *beta2[i];
+   for(i in 1: n_var)  beta2_it[t,i] = (1-omega[2]) * beta2[i];
  }  
  
 
@@ -229,8 +232,8 @@ transformed parameters{
 // Simulate Italy --------------------------------------------------------------
  for (t in 1:(n_ts_it)){
    
-   IA_it[time_seed_M_it+1,1] = I0_it_M;
-   IA_it[time_seed_alpha_it+1,4] = I0_it_Al;
+   IA_it[time_seed_M_it,1] = I0_it_M;
+   IA_it[time_seed_alpha_it,4] = I0_it_Al;
 
    p_daily_it[t] = (epsilon2 * sum(E_it[t,2:4])) / S0_it;
    
@@ -251,7 +254,7 @@ transformed parameters{
    beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i]) / S0_it;
    
    S_it[t+1] = 
-   S_it[t] - S_it[t]*sum(FOI_it[t,]) - vac_it[t]*S_it[t];
+   S_it[t] - S_it[t] * sum(FOI_it[t,]) - vac_it[t]*S_it[t] ;
    
    for(i in 1:n_var) E_it[t+1,i] = 
    E_it[t,i] + S_it[t] * FOI_it[t,i] - epsilon2 * E_it[t,i];
@@ -286,8 +289,8 @@ transformed parameters{
 // Simulate Veneto -------------------------------------------------------------
  for (t in 1:(n_ts_ven)){
    
-   IA_ven[time_seed_M_ven+1,1] = I0_ven_M;
-   IA_ven[time_seed_alpha_ven+1,4] = I0_ven_Al;
+   IA_ven[time_seed_M_ven,1] = I0_ven_M;
+   IA_ven[time_seed_alpha_ven,4] = I0_ven_Al;
 
    p_daily_ven[t] = (epsilon2 * sum(E_ven[t,2:4])) / S0_ven;
    
@@ -296,11 +299,13 @@ transformed parameters{
    (PCR_daily_ven[t] + Ag_daily_ven[t] * (1-p_daily_ven[t]));
    
    deltaA_ven[t,1] = pPCR_daily_ven[t] * rho_ven * phi_PCR;
+   
    for(i in 2:n_var) deltaA_ven[t,i] = 
    rho_ven * (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
    
    
    deltaS_ven[t,1] = pPCR_daily_ven[t]  * phi_PCR;
+   
    for(i in 2:n_var) deltaS_ven[t,i] = 
    (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
 
@@ -340,13 +345,10 @@ transformed parameters{
   
 }
 
-
-
-
-
 model {
 
 // Define Italy model param ----------------------------------------------------
+
   real daily_incidence_it[n_days_it, n_var];  // daily variant incidence
   real monthly_incidence_it[n_months_it, n_var];  // monthly variant incidence
 
@@ -366,7 +368,7 @@ model {
   int ind_i ;
   
   
-// Define veneto model param ---------------------------------------------------
+  // Define veneto model param ---------------------------------------------------
  
   real daily_incidence_ven[n_days_ven, n_var];  // daily variant incidence
   real monthly_incidence_ven[n_months_ven, n_var];  // monthly variant incidence
@@ -386,7 +388,7 @@ model {
   int index_v;
   int ind_v ;
 
-// Italy  model ----------------------------------------------------------------
+  // Italy  model ----------------------------------------------------------------
 
   index_i = 1;
 
@@ -407,7 +409,7 @@ model {
    ind_it = index_it + 1;
    for (i in 1:n_var){
      monthly_incidence_it[m,i] =  
-     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] );}
   
    index_it = index_it + 1;
  }
@@ -453,7 +455,7 @@ model {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) ;    }
    index_ven = index_ven + 1;
  }
  
@@ -480,19 +482,14 @@ model {
 
 
 // priors ----------------------------------------------------------------------
-  beta    ~ normal(1,1);
-  rho_it  ~ beta(1,1);
-  rho_ven ~ beta(1,1);
-  omega   ~ beta(1,1); 
-  I0_it_M  ~ normal(1,200);
-  I0_it_A  ~ normal(1,200);
-  I0_it_O  ~ normal(1,200);
-  I0_it_Al ~ normal(1,200);
-  I0_ven_M  ~ normal(1,200);
-  I0_ven_A  ~ normal(1,200);
-  I0_ven_O  ~ normal(1,200);
-  I0_ven_Al ~ normal(1,200);
-  k       ~ exponential(0.01);
+
+   beta    ~ normal(1,1);
+   rho_it  ~ beta(1,1);//
+// rho_ven ~ beta(1,1);
+   omega   ~ beta(1,1); 
+   I0_it ~ uniform(1,100);
+   I0_ven ~ uniform(1,100);
+   k       ~ exponential(0.01);
 }
 
 

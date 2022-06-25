@@ -91,27 +91,19 @@ transformed data {
 }
 
 parameters {
- real<lower = 0>             beta[n_var];  // transmission parameter 
-  real<lower = 0, upper = 1>  rho_ven;      // probability of reporting 
-
-  real<lower = 0  >          I0_ven_M;    // seed
-  real<lower = 0  >          I0_ven_A;    // seed
-  real<lower = 0  >          I0_ven_O;    // seed
-  real<lower = 0  >         I0_ven_Al;    // seed
-  
-  real<lower = I0_ven_M>             I0_it_M; // seed
-  real<lower = I0_ven_A>             I0_it_A; // seed
-  real<lower = I0_ven_O>             I0_it_O; // seed
-  real<lower = I0_ven_Al>            I0_it_Al; // seed
-  
-  real<lower = 0, upper = 1>  rho_it;       // probability of reporting 
-  real<lower = 0, upper = 1>  omega[4];     // reduction in transmission
-  real<lower = 0>             k;            // overdispersion parameter
+  real<lower = 0>              beta[n_var];  // transmission parameter 
+  real<lower = 0, upper = 1>   rho_ven;      // probability of reporting 
+  real<lower = 0, upper = 1>   rho_it;       // probability of reporting
+  real<lower = 0, upper = 100> I0_ven[4];    // seed
+  real<lower = 0, upper = 100> I0_it[4] ;        // seed
+  real<lower = 0, upper = 1>   omega[4];     // reduction in transmission
+  real<lower = 0>              k;            // overdispersion parameter 
 
 }   
 
 transformed parameters{
   
+   // real <lower = 0, upper = 1>  rho_ven = rho_it ;
    real beta2[n_var] ;
   
 // Define Italy param ----------------------------------------------------------
@@ -135,6 +127,12 @@ transformed parameters{
 
   real beta2_it[n_ts_it,n_var]; 
   
+  real I0_it_M  = I0_it[1] * S0_it / 100000;
+  real I0_it_A  = I0_it[2] * S0_it / 100000;
+  real I0_it_O  = I0_it[3] * S0_it / 100000;
+  real I0_it_Al = I0_it[4] * S0_it / 100000;
+  
+  
 // Define Veneto param ---------------------------------------------------------
   
   real S_ven [(n_ts_ven +1)];
@@ -155,6 +153,11 @@ transformed parameters{
 
 
   real beta2_ven[n_ts_ven, n_var]; 
+  
+  real I0_ven_M =  I0_ven[1] * S0_ven / 100000;
+  real I0_ven_A =  I0_ven[2] * S0_ven / 100000;
+  real I0_ven_O =  I0_ven[3] * S0_ven / 100000;
+  real I0_ven_Al = I0_ven[4] * S0_ven / 100000;
   
   // Scale beta 
 
@@ -382,7 +385,7 @@ model {
    ind_it = index_it + 1;
    for (i in 1:n_var){
      monthly_incidence_it[m,i] =  
-     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000001;}
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] );}
   
    index_it = index_it + 1;
  }
@@ -429,7 +432,7 @@ model {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] );    }
    index_ven = index_ven + 1;
  }
  
@@ -456,20 +459,13 @@ model {
 
 
 // priors ----------------------------------------------------------------------
-
-  beta    ~ normal(1,1);
-  rho_it  ~ beta(1,1);
-  rho_ven ~ beta(1,1);
-  omega   ~ beta(1,1); 
-  I0_it_M  ~ normal(1,200);
-  I0_it_A  ~ normal(1,200);
-  I0_it_O  ~ normal(1,200);
-  I0_it_Al ~ normal(1,200);
-  I0_ven_M  ~ normal(1,200);
-  I0_ven_A  ~ normal(1,200);
-  I0_ven_O  ~ normal(1,200);
-  I0_ven_Al ~ normal(1,200);
-  k       ~ exponential(0.01);
+   beta    ~ normal(1,1);
+   rho_it  ~ beta(1,1);//
+   rho_ven ~ beta(1,1);
+   omega   ~ beta(1,1); 
+   I0_it   ~ uniform(1,100);
+   I0_ven  ~ uniform(1,100);
+   k       ~ exponential(0.01);
 }
 
 
