@@ -120,13 +120,25 @@ run_model_fitting = function(file_path,
                        adapt_delta=adapt_delta)
   
   
-  
-  warnings(fit)
-  
-
   # Plot 
   
-  plot = plot_stan_fit(fit=fit,file_path =file_path)
+  plot = plot_stan_fit(fit=fit,file_path =file_path,
+                       n_pop_it=n_pop_it,
+                       n_recov_it=n_recov_it,
+                       n_pop_veneto=n_pop_veneto,
+                       n_recov_veneto=n_recov_veneto,
+                       index_M_it=index_M_it,
+                       index_A_it=index_A_it,
+                       index_O_it =index_O_it,
+                       index_Al_it=index_Al_it,
+                       index_M_veneto=index_M_veneto,
+                       index_A_veneto =index_A_veneto,
+                       index_O_veneto=index_O_veneto,
+                       index_Al_veneto=index_Al_veneto,  
+                       start_date_it=start_date_it, 
+                       end_date_it=end_date_it,
+                       start_date_veneto=start_date_veneto,
+                       end_date_veneto=end_date_veneto)
   
   # Save posterior 
   
@@ -144,12 +156,20 @@ run_model_fitting = function(file_path,
   log_lik= extract_log_lik(fit)
   write.csv(log_lik,  paste0(file_path, "/log_lik.csv"))
   
+
+  stan_fit_post= as.array(fit)
   
-  # # summary of parameter values, effective sample size and Rhat 
-  # param_sum = summary(fit, pars = pars)$summary
-  # 
-  # # save files 
-  # write.csv(param_sum, file=paste0(file_path,"/param_sum.csv"))
+  markov_trace = mcmc_trace(stan_fit_post, pars=c("lp__", pars))
+
+ 
+  ggsave(
+    markov_trace,
+    file =  paste0(file_path, "/trace_plot.png"),
+    height = 20,
+    width = 50,
+    unit = "cm",
+    dpi = 720
+  )
   
  # diagnostics = diagnose_stan_fit(fit=fit,pars=pars,file_path = file_path)  
   

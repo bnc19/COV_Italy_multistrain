@@ -18,8 +18,8 @@ save_post_chains = function(fit,file_path){
   omega_i1 =  fit_posts$omega[,1]
   omega_i2 =  fit_posts$omega[,2]
   
-  omega_v1 =  fit_posts$omega[,3]
-  omega_v2 =  fit_posts$omega[,4]
+  # omega_v1 =  fit_posts$omega[,3]
+  # omega_v2 =  fit_posts$omega[,4]
   
   I0_i_M =  fit_posts$I0_it_M
   I0_i_A =  fit_posts$I0_it_A
@@ -45,8 +45,8 @@ save_post_chains = function(fit,file_path){
     beta_Al,
     rho_v,
     rho_i,
-    omega_v1,
-    omega_v2,
+    # omega_v1,
+    # omega_v2,
     omega_i1,
     omega_i2,
     I0_i_M,
@@ -65,8 +65,8 @@ save_post_chains = function(fit,file_path){
         beta_Al,
         rho_v,
         rho_i,
-        omega_v1,
-        omega_v2,
+        # omega_v1,
+        # omega_v2,
         omega_i1,
         omega_i2,
         I0_i_M,

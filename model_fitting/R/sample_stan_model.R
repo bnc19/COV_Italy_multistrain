@@ -6,7 +6,7 @@ draw_init_values = function(seed=1){
   list(  beta = replicate(4,runif(1,0,3)),
          I0_it = replicate(4, runif(1, 1,100)),
          I0_ven = replicate(4, runif(1, 1,100)),
-         omega = replicate(4,runif(1,0.2,0.8)),
+         #omega = replicate(4,runif(1,0.2,0.8)),
          rho_it = runif(1,0.2,0.8),
          #rho_ven = runif(1,0.2,0.8),
          k = runif(1,0.01,1)
@@ -135,7 +135,7 @@ sample_stan_model = function(
     thin =n_thin,
     control = list(
       adapt_delta = adapt_delta, 
-      max_treedepth = 12
+      max_treedepth = 15
     )
   ) 
   

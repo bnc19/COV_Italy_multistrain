@@ -3,28 +3,31 @@ plot_stan_fit = function(fit,
                          file_path,
                          varaints = c("M234I-A376T", "A220V", "Other", "Alpha"),
                          # initial conditions
-                         n_pop_it = 59257566 - 4847026,
-                         n_recov_it = 1482377 - 93401,
-                         n_pop_veneto= 4847026,
-                         n_recov_veneto= 93401,
+                         n_pop_it,
+                         n_recov_it,
+                         n_pop_veneto,
+                         n_recov_veneto,
                          # index data Italy 
-                         index_M_it = 6:14,
-                         index_A_it = 3:14,
-                         index_O_it =  3:9,
-                         index_Al_it = 9:14,
+                         index_M_it,
+                         index_A_it,
+                         index_O_it ,
+                         index_Al_it,
                          # index data Veneto 
-                         index_M_veneto = 8:14,
-                         index_A_veneto = c(5,7:14),
-                         index_O_veneto = c(5,7:9),
-                         index_Al_veneto = 9:14,
+                         index_M_veneto,
+                         index_A_veneto ,
+                         index_O_veneto,
+                         index_Al_veneto,
                          # Dates Italy 
-                         start_date_it =  "01-05-2020", 
-                         end_date_it = "31-05-2021",
+                         start_date_it, 
+                         end_date_it,
                          # Dates Veneto 
-                         start_date_veneto=  "01-07-2020",
-                         end_date_veneto= "31-05-2021"
+                         start_date_veneto,
+                         end_date_veneto
 ){
-
+ library(ggplot2)
+  library(dplyr)
+  library(cowplot)
+  library(Hmisc)
   # Import Italy data ------------------------------------------------------------
   A_data_it = read.csv("data/Dataset_italy_A_v5.csv")$Freq 
   M_data_it  = read.csv("data/Dataset_italy_M_v5.csv")$Freq 
