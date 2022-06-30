@@ -27,13 +27,33 @@ return(posterior_samples)
 
 
 summarise_posterior_chains = function( posterior_chains)  {
-summary = data.frame(
+
+  posterior_chains = posterior_chains %>%  as.data.frame() %>% 
+   mutate( rho_v =  rho_v*100,
+           rho_i =  rho_i*100, 
+           omega_i1=  omega_i1*100,  
+           omega_i2=  omega_i2*100)
+  
+  summary = data.frame(
   mean  = apply(posterior_chains, 2,  mean),
   lower = apply(posterior_chains, 2, quantile, probs = 0.025),
   upper = apply(posterior_chains, 2, quantile, probs = 0.975)
 )
 
-return(summary[-1,])
+
+summary = round(summary, 1)
+ 
+Out = summary  %>% 
+  mutate(parameters = rownames(summary)) %>%  
+  mutate(CrI =  paste0("(", lower, "-", upper,")")) %>% 
+  mutate(Mean = ifelse(
+    grepl("rho|omega", parameters), paste0(mean, "%"), mean)) %>% 
+  mutate(out = paste(Mean, CrI)) %>%  
+  filter(parameters!= "rho_i")
+
+
+
+return(Out[-1,])
 
 }
 

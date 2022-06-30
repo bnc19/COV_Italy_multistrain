@@ -51,7 +51,7 @@ calc_test_met = function(C_D_prev,
   if ( Legend == F) {
     leg = c("none")
   } else {
-    leg = c(0.8,0.7)
+    leg = c(0.85,0.6)
   }
   
   if (x_axis_ticks == F){
@@ -73,42 +73,42 @@ calc_test_met = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "PPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position = leg
     ) +
     scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10)) +
     scale_x_continuous(limits = c(0, 50), breaks = seq(0, 50, 10))  + 
     ggtitle(title)+ 
-    geom_contour(aes(z = PPV), 
-                 breaks = 50, col = 'black', size = .7, linetype = 2)+ 
-    geom_contour(aes(z = PPV), 
-                 breaks = 25, col = 'black', size = .7, linetype = 1)+
-    geom_contour(aes(z = PPV), 
-                 breaks = 75, col = 'black', size = .7, linetype = 3)
-  
-  
+    geom_contour(aes(z = PPV, linetype = "50"), 
+                 breaks = 50, col = 'black', size = .7)+ 
+    geom_contour(aes(z = PPV,  linetype = "25"), 
+                 breaks = 25, col = 'black', size = .7)+
+    geom_contour(aes(z = PPV, linetype = "75"), 
+                 breaks = 75, col = 'black', size = .7) +
+    scale_linetype_manual(name = element_blank(), values = c( "25" = 1, "50" = 2, "75" = 3)) 
+
   
   NPV_plot = ggplot(out, aes(Var1 ,Var2 , fill= NPV)) + 
     geom_tile()+
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "NPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5, size=10),
       legend.position = leg
     ) +
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
-    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20))  + 
-    geom_contour(aes(z = NPV), 
-                 breaks = 50, col = 'black', size = .7, linetype = 2)+ 
-    geom_contour(aes(z = NPV), 
-                 breaks = 25, col = 'black', size = .7, linetype = 1)+
-    geom_contour(aes(z = NPV), 
-                 breaks = 75, col = 'black', size = .7, linetype = 3)
-  
+    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) + 
+    geom_contour(aes(z = NPV, linetype = "50"), 
+                 breaks = 50, col = 'black', size = .7)+ 
+    geom_contour(aes(z = NPV,  linetype = "25"), 
+                 breaks = 25, col = 'black', size = .7)+
+    geom_contour(aes(z = NPV, linetype = "75"), 
+                 breaks = 75, col = 'black', size = .7) +
+    scale_linetype_manual(name =element_blank(), values = c( "25" = 1, "50" = 2, "75" = 3)) 
   
   
   
@@ -117,38 +117,40 @@ calc_test_met = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "p(T+)") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg) +
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
-    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20))  +  
-    geom_contour(aes(z = PT_pos), 
-                 breaks = 50, col = 'black', size = .7, linetype = 2)+ 
-    geom_contour(aes(z = PT_pos), 
-                 breaks = 25, col = 'black', size = .7, linetype = 1)+
-    geom_contour(aes(z = PT_pos), 
-                 breaks = 75, col = 'black', size = .7, linetype = 3)
+    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) + 
+    geom_contour(aes(z = PT_pos, linetype = "50"), 
+                 breaks = 50, col = 'black', size = .7)+ 
+    geom_contour(aes(z = PT_pos,  linetype = "25"), 
+                 breaks = 25, col = 'black', size = .7)+
+    geom_contour(aes(z = PT_pos, linetype = "75"), 
+                 breaks = 75, col = 'black', size = .7) +
+    scale_linetype_manual(name =element_blank(), values = c( "25" = 1, "50" = 2, "75" = 3)) 
   
   
   
   pAg_plot = ggplot(out, aes(Var1 ,Var2 , fill= proportion_Ag)) + 
     geom_tile()+
-    scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "ANCOV %") +
+    scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "Ag %") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg) +
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
-    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20))  + 
-    geom_contour(aes(z = proportion_Ag), 
-                 breaks = 50, col = 'black', size = .7, linetype = 2)+ 
-    geom_contour(aes(z = proportion_Ag), 
-                 breaks = 25, col = 'black', size = .7, linetype = 1)+
-    geom_contour(aes(z = proportion_Ag), 
-                 breaks = 75, col = 'black', size = .7, linetype = 3)
+    scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) + 
+    geom_contour(aes(z = proportion_Ag, linetype = "50"), 
+                 breaks = 50, col = 'black', size = .7)+ 
+    geom_contour(aes(z = proportion_Ag,  linetype = "25"), 
+                 breaks = 25, col = 'black', size = .7)+
+    geom_contour(aes(z = proportion_Ag, linetype = "75"), 
+                 breaks = 75, col = 'black', size = .7) +
+    scale_linetype_manual(name =element_blank(), values = c( "25" = 1, "50" = 2, "75" = 3)) 
   
   
   
@@ -252,9 +254,9 @@ calc_test_met_pos_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "PPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position = leg
     ) +
     scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10)) +
@@ -266,13 +268,15 @@ calc_test_met_pos_ag = function(C_D_prev,
                  breaks = 25, col = 'black', size = .7, linetype = 1)+
     geom_contour(aes(z = PPV), 
                  breaks = 75, col = 'black', size = .7, linetype = 3)
+
+  
   
   NPV_plot = ggplot(out, aes(Var1 ,Var2 , fill= NPV)) + 
     geom_tile()+
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "NPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg
@@ -294,7 +298,7 @@ calc_test_met_pos_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "p(T+)") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg)+
@@ -314,7 +318,7 @@ calc_test_met_pos_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "ANCOV %") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg) +
@@ -432,9 +436,9 @@ calc_test_met_neg_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "PPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14 ),
+      plot.title = element_text(hjust = 0.5, size=20 ),
       legend.position = leg
     ) +
     scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10)) +
@@ -454,7 +458,7 @@ calc_test_met_neg_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name= "NPV") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg
@@ -476,7 +480,7 @@ calc_test_met_neg_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "p(T+)") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg) +
@@ -496,7 +500,7 @@ calc_test_met_neg_ag = function(C_D_prev,
     scale_fill_distiller(palette = "RdPu", limits = c(0,100), name = "ANCOV %") +
     labs(x = " ", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
       plot.title = element_text(hjust = 0.5),
       legend.position = leg) +

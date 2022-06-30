@@ -30,7 +30,8 @@ format_stan_cf_data= function(
   time_seed_M_veneto,
   time_vac_veneto,
   scale_time_step,
-  posterior_sample_row
+  posterior_sample_row,
+  italy_testing_in_veneto
 ){
   
 
@@ -52,8 +53,14 @@ format_stan_cf_data= function(
   Al_data_veneto  = read.csv("data/Dataset_Veneto_Alpha_v1.csv")$Freq 
   n_seq_veneto  = read.csv("data/Dataset_Veneto_A_v5.csv")$TotSeq
   avg_daily_rep_inc_veneto  = read.csv("data/Dataset_Veneto_A_v5.csv")$new_reported_cases_daily
+  
+  if(italy_testing_in_veneto == T){
+    daily_PCR_veneto  = round(read.csv("data/Italy_daily_test_data.csv")$pcr_daily)
+    daily_Ag_veneto = round(read.csv("data/Italy_daily_test_data.csv")$antigen_daily)
+  } else {
   daily_PCR_veneto  = round(read.csv("data/Veneto_daily_test_data.csv")$pcr_daily)
   daily_Ag_veneto = round(read.csv("data/Veneto_daily_test_data.csv")$antigen_daily)
+  }
   average_daily_vaccination_veneto  =  read.csv("data/data_vac_veneto_day.csv")$prop_vac
   
   
@@ -225,9 +232,7 @@ format_stan_cf_data= function(
   rho_it = posterior_sample_row$rho_i
   omega = c(
     posterior_sample_row$omega_i1,
-    posterior_sample_row$omega_i2,
-    posterior_sample_row$omega_v1,
-    posterior_sample_row$omega_v2
+    posterior_sample_row$omega_i2
   )
   
   k = posterior_sample_row$k
@@ -235,7 +240,7 @@ format_stan_cf_data= function(
   # Extract Tau if prevalence 
   
   if(is.null(posterior_sample_row$tau)){
-    tau = 0 
+    tau = 1  
   } else{
     tau = posterior_sample_row$tau
   }

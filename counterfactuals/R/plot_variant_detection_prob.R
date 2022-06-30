@@ -53,7 +53,7 @@ out = data.frame(prev_seq_perc,Prob_genome_detection_C_pos, Prob_genome_detectio
 if ( Legend == F) {
   leg = c("none")
 } else {
-  leg = c(0.25,0.62)
+  leg = c(0.25,0.55)
 }
 
 if (x_axis_ticks == F){
@@ -74,69 +74,71 @@ if (y_axis_label == F){
   y_label = c("Concordant variant prevalence (%)", "Discordant varaint prevalence (%)")
 )
 
+# concordant -------------------------------------------------------------------
 seq_con_plot_pos = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_C_pos)) + 
   geom_tile() +
 scale_fill_distiller(palette = "RdYlBu" , limits = c(0,3), name= "Cases\ndetected (%)") +
   labs(x = "", y = y_label[1]) +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     legend.position = "none"
   ) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
 #  scale_x_continuous(limits = c(0.00, 0.05), breaks = seq(0.00, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_C_pos), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_C_pos), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_C_pos), 
-               breaks = 2, col = 'black', size = .7, linetype = 3)
+  geom_contour(aes(z = Prob_genome_detection_C_pos,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_C_pos,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_C_pos, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
-
+# discordant -------------------------------------------------------------------
 
 seq_dis_plot_pos = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_D_pos)) + 
   geom_tile()+
   scale_fill_distiller(palette = "RdYlBu", limits = c(0,3), name= "Cases\ndetected (%)") +
   labs(x = "", y = y_label[2]) +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     legend.position = leg
   ) +
   ggtitle(title[1]) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   # scale_x_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_D_pos), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_D_pos), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_D_pos), 
-               breaks =2, col = 'black', size = .7, linetype = 3)
+  geom_contour(aes(z = Prob_genome_detection_D_pos,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_D_pos,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_D_pos, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
-
-
+# concordant -------------------------------------------------------------------
 
 seq_con_plot_neg = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_C_neg)) + 
   geom_tile() +
   scale_fill_distiller(palette = "RdYlBu" , limits = c(0,3), name= "Cases\ndetected (%)") +
   labs(x = "", y = "") +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     legend.position = "none"
   ) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   # scale_x_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_C_neg), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_C_neg), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_C_neg), 
-               breaks = 2, col = 'black', size = .7, linetype = 3)
-
+  geom_contour(aes(z = Prob_genome_detection_C_neg,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_C_neg,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_C_neg, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
 
 seq_dis_plot_neg = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_D_neg)) + 
@@ -144,21 +146,21 @@ seq_dis_plot_neg = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_D_ne
   scale_fill_distiller(palette = "RdYlBu", limits = c(0,3), name= "Cases\ndetected (%)") +
   labs(x = "", y = "") +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     legend.position =  "none"
   ) +
   ggtitle(title[2])+
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   #  scale_x_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_D_neg), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_D_neg), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_D_neg), 
-               breaks = 2, col = 'black', size = .7, linetype = 3)
-
+  geom_contour(aes(z = Prob_genome_detection_D_neg,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_D_neg,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_D_neg, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
 
 ### sequence both pos and neg 
@@ -168,19 +170,20 @@ seq_con_plot_both = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_C_b
   scale_fill_distiller(palette = "RdYlBu" , limits = c(0,3), name= "Cases\ndetected (%)") +
   labs(x = "", y = "") +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     legend.position = "none"
   ) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   # scale_x_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_C_both), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_C_both), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_C_both), 
-               breaks = 2, col = 'black', size = .7, linetype = 3)
+  geom_contour(aes(z = Prob_genome_detection_C_both,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_C_both,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_C_both, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
 
 
@@ -189,9 +192,9 @@ seq_dis_plot_both = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_D_b
   scale_fill_distiller(palette = "RdYlBu", limits = c(0,3), name= "Cases\ndetected (%)n") +
   labs(x = "", y = "") +
   theme_bw() + theme(
-    text = element_text(size = 14),
+    text = element_text(size = 20),
     axis.title.y = element_text(angle = 90, vjust = 0.7),
-    plot.title = element_text(hjust = 0.5, size=14),
+    plot.title = element_text(hjust = 0.5, size=20),
     # axis.text.x = element_blank(), 
     # axis.text.y = axis.text.y, 
     legend.position =  "none"
@@ -199,12 +202,13 @@ seq_dis_plot_both = ggplot(out, aes(Var2 ,Var1 , fill= Prob_genome_detection_D_b
   ggtitle(title[3]) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   #  scale_x_continuous(limits = c(0, 0.05), breaks = seq(0, 0.05, 0.005))  +
-  geom_contour(aes(z = Prob_genome_detection_D_both), 
-               breaks = 0.1, col = 'black', size = .7, linetype = 2)+ 
-  geom_contour(aes(z = Prob_genome_detection_D_both), 
-               breaks = 1, col = 'black', size = .7, linetype = 1)+
-  geom_contour(aes(z = Prob_genome_detection_D_both), 
-               breaks = 2, col = 'black', size = .7, linetype = 3)
+  geom_contour(aes(z = Prob_genome_detection_D_both,  linetype = "0.1"), 
+               breaks = 0.1, col = 'black', size = .7)+ 
+  geom_contour(aes(z = Prob_genome_detection_D_both,linetype = "1"), 
+               breaks = 1, col = 'black', size = .7)+
+  geom_contour(aes(z = Prob_genome_detection_D_both, linetype = "2"), 
+               breaks = 2, col = 'black', size = .7) +
+  scale_linetype_manual(name = element_blank(), values = c( "0.1" = 2, "1" = 1, "2" = 3)) 
 
 
 
@@ -292,9 +296,9 @@ calc_variant_detection_prob_AN_and_DN = function(
     scale_fill_distiller(palette = "RdYlBu" , limits = c(0,3), name= "Cases detected (%)") +
     labs(x = "", y = y_label[1]) +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position = leg
     ) +
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -313,9 +317,9 @@ calc_variant_detection_prob_AN_and_DN = function(
     scale_fill_distiller(palette = "RdYlBu", limits = c(0,3), name= "Cases\ndetected (%)n") +
     labs(x = "", y = y_label[2]) +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position = "none"
     ) +
     ggtitle(title[1]) +
@@ -336,9 +340,9 @@ calc_variant_detection_prob_AN_and_DN = function(
     scale_fill_distiller(palette = "RdYlBu" , limits = c(0,3), name= "Cases\ndetected (%)") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position = "none"
     ) +
     scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -357,9 +361,9 @@ calc_variant_detection_prob_AN_and_DN = function(
     scale_fill_distiller(palette = "RdYlBu", limits = c(0,3), name= "Cases\ndetected (%)") +
     labs(x = "", y = "") +
     theme_bw() + theme(
-      text = element_text(size = 14),
+      text = element_text(size = 20),
       axis.title.y = element_text(angle = 90, vjust = 0.7),
-      plot.title = element_text(hjust = 0.5, size=14),
+      plot.title = element_text(hjust = 0.5, size=20),
       legend.position =  "none"
     ) +
     ggtitle(title[2])+

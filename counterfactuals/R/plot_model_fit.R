@@ -4,7 +4,8 @@
 
 summarise_results = function(posterior_results,
                              start_date,
-                             end_date){
+                             end_date,
+                             S0){
   
   start = as.Date.character(start_date, format = "%d-%m-%Y")
   end = as.Date.character(end_date, format = "%d-%m-%Y")
@@ -12,16 +13,17 @@ summarise_results = function(posterior_results,
   all_dates = 
     seq.Date(from = start, to = end,  by = "days")
   
-  out=  posterior_results %>% as.data.frame.table() %>%
+  out =  posterior_results %>% as.data.frame.table() %>%
     rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(!grepl("ratio",variant )) %>%  
     dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time)) %>%
+                  time = as.numeric(time),
+                  value =  value / S0 * 100000) %>%
     group_by(time,variant) %>%
     summarise(
       lower = quantile(value, 0.025),
       mean = mean(value),
-      upper = quantile(value, 0.975)
-    ) %>% 
+      upper = quantile(value, 0.975)) %>% 
     ungroup( ) %>%  
     mutate(Date = rep(all_dates, each = 8)) %>% 
     separate(variant, into = c("output", "variant")) %>% 
@@ -37,27 +39,48 @@ summarise_results = function(posterior_results,
 # returns a data frame of reported inc, true inc, ratio for each variant -------
 # aggregated over the study period ---------------------------------------------
 
-calculate_ratio_reported = function(posterior_results){
+calculate_ratio_reported = function(posterior_results,
+                                    S0){
   
 out = posterior_results %>% as.data.frame.table() %>%
     rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(grepl("ratio",variant )) %>%  
     dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time)) %>%
-  pivot_wider(id_cols = c(time, ni), names_from = variant, values_from = value) %>% 
-    mutate(ratio_M = rep_M/true_M,
-           ratio_A = rep_A/true_A,
-           ratio_O = rep_O/true_O,
-           ratio_Al = rep_Al/true_Al) %>% 
-    pivot_longer(cols = -c(time, ni), names_to = "variant") %>% 
-    mutate(value = ifelse(is.na(value), 0,value)) %>% 
+                  time = as.numeric(time),
+                  value = value ) %>%
+  group_by(variant, ni) %>% 
+  summarise(value = mean(value, na.rm=T)) %>%   # calculate cumulative incidence 
     group_by(variant) %>%
     summarise(
       lower = quantile(value, 0.025),
       mean = mean(value),
       upper = quantile(value, 0.975)
-    ) %>% 
+    ) %>%  
     ungroup( )
   
+
+out2 = posterior_results %>% as.data.frame.table() %>%
+  rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+  filter(!grepl("ratio",variant )) %>%  
+  dplyr::mutate(ni = as.numeric(ni),
+                time = as.numeric(time),
+                value = value ) %>%
+  group_by(variant, ni) %>% 
+  summarise(value = sum(value, na.rm=T) / S0 * 100) %>%   # calculate cumulative incidence 
+  pivot_wider(id_cols = ni, names_from = variant, values_from = value ) %>%  
+  mutate(true_tot = true_M+true_A+true_O+true_Al, 
+         rep_tot = rep_M+rep_A+rep_O+rep_Al) %>% 
+  pivot_longer(cols= -ni, names_to = "variant") %>% 
+  group_by(variant) %>%
+  summarise(
+    lower = quantile(value, 0.025),
+    mean = mean(value),
+    upper = quantile(value, 0.975)
+  ) %>%  
+  ungroup( ) %>% 
+  bind_rows(out)
+
+return(out2)
 }
 
 # calculated binomial confint for variant specific data ------------------------
@@ -72,6 +95,9 @@ plot_model_fit = function(posts_df,
                           ) {
   
   
+  
+  library(Hmisc)
+  
   if (location == "Italy") {
     # Import Italy data ----------------------------------------------------------
     A_data = read.csv("data/Dataset_italy_A_v5.csv")$Freq
@@ -81,12 +107,17 @@ plot_model_fit = function(posts_df,
     n_seq  = read.csv("data/Dataset_italy_A_v5.csv")$TotSeq
     avg_daily_rep_inc  = read.csv("data/Dataset_italy_A_v5.csv")$new_reported_cases_daily
     
-    n_pop_it = 59257566 - 4847026
+    n_pop = 59257566 - 4847026
     n_recov  = 1482377 - 93401
     index_M  = 6:14
     index_A  = 3:14
     index_O  =  3:9
     index_Al  = 9:14
+    
+ 
+      leg = c("none")
+
+    
     
   } else if (location == "Veneto"){
     # Import Veneto data ---------------------------------------------------------
@@ -103,6 +134,9 @@ plot_model_fit = function(posts_df,
   index_A = c(5,7:14)
   index_O = c(5,7:9)
   index_Al = 9:14
+  
+  
+  leg = c(0.14,0.86)
   }
   # Dates ------------------------------------------------------------------------
   
@@ -129,61 +163,72 @@ plot_model_fit = function(posts_df,
   
   # Plot model -------------------------------------------------------------------
   
-  dataConf  = dataDay   = list()
+  data_conf  = data_day   = list()
   # account for seeding and aggregating from day to month
   
   monthly_date   = all_dates  [which(as.numeric(format(all_dates  , "%d")) == 1)]
   
-  dataList   = list(M_data [index_M], A_data [index_A],
+  data_list   = list(M_data [index_M], A_data [index_A],
                     O_data [index_O], Al_data [index_Al])  # data
   
-  indexList   = list(index_M_i  , index_A_i  , index_O_i  , index_Al_i)  # index data by month
+  index_list   = list(index_M_i  , index_A_i  , index_O_i  , index_Al_i)  # index data by month
   
   # calculate binomial confidence intervals
   
-  for (i in 1:length(dataList)) {
-    dataConf  [[i]] = data.frame(
-      Date = monthly_date  [indexList  [[i]]],
-      binconf(dataList  [[i]], n_seq_i [indexList  [[i]]]) *
-        (avg_daily_rep_inc_i  [indexList  [[i]]] / (n_pop   - n_recov) * 100000) ,
+  for (i in 1:length(data_list)) {
+    data_conf  [[i]] = data.frame(
+      Date = monthly_date  [index_list  [[i]]],
+      binconf(data_list  [[i]], n_seq_i [index_list  [[i]]]) *
+        (avg_daily_rep_inc_i  [index_list  [[i]]] / (n_pop   - n_recov) * 100000) ,
       variant = variants[i]
     )
     
   }
   
-  dataConfDf   = bind_rows(dataConf)
-  dataDay   = left_join(data.frame(Date = all_dates), dataConfDf)
+  data_conf_df   = bind_rows(data_conf)
+  data_day   = left_join(data.frame(Date = all_dates), data_conf_df)
+  
+  posts_df$Date = as.Date.character(posts_df$Date, format = "%Y-%m-%d")
   
   
-  plot = posts_df %>%
-    left_join(dataDay  , by = "Date") %>%
+  plot = data_day %>%
+    left_join(posts_df  , by = "Date") %>%
     mutate(Variant = ifelse(
-      variant.x == "M",
+      variant.y == "M",
       "M234I-A376T",
       ifelse(
-        variant.x == "A",
+        variant.y == "A",
         "A220V",
-        ifelse(variant.x == "O", "Other", "Alpha")
-      )
-    )) %>%
+        ifelse(variant.y == "O", "Other",
+        ifelse(variant.y == "Al","Alpha", "X"
+      ))
+    ))) %>%
+    mutate(Data = ifelse(!is.na (PointEst), "Data", NA )) %>%  
+    mutate(Model = ifelse(is.na (PointEst), "Model", NA )) %>%  
     ggplot(aes(x = Date , y = mean_rep)) +
-    geom_line(aes(color = Variant)) +
+    geom_line(aes(color = Variant, linetype = Model)) +
     geom_ribbon(aes(
       ymin = lower_rep,
       ymax = upper_rep,
       fill = Variant
     ), alpha = 0.4) +
-    geom_point(aes(y = PointEst , color = variant.y)) +
+    geom_point(aes(y = PointEst , color = variant.x, shape = Data)) +
     geom_errorbar(aes(
       ymin = Lower,
       ymax = Upper,
-      color = variant.y
+      color = variant.x
     )) +
     labs(y = paste0("")) +
-    theme_bw() + theme(text = element_text(size = 16), legend.position = "none") +
-    scale_x_date(date_labels = "%b/%Y", breaks = "2 months") +
+    theme_bw() +
     ggtitle(paste(location)) +
-    ylim(c(0, 180))
+    ylim(c(0, 105)) + 
+    scale_shape_manual(values = c('Data' = 16)) +
+    scale_linetype_manual(values = c("Model" = "solid")) +
+    theme(text = element_text(size = 16), legend.position = leg, 
+          legend.margin = margin(0, 0, 0, 0),
+          legend.spacing.x = unit(0, "mm"),
+          legend.spacing.y = unit(0, "mm"), legend.title = element_blank()) +
+    scale_x_date(date_labels = "%b/%Y", breaks = "2 months")
   
   
   
