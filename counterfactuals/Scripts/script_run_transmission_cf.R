@@ -18,7 +18,7 @@ source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
 
-posterior_chains = read.csv("MF_results/inc/symp_test/6/posterior_chains.csv")
+posterior_chains = read.csv("MF_results/inc/symp_test/17/posterior_chains.csv")
 
 
 file_path = "CF_results"

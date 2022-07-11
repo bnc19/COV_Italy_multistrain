@@ -14,13 +14,13 @@ library(cowplot)
 library(ggpubr)
 
 
-source("counterfactuals/R/plot_variant_detection_prob.R")
+source("R/plot_variant_detection_prob.R")
 
 
 ################  Produce plots ################
 
 only_antigen  = calc_variant_detection_prob_AN_or_DN (
-  sens_C = 0.643,
+  sens_C = 0.689,
   sens_D = 0.0,
   Legend = T,
   y_axis_ticks = F,
@@ -42,7 +42,7 @@ only_molecular  = calc_variant_detection_prob_AN_or_DN (
 
 follow_up50  =  calc_variant_detection_prob_AN_and_DN (
   PCR_sens = 0.92 ,
-  Ag_sens_C = 0.643,
+  Ag_sens_C = 0.689,
   Ag_sens_D = 0.0,
   Ag_spec = 0.99,
   Legend = F,
@@ -56,7 +56,7 @@ follow_up50  =  calc_variant_detection_prob_AN_and_DN (
 
 follow_up100  =  calc_variant_detection_prob_AN_and_DN (
   PCR_sens = 0.92 ,
-  Ag_sens_C = 0.643,
+  Ag_sens_C = 0.689,
   Ag_sens_D = 0.0,
   Ag_spec = 0.99,
   Legend = F,

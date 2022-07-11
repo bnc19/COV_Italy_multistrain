@@ -22,29 +22,41 @@ source("R/sample_posterior_chains.R")
 # symp inc ---------------------------------------------------------------------
 
 # inc DIC / WAIC
-DIC_symp_inc = calc_dic(
-  posterior_chains = read.csv("MF_results/inc/symp_test/8/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/inc/symp_test/8/log_lik.csv")[,-1],
+calc_dic(
+  posterior_chains = read.csv("MF_results/inc/symp_test/17/posterior_chains.csv"),
+  log_lik = read.csv("MF_results/inc/symp_test/17/log_lik.csv")[,-1],
   fixed_model_path = "models/est_test_symp_cf.stan",
   scale_time_step = 2,
   start_date_veneto =  "01-05-2020",
   time_seed_M_veneto = "01-08-2020",
   phi_Ag =  0.689
+  # ,
+  # sigma = 1 / (5.6 - 1.31),
+  # gamma = 1 / (7.2 - 5.6)
 )
 
-DIC_symp_inc 
-
 # 1 1196.377
-# 6 1101.816
-# 8 1097.324
+
+# 6 1101.816 
+
+# M17 - (baseline) - 1121.50   NO DIV, "Rhat good" :) 
+# 16 - 1024.95
+
+
+# 10 68.9% sens 1146.156  
+# 11  1017.97
+# 12 1091.8
+# 13 1573.40
+# 14 1108.9744 
+
 waic(as.matrix(read.csv("MF_results/inc/symp_test/6/log_lik.csv")[,-1]))
 
 
 # symp summary 
 sum_symp_inc = summarise_posterior_chains(
-  posterior_chains = read.csv("MF_results/inc/symp_test/8/posterior_chains.csv"))
+  posterior_chains = read.csv("MF_results/inc/symp_test/17/posterior_chains.csv"))
 
-write.csv(sum_symp_inc, "MF_results/comp_main_model/8/sum_symp_inc.csv")
+write.csv(sum_symp_inc, "MF_results/comp_main_model/17/sum_symp_inc.csv")
 
 
 
@@ -63,8 +75,8 @@ DIC_asymp_inc = calc_dic(
 
 DIC_asymp_inc 
 # 1  1196.533
-# 2  1163.329
-# 6  1161.18
+# 2  1163.329 
+# 6   1174.052  - -564.195
 
 waic(as.matrix(read.csv("MF_results/inc/asymp_test/6/log_lik.csv")[,-1]))
 
@@ -81,8 +93,8 @@ write.csv(sum_asymp_inc, "MF_results/comp_main_model/6/sum_asymp_inc.csv")
 
 # DIC  / WAIC
 DIC_asymp_inc_2 = calc_dic(
-  posterior_chains = read.csv("MF_results/inc/asymp_test_2/6/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/inc/asymp_test_2/6/log_lik.csv")[,-1],
+  posterior_chains = read.csv("MF_results/inc/asymp_test_2/9/posterior_chains.csv"),
+  log_lik = read.csv("MF_results/inc/asymp_test_2/9/log_lik.csv")[,-1],
   fixed_model_path = "models/est_test_asymp2_cf.stan",
   scale_time_step = 2,
   start_date_veneto =  "01-05-2020",
@@ -95,8 +107,8 @@ DIC_asymp_inc_2
 
 #  1 - 1195.755
 #  2 - 1158.526
-#  6 - 1132.769 
-
+#  6 - 1128.766   - -547.1309
+#  9 - 1139.3618 
 waic(as.matrix(read.csv("MF_results/inc/asymp_test_2/6/log_lik.csv")[,-1]))
 
 #   
