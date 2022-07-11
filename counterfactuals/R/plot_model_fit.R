@@ -116,6 +116,7 @@ plot_model_fit = function(posts_df,
     
  
       leg = c("none")
+       y = " "
 
     
     
@@ -137,6 +138,8 @@ plot_model_fit = function(posts_df,
   
   
   leg = c(0.14,0.86)
+  
+  y = "Reported incidence per 100,000 population"
   }
   # Dates ------------------------------------------------------------------------
   
@@ -218,17 +221,17 @@ plot_model_fit = function(posts_df,
       ymax = Upper,
       color = variant.x
     )) +
-    labs(y = paste0("")) +
+    labs(y = paste0(y)) +
     theme_bw() +
     ggtitle(paste(location)) +
     ylim(c(0, 105)) + 
     scale_shape_manual(values = c('Data' = 16)) +
     scale_linetype_manual(values = c("Model" = "solid")) +
-    theme(text = element_text(size = 16), legend.position = leg, 
+    theme(text = element_text(size = 18), legend.position = leg, 
           legend.margin = margin(0, 0, 0, 0),
           legend.spacing.x = unit(0, "mm"),
           legend.spacing.y = unit(0, "mm"), legend.title = element_blank()) +
-    scale_x_date(date_labels = "%b/%Y", breaks = "2 months")
+    scale_x_date(date_labels = "%b/%Y", breaks = "3 months")
   
   
   

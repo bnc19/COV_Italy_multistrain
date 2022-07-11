@@ -245,6 +245,13 @@ format_stan_cf_data= function(
     tau = posterior_sample_row$tau
   }
   
+  
+  if(is.null(posterior_sample_row$alpha)){
+    alpha = 1  
+  } else{
+    alpha = posterior_sample_row$alpha
+  }
+  
   # List of data for Rstan -------------------------------------------------------
   
   model_data_real = list(
@@ -257,6 +264,7 @@ format_stan_cf_data= function(
     rho_it = rho_it, 
     omega = omega,
     tau = tau, 
+    alpha = alpha,
     k = k,
     # Shared data 
     scale_time_step = scale_time_step,

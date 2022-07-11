@@ -37,61 +37,63 @@ calc_dic = function (
   time_vac_veneto = "27-12-2020",
   italy_testing_in_veneto = F
 ){
-
-source("R/sample_posterior_chains.R")
-source("R/run_cf.R")
-library(rstan)
   
-# compile model
-model = stan_model(fixed_model_path)
+  source("R/sample_posterior_chains.R")
+  source("R/run_cf.R")
+  library(rstan)
   
-# calculate posterior mean 
-post_chains_sum = summarise_posterior_chains_DIC(posterior_chains = posterior_chains)
-
-# run model using posterior mean values 
-model_posts = replicate_rstan_fixed(model = model,
-                                    posterior_sample_row = data.frame(t(post_chains_sum))[1,],
-                                    scale_time_step = scale_time_step,
-                                    n_pop_it = n_pop_it,
-                                    n_recov_it =n_recov_it,
-                                    index_M_it = index_M_it,
-                                    index_A_it = index_A_it,
-                                    index_O_it =  index_O_it,
-                                    index_Al_it = index_Al_it,
-                                    n_pop_veneto = n_pop_veneto,
-                                    n_recov_veneto = n_recov_veneto,
-                                    index_M_veneto = index_M_veneto,
-                                    index_A_veneto = index_A_veneto,
-                                    index_O_veneto = index_O_veneto,
-                                    index_Al_veneto = index_Al_veneto,
-                                    epsilon = epsilon,
-                                    sigma = sigma,
-                                    gamma = gamma,
-                                    mu = mu ,
-                                    phi_PCR = phi_PCR,
-                                    phi_Ag =  phi_Ag,
-                                    start_date_it =  start_date_it,
-                                    end_date_it = end_date_it,
-                                    time_intervention_it = time_intervention_it ,
-                                    time_seed_alpha_it = time_seed_alpha_it,
-                                    time_seed_M_it = time_seed_M_it ,
-                                    time_vac_it = time_vac_it,
-                                    start_date_veneto =  start_date_veneto,
-                                    end_date_veneto = end_date_veneto,
-                                    time_intervention_veneto = time_intervention_veneto,
-                                    time_seed_alpha_veneto = time_seed_alpha_veneto,
-                                    time_seed_M_veneto = time_seed_M_veneto,
-                                    time_vac_veneto = time_vac_veneto,
-                                    italy_testing_in_veneto = F)
-
-
-# Calculate model deviance 
-
-E_log_lik =  model_posts$sum_LL # mean post value 
-
-pDIC = 2 * (E_log_lik - mean(rowSums(log_lik)))  # sum across the data points to get total log likelihood then calculate the mean for all iterations 
-
-dic = -2 * E_log_lik  + 2 * pDIC
-
-return(dic)
+  # compile model
+  model = stan_model(fixed_model_path)
+  
+  # calculate posterior mean 
+  post_chains_sum = summarise_posterior_chains_DIC(posterior_chains = posterior_chains)
+  
+  # run model using posterior mean values 
+  model_posts = replicate_rstan_fixed(model = model,
+                                      posterior_sample_row = data.frame(t(post_chains_sum))[1,],
+                                      scale_time_step = scale_time_step,
+                                      n_pop_it = n_pop_it,
+                                      n_recov_it =n_recov_it,
+                                      index_M_it = index_M_it,
+                                      index_A_it = index_A_it,
+                                      index_O_it =  index_O_it,
+                                      index_Al_it = index_Al_it,
+                                      n_pop_veneto = n_pop_veneto,
+                                      n_recov_veneto = n_recov_veneto,
+                                      index_M_veneto = index_M_veneto,
+                                      index_A_veneto = index_A_veneto,
+                                      index_O_veneto = index_O_veneto,
+                                      index_Al_veneto = index_Al_veneto,
+                                      epsilon = epsilon,
+                                      sigma = sigma,
+                                      gamma = gamma,
+                                      mu = mu ,
+                                      phi_PCR = phi_PCR,
+                                      phi_Ag =  phi_Ag,
+                                      start_date_it =  start_date_it,
+                                      end_date_it = end_date_it,
+                                      time_intervention_it = time_intervention_it ,
+                                      time_seed_alpha_it = time_seed_alpha_it,
+                                      time_seed_M_it = time_seed_M_it ,
+                                      time_vac_it = time_vac_it,
+                                      start_date_veneto =  start_date_veneto,
+                                      end_date_veneto = end_date_veneto,
+                                      time_intervention_veneto = time_intervention_veneto,
+                                      time_seed_alpha_veneto = time_seed_alpha_veneto,
+                                      time_seed_M_veneto = time_seed_M_veneto,
+                                      time_vac_veneto = time_vac_veneto,
+                                      italy_testing_in_veneto = F)
+  
+  
+  # Calculate model deviance 
+  
+  E_log_lik =  model_posts$sum_LL # mean post value 
+  
+  LL = mean(rowSums(log_lik)) 
+  
+  pDIC = 2 * (E_log_lik - mean(rowSums(log_lik)))  # sum across the data points to get total log likelihood then calculate the mean for all iterations 
+  
+  dic = -2 * E_log_lik  + 2 * pDIC
+  
+  return(c(dic, LL))
 }
