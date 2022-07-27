@@ -29,7 +29,8 @@ format_stan_data= function(
   time_seed_alpha_veneto,
   time_seed_M_veneto,
   time_vac_veneto,
-  scale_time_step
+  scale_time_step,
+  VE 
 ){
   
 
@@ -274,7 +275,9 @@ format_stan_data= function(
     time_seed_M_ven     = index_seed_M_veneto     * scale_time_step,
     time_seed_alpha_ven = index_seed_alpha_veneto * scale_time_step,
     
-    month_index_ven = index_1st_month_veneto
+    month_index_ven = index_1st_month_veneto,
+    
+    VE = VE
   )
   
   return(model_data_real)

@@ -35,9 +35,9 @@ save_post_chains = function(fit,file_path){
   
   k = fit_posts$k
   
-  tau = fit_posts$tau
+  alpha = fit_posts$alpha
   
-  if(is.null(tau)){
+  if(is.null(alpha)){
   posterior_chains = data.frame(
     beta_M,
     beta_A,
@@ -78,7 +78,7 @@ save_post_chains = function(fit,file_path){
         I0_v_O,
         I0_v_Al,
         k, 
-        tau)
+        alpha)
       
     }
   
