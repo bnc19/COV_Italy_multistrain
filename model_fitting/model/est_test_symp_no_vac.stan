@@ -13,6 +13,7 @@ data {
   real phi_PCR;
   real phi_Ag;
   
+  real VE; 
   // italy data 
 
   int<lower = 1> n_data_it[n_var];      // number of months observed 
@@ -90,25 +91,26 @@ transformed data {
 }
 
 parameters {
-  real<lower = 0>             beta[n_var];  // transmission parameter 
-  real<lower = 0>             I0_ven[n_var];    // seed
-  real<lower = 0, upper = 1>  rho_ven;      // probability of reporting 
-  real<lower = 0>             I0_it[n_var];    // seed
-  real<lower = 0, upper = 1>  rho_it;      // probability of reporting 
-  real<lower = 0, upper = 1>  omega[4]; // reduction in transmission
-  real<lower = 0>             k;        // overdispersion parameter 
-
+  real<lower = 0>              beta[n_var];  // transmission parameter 
+  // real<lower = 0, upper = 1>   rho_ven;      // probability of reporting 
+  real<lower = 0, upper = 1>   rho_it;       // probability of reporting
+  real<lower = 0> I0_ven_M ;
+  real<lower = 0, upper = 5> I0_ven_A ;
+  real<lower = 0> I0_ven_O ;
+  real<lower = 0> I0_ven_Al;
+    
+  real<lower = 0> I0_it_M   ;
+  real<lower = 0, upper = 5> I0_it_A   ;
+  real<lower = 0> I0_it_O   ;
+  real<lower = 0> I0_it_Al  ;
+  real<lower = 0, upper = 1>   omega[2];     // reduction in transmission
+  real<lower = 0>              k;            // overdispersion parameter  
 }   
 
-
-model {
-
-}
-
-
-
-generated quantities {
-    real beta2[n_var] ;
+transformed parameters{
+  
+  real <lower = 0, upper = 1>  rho_ven = rho_it  ;
+  real beta2[n_var] ;
    
 // Define Italy param ----------------------------------------------------------
   
@@ -131,13 +133,7 @@ generated quantities {
 
   real beta2_it[n_ts_it,n_var]; 
   
-  real daily_incidence_it[n_days_it, n_var];  // monthly variant incidence
 
-  // used for for loop
-
-  int index_i;
-  int ind_i ;
-  
 // Define Veneto param ---------------------------------------------------------
   
   real S_ven[(n_ts_ven +1)];
@@ -159,12 +155,6 @@ generated quantities {
 
   real beta2_ven[n_ts_ven,n_var]; 
  
-  real daily_incidence_ven[n_days_ven, n_var];  // monthly variant incidence
- 
-  int index_v;
-  int ind_v ;
-  
-  
   
    // Scale beta 
 
@@ -172,15 +162,15 @@ generated quantities {
   
 // Initial values  Italy 
 
-  S_it[1] = S0_it - I0_it[2] - I0_it[3] ;
+  S_it[1] = S0_it - I0_it_A - I0_it_O ;
 
  for(i in 1:n_var) E_it[1,i] = 0 ;
  for(i in 1:n_var) PS_it[1,i] = 0 ;
  for(i in 1:n_var) IA_it[1,i] = 0 ;
   
   IS_it[1,1] = 0 ;
-  IS_it[1,2] = I0_it[2] ;
-  IS_it[1,3] = I0_it[3] ;
+  IS_it[1,2] = I0_it_A ;
+  IS_it[1,3] = I0_it_O ;
   IS_it[1,4] = 0 ;
   
   Q_it[1] = 0 ;
@@ -188,15 +178,15 @@ generated quantities {
   
 // Initial values Veneto -------------------------------------------------------
 
-  S_ven[1] = S0_ven - I0_ven[2] - I0_ven[3] ;
+  S_ven[1] = S0_ven - I0_ven_A - I0_ven_O ;
 
  for(i in 1:n_var) E_ven[1,i] = 0 ;
  for(i in 1:n_var) PS_ven[1,i] = 0 ;
  for(i in 1:n_var) IA_ven[1,i] = 0 ;
   
   IS_ven[1,1] = 0 ;
-  IS_ven[1,2] = I0_ven[2] ;
-  IS_ven[1,3] = I0_ven[3] ;
+  IS_ven[1,2] = I0_ven_A ;
+  IS_ven[1,3] = I0_ven_O;
   IS_ven[1,4] = 0 ;
   
   Q_ven[1] = 0 ;
@@ -226,19 +216,19 @@ generated quantities {
  } 
  
  for(t in time_switch1_ven :  (time_switch2_ven-1)) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[3]) * beta2[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[1]) * beta2[i];
  }  
  
  for(t in  time_switch2_ven :  n_ts_ven) {
-   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[4]) * beta2[i];
+   for(i in 1: n_var)  beta2_ven[t,i] = (1-omega[2]) * beta2[i];
  }  
  
 
 // Simulate Italy --------------------------------------------------------------
  for (t in 1:(n_ts_it)){
    
-   IS_it[time_seed_M_it+1,1] = I0_it[1];
-   IS_it[time_seed_alpha_it+1,4] = I0_it[4];
+   IS_it[time_seed_M_it,1] = I0_it_M;
+   IS_it[time_seed_alpha_it,4] = I0_it_Al;
 
    p_daily_it[t] = (epsilon2 * sum(E_it[t,2:4])) / S0_it;
    
@@ -251,10 +241,10 @@ generated quantities {
    rho_it * (phi_PCR * pPCR_daily_it[t] + phi_Ag * (1 - pPCR_daily_it[t]));
 
    for(i in 1:n_var) FOI_it[t,i] =
-   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i]) / S0_it;
+   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + (IS_it[t,i])) / S0_it;
    
    S_it[t+1] = 
-   S_it[t] - S_it[t]*sum(FOI_it[t,]) - vac_it[t]*S_it[t];
+   S_it[t] - S_it[t]*sum(FOI_it[t,]);
    
    for(i in 1:n_var) E_it[t+1,i] = 
    E_it[t,i] + S_it[t] * FOI_it[t,i] - epsilon2 * E_it[t,i];
@@ -273,7 +263,7 @@ generated quantities {
    
    R_it[t+1] = 
    R_it[t] + gamma2 * Q_it[t] + gamma2 * sum(IS_it[t,])  
-   + gamma2 * sum(IA_it[t,]) + vac_it[t] * S_it[t];
+   + gamma2 * sum(IA_it[t,]) ;
    
    
    for(i in 1:n_var) incidence_it[t,i] = 
@@ -285,8 +275,8 @@ generated quantities {
 // Simulate Veneto -------------------------------------------------------------
  for (t in 1:(n_ts_ven)){
    
-   IS_ven[time_seed_M_ven+1,1] = I0_ven[1];
-   IS_ven[time_seed_alpha_ven+1,4] = I0_ven[4];
+   IS_ven[time_seed_M_ven,1] = I0_ven_M;
+   IS_ven[time_seed_alpha_ven,4] = I0_ven_Al;
 
    p_daily_ven[t] = (epsilon2 * sum(E_ven[t,2:4])) / S0_ven;
    pPCR_daily_ven[t] = 
@@ -298,10 +288,10 @@ generated quantities {
    rho_ven * (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
 
    for(i in 1:n_var) FOI_ven[t,i] =
-   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + IS_ven[t,i]) / S0_ven;
+   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + (IS_ven[t,i])) / S0_ven;
    
    S_ven[t+1] = 
-   S_ven[t] - S_ven[t]*sum(FOI_ven[t,]) - vac_ven[t]*S_ven[t];
+   S_ven[t] - S_ven[t]*sum(FOI_ven[t,]);
    
    for(i in 1:n_var) E_ven[t+1,i] = 
    E_ven[t,i] + S_ven[t] * FOI_ven[t,i] - epsilon2 * E_ven[t,i];
@@ -321,13 +311,216 @@ generated quantities {
    
    R_ven[t+1] = 
    R_ven[t] + gamma2 * Q_ven[t] + gamma2 * sum(IS_ven[t,]) 
-   + gamma2 * sum(IA_ven[t,]) + vac_ven[t] * S_ven[t];
+   + gamma2 * sum(IA_ven[t,]) ;
    
    
    for(i in 1:n_var) incidence_ven[t,i] =
    (delta_ven[t,i]*mu*sigma2*PS_ven[t,i]) / S0_ven * 100000  ;
+ }
+  
+  
+}
 
-// Aggregaate to day  ----------------------------------------------------------------
+
+model {
+
+// Define Italy model param ----------------------------------------------------
+  real daily_incidence_it[n_days_it, n_var];  // daily variant incidence
+  real monthly_incidence_it[n_months_it, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_it[n_data_it[1]];
+  real lambda_A_it[n_data_it[2]]; 
+  real lambda_O_it[n_data_it[3]];
+  real lambda_Al_it[n_data_it[4]]; 
+  
+
+  // used for for loop
+  
+  int index_it;
+  int ind_it ; 
+  int index_i;
+  int ind_i ;
+  
+  
+// Define veneto model param ---------------------------------------------------
+ 
+  real daily_incidence_ven[n_days_ven, n_var];  // daily variant incidence
+  real monthly_incidence_ven[n_months_ven, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_ven[n_data_ven[1]];
+  real lambda_A_ven[n_data_ven[2]]; 
+  real lambda_O_ven[n_data_ven[3]];
+  real lambda_Al_ven[n_data_ven[4]]; 
+  
+
+  // used for for loop
+  
+  int index_ven;
+  int ind_ven ; 
+  int index_v;
+  int ind_v ;
+
+// Italy  model ----------------------------------------------------------------
+
+  index_i = 1;
+
+  for (t in 1:n_days_it){
+  ind_i = index_i + (scale_time_step-1);
+
+  for(i in 1:n_var) daily_incidence_it[t,i] =  sum(incidence_it[index_i:ind_i, i]);
+
+  index_i = index_i + scale_time_step;
+}
+
+  // index by month for daily average of variant incidences and month average 
+  // concordant incidence, in month i 
+   
+ index_it = 1; 
+ 
+ for (m in 1:n_months_it){ 
+   ind_it = index_it + 1;
+   for (i in 1:n_var){
+     monthly_incidence_it[m,i] =  
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i]) + 0.000000001;}
+  
+   index_it = index_it + 1;
+ }
+ 
+   // variant specific mean parameters for likelihood  
+  lambda_M_it = monthly_incidence_it[index_M_it, 1] ; 
+  
+  lambda_A_it =  monthly_incidence_it[index_A_it, 2] ;
+  
+  lambda_O_it =  monthly_incidence_it[index_O_it, 3];
+  
+  lambda_Al_it =  monthly_incidence_it[index_Al_it, 4] ;
+  
+  // likelihood 
+  
+  target += 10 * neg_binomial_2_lpmf(y_M_it | lambda_M_it, 1/k);
+
+  target += neg_binomial_2_lpmf(y_A_it | lambda_A_it, 1/k);
+
+  target += neg_binomial_2_lpmf(y_O_it | lambda_O_it, 1/k);
+
+  target += neg_binomial_2_lpmf(y_Al_it | lambda_Al_it, 1/k);
+
+// Veneto model ----------------------------------------------------------------
+
+ // index by month for daily average of variant incidences and month average 
+ // concordant incidence, in month i 
+ 
+   index_v = 1;
+
+  for (t in 1:n_days_ven ){
+  ind_v = index_v + (scale_time_step-1);
+
+  for(i in 1:n_var) daily_incidence_ven[t,i] =  sum(incidence_ven[index_v:ind_v,i]);
+
+  index_v = index_v + scale_time_step;
+}
+
+   
+ index_ven= 1; 
+ 
+ for (m in 1:n_months_ven){ 
+   ind_ven = index_ven + 1;
+   for (i in 1:n_var){
+     monthly_incidence_ven[m,i] =  
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] )+ 0.000000001;    }
+   index_ven = index_ven + 1;
+ }
+ 
+  // variant specific mean parameters for likelihood  
+
+  lambda_M_ven = monthly_incidence_ven[index_M_ven, 1] ; 
+  
+  lambda_A_ven =  monthly_incidence_ven[index_A_ven, 2] ;
+  
+  lambda_O_ven =  monthly_incidence_ven[index_O_ven, 3];
+  
+  lambda_Al_ven =  monthly_incidence_ven[index_Al_ven, 4] ;
+  
+  
+  // likelihood 
+  
+  target += 10 * neg_binomial_2_lpmf(y_M_ven | lambda_M_ven, 1/k);
+
+  target += neg_binomial_2_lpmf(y_A_ven | lambda_A_ven, 1/k);
+
+  target += neg_binomial_2_lpmf(y_O_ven | lambda_O_ven, 1/k);
+
+  target += neg_binomial_2_lpmf(y_Al_ven | lambda_Al_ven, 1/k);
+
+
+// priors ----------------------------------------------------------------------
+   beta    ~ normal(1,1);
+   rho_it  ~ beta(1,1);
+   omega   ~ beta(1,1); 
+   I0_it_M   ~ normal(1,100);
+   I0_it_A   ~ normal(1,100);
+   I0_it_Al  ~ normal(1,100);
+   I0_it_O   ~ normal(1,100);
+
+   I0_ven_M  ~ normal(1,10);
+   I0_ven_A  ~ normal(1,10);
+   I0_ven_O  ~ normal(1,10);
+   I0_ven_Al  ~ normal(1,10);
+      
+   k       ~ exponential(0.01);
+
+}
+
+
+
+generated quantities {
+  vector[sum(n_data_it) + sum(n_data_ven)] log_lik;
+  
+// Define Italy model param ----------------------------------------------------
+  real daily_incidence_it[n_days_it, n_var];  // monthly variant incidence
+  real monthly_incidence_it[n_months_it, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_it[n_data_it[1]];
+  real lambda_A_it[n_data_it[2]]; 
+  real lambda_O_it[n_data_it[3]];
+  real lambda_Al_it[n_data_it[4]]; 
+  
+
+  // used for for loop
+  
+  int index_it;
+  int ind_it ; 
+  int index_i;
+  int ind_i ;
+  
+  
+// Define veneto model param ---------------------------------------------------
+ 
+  real daily_incidence_ven[n_days_ven, n_var];  // monthly variant incidence
+  real monthly_incidence_ven[n_months_ven, n_var];  // monthly variant incidence
+
+  // poisson rate paramater 
+  
+  real lambda_M_ven[n_data_ven[1]];
+  real lambda_A_ven[n_data_ven[2]]; 
+  real lambda_O_ven[n_data_ven[3]];
+  real lambda_Al_ven[n_data_ven[4]]; 
+  
+
+  // used for for loop
+  
+  int index_ven;
+  int ind_ven ; 
+  int index_v;
+  int ind_v ;
+
+// Italy  model ----------------------------------------------------------------
 
   index_i = 1;
 
@@ -339,7 +532,35 @@ generated quantities {
   index_i = index_i + scale_time_step;
 }
 
+  // index by month for daily average of variant incidences and month average 
+  // concordant incidence, in month i 
+   
+ index_it = 1; 
+ 
+ for (m in 1:n_months_it){ 
+   ind_it = index_it + 1;
+   for (i in 1:n_var){
+     monthly_incidence_it[m,i] =  
+     mean( daily_incidence_it[month_index_it[index_it]:(month_index_it[ind_it]-1),i] ) + 0.000000001;}
   
+   index_it = index_it + 1;
+ }
+ 
+   // variant specific mean parameters for likelihood  
+  lambda_M_it = monthly_incidence_it[index_M_it, 1] ; 
+  
+  lambda_A_it =  monthly_incidence_it[index_A_it, 2] ;
+  
+  lambda_O_it =  monthly_incidence_it[index_O_it, 3];
+  
+  lambda_Al_it =  monthly_incidence_it[index_Al_it, 4] ;
+
+
+// Veneto model ----------------------------------------------------------------
+
+ // index by month for daily average of variant incidences and month average 
+ // concordant incidence, in month i 
+ 
    index_v = 1;
 
   for (t in 1:n_days_ven){
@@ -357,7 +578,7 @@ generated quantities {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000001;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) + 0.000000001;    }
    index_ven = index_ven + 1;
  }
  
