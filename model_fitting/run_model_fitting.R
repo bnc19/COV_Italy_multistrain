@@ -3,9 +3,8 @@
 # This script fits a multivariant model to epidemiological and genomic data from Veneto 
 # or the rest of Italy. The model can be run on a high performance cluster (HPC) or
 # locally. Currently, each model runs 3 chains for  200 iterations, discarding the first 
-# 100 as burnin. Initial values are close to the posterior means. This is to demo the
-# models ~ quickly (12 hours on a normal computer). In order to obtain the results 
-# provided in the manuscript, 3 chains with more diffuse starting points were run for
+# 100 as burnin. This is to demo the models ~ quickly (12 hours on a normal computer). 
+# In order to obtain the resultsprovided in the manuscript, 4 chains were run for
 # 2000 iterations, discarding the first 1000 iterations as burnin. This takes ~6 
 # hours per model to run on the HPC. 
 #
