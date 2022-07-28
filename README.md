@@ -1,14 +1,22 @@
 Claudia Del Vecchio, Bethan Cracknell Daniels, Giuseppina Brancaccio et al. Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants, 28 March 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-1481444/v1]
 
+# About this repository
+
+This repository contains all the code needed to reproduce the results presented in Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants, in full. All data used is made available in the repository. 
+
+All required packages and their versions are available in the DESCRIPTION file. Instructions to install download Rstan can be found [here](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started). 
+
+
+
 # Repository structure
 
 This repository is divided into 3 sections: 
 
 * *hospital_based_surveillance* - code to analyse antigen assay performance observed during hospital surveillance in Veneto. Also includes code to produce figures S3, S4, S5, S9 and S10, and tables 1, S1 and S2 from the manuscript. 
-* *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto (between July 2020-May 2021) and the rest of Italy (between May 2020-2021), separately. 
-* *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures 1,5,6,7S7 and S8 from the manuscript. 
+* *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto and the rest of Italy. **Note that the code is currently set up to run each model both locally and on a HPC for 200 iterations with the first 100 discarded as burn in. This is to demo the models quickly (~4 hours on a normal computer). In order to obtain the results provided in the manuscript, 4 chains were run for 2000 iterations, discarding the first 1000 iterations as burnin. This takes ~6  hours per model to run on the HPC.** 
 
-* N.B. the scripts *fit_SEIR_model_on_cluster.R*, *script_run_main_analysis.R* and *script_run_and_plot_sensitivity_analysis.R* require Rstan installation to run. See instructions: https://mc-stan.org/users/interfaces/rstan
+* *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce figures 3,5,6 and 7 from the manuscript. 
+
 
 ## hospital_based_surveillance
 
