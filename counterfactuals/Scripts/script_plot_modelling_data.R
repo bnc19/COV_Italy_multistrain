@@ -10,7 +10,7 @@ setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
 library(cowplot)
 library(tidyverse)
-
+dir.create("Figures")
 
 n_pop_it = 59257566 - 4847026
 n_recov_it = 1482377 - 93401
@@ -232,7 +232,7 @@ grid_out = plot_grid(total_plots,  variant_plot,
 
 ggsave(
   plot = grid_out,
-  filename = "Figure3.pdf",
+  filename = "Figures/Figure3.pdf",
   height = 35,
   width = 55,
   units = "cm",
