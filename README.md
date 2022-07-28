@@ -19,7 +19,7 @@ This repository is divided into 3 sections:
 * *counterfactuals*- code to run models of the baseline and counterfactual testing scenarios using posterior samples obtained from *model_fitting* as input. Also includes code to run the sensitivity analyses, code to calculate test performance metrics and estimate variant detection by genomic surveillance, and code to produce Figures 3,5,6 and 7 from the manuscript. 
 
 
-## hospital_based_surveillance
+## *hospital_based_surveillance*
 
 **This folder contains**
 
