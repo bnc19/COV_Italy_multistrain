@@ -97,6 +97,14 @@ test_spec_100 = calc_test_met(C_D_prev = C_D_prev,
               Legend = T,
               title = "only antigen")
 
+# prob testing pos if conc prev < 0.05
+range(filter(test_spec_100[[1]], Var1  <0.5)$PT_pos)
+range(filter(test_spec_100[[1]], Var1  <0.5 )$PPV, na.rm = T)
+
+range(filter(test_spec_100[[1]], Var1  <0.5 & Var2 > 25 )$NPV, na.rm = T)
+range(filter(test_spec_100[[1]], Var1  <0.5 & Var2 > 25)$PPV, na.rm = T)
+
+
 
 test_spec_0 = calc_test_met(C_D_prev = C_D_prev, 
                             PCR_sens = 0.92 ,
@@ -122,7 +130,7 @@ test_spec_test_prop_anot = annotate_figure(test_spec_test_prop, bottom = text_gr
 
 ggsave(
   plot = test_spec_test_prop_anot,
-  filename = "fig6.jpg",
+  filename = "Figure6.png",
   height = (80 * 4/6),
   width = 80,
   units = "cm",

@@ -110,8 +110,10 @@ generated quantities {
   
    real beta2[n_var] ;
    
+   
 // Define Italy param ----------------------------------------------------------
   
+  real R0_it[n_ts_it, n_var]; 
   real S_it[(n_ts_it +1)];
   real E_it[(n_ts_it +1), n_var];
   real PS_it[(n_ts_it+1), n_var];
@@ -133,7 +135,8 @@ generated quantities {
   real beta2_it[n_ts_it,n_var]; 
   
 // Define Veneto param ---------------------------------------------------------
-  
+  real R0_ven[n_ts_ven, n_var]; 
+
   real S_ven[(n_ts_ven +1)];
   real E_ven[(n_ts_ven +1), n_var];
   real PS_ven[(n_ts_ven+1), n_var];
@@ -161,10 +164,12 @@ real sum_LL ;
   
 // Define Italy model param ----------------------------------------------------
 
- real daily_incidence_it[n_days_it, n_var];  // daily repored variant incidence
+  real daily_incidence_it[n_days_it, n_var];  // daily repored variant incidence
   real daily_incidence_it_t[n_days_it, n_var];  // daily true variant incidence
   real monthly_incidence_it[n_months_it, n_var];  // monthly reported variant incidence
   real ratio_it[n_days_it, n_var];
+  real R0_it_daily[n_days_it, n_var]; 
+  real pPCR_it[n_days_it]; 
   // poisson rate paramater 
   
   real lambda_M_it[n_data_it[1]];
@@ -187,6 +192,8 @@ real sum_LL ;
   real daily_incidence_ven_t[n_days_ven, n_var];  // true reported variant incidence
   real monthly_incidence_ven[n_months_ven, n_var];  // monthly reported variant incidence
   real ratio_ven [n_days_ven, n_var];
+   real R0_ven_daily[n_days_ven, n_var]; 
+  real pPCR_ven[n_days_ven]; 
   // poisson rate paramater 
   
   real lambda_M_ven[n_data_ven[1]];
@@ -318,7 +325,9 @@ real sum_LL ;
      for(i in 1:n_var) incidence_it_t[t,i] = 
    (epsilon2 * E_it[t,i])  ;
  
- 
+   
+    for(i in 1:n_var) R0_it[t,i] = (beta2[i] / sigma2) + ((1-mu) * beta2[i] / gamma2 ) + (((1- delta_it[t,i]) * mu * beta2[i])  / gamma2 );
+
  
  }
  
@@ -372,8 +381,15 @@ real sum_LL ;
       
    for(i in 1:n_var) incidence_ven_t[t,i] =
    (epsilon2 * E_ven[t,i])  ;
+   
+    for(i in 1:n_var) R0_ven[t,i] = (beta2[i] / sigma2) + ((1-mu) * beta2[i] / gamma2 ) + (((1- delta_ven[t,i]) * mu * beta2[i])  / gamma2 );
+   
  }
  
+
+
+
+
   
 
 // Italy  model ----------------------------------------------------------------
@@ -386,6 +402,9 @@ real sum_LL ;
   for(i in 1:n_var) daily_incidence_it[t,i] =  sum(incidence_it[index_i:ind_i,i]);
   for(i in 1:n_var) daily_incidence_it_t[t,i] =  sum(incidence_it_t[index_i:ind_i,i]);
   for(i in 1:n_var) ratio_it[t,i] =  daily_incidence_it[t,i]/ daily_incidence_it_t[t,i];
+  for(i in 1:n_var) R0_it_daily[t,i] = mean(R0_it[index_i:ind_i,i]); 
+  pPCR_it[t] = mean(pPCR_daily_it[index_i:ind_i]);
+
   index_i = index_i + scale_time_step;
 }
 
@@ -426,6 +445,8 @@ real sum_LL ;
   for(i in 1:n_var) daily_incidence_ven[t,i] =  sum(incidence_ven[index_v:ind_v,i]);
   for(i in 1:n_var) daily_incidence_ven_t[t,i] =  sum(incidence_ven_t[index_v:ind_v,i]);
   for(i in 1:n_var) ratio_ven[t,i] =  daily_incidence_ven[t,i]/ daily_incidence_ven_t[t,i];
+  for(i in 1:n_var) R0_ven_daily[t,i] = mean(R0_ven[index_v:ind_v,i]); 
+   pPCR_ven[t] = mean(pPCR_daily_ven[index_v:ind_v]);
 
   index_v = index_v + scale_time_step;
 }

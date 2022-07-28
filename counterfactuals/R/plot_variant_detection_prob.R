@@ -224,7 +224,7 @@ return(list(out, seq_con_plot_pos,seq_con_plot_neg,seq_con_plot_both,
 
 calc_variant_detection_prob_AN_and_DN = function( 
   PCR_sens = 0.92 ,
-  Ag_sens_C = 0.643,
+  Ag_sens_C = 0.689,
   Ag_sens_D = 0.0,
   Ag_spec = 0.99,
   Legend = F,

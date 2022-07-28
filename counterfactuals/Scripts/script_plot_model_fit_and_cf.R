@@ -17,13 +17,13 @@ source("R/plot_model_fit.R")
 
 
 #  Import  data  -----------------------------------------------
-file_names_main = dir("MF_results/baseline") 
-list_main = lapply(paste0("MF_results/baseline/",file_names_main),read.csv, )
+file_names_main = dir("CF_results/baseline") 
+list_main = lapply(paste0("CF_results/baseline/",file_names_main),read.csv, )
 names(list_main) = file_names_main
 
 file_names_cf = dir("CF_Results") 
-list_cf = lapply(paste0("CF_Results/",file_names_cf),read.csv, )
-names(list_cf) = file_names_cf
+list_cf = lapply(paste0("CF_Results/",file_names_cf[-1]),read.csv, )
+names(list_cf) = file_names_cf[-1]
 
 
 # Plot main models -------------------------------------------------------------
@@ -39,7 +39,7 @@ Italy_plot = plot_model_fit(
   list_main$Italy_post_df.csv,
   start_date = "01-05-2020",
   end_date = "31-05-2021",
-  location = "Italy"
+  location = "Rest of Italy"
 )
 
 
@@ -96,26 +96,25 @@ Prob_det_plot = list_main$Veneto_ratio.csv %>%
         "M234I-A376T model" = hex_codes2[3],
         "Other model" = hex_codes2[4]) )
 
-list_main$Italy_ratio.csv
-list_main$Veneto_ratio.csv
+
 ################  Plot cumulative incidence by test strategy ################  
 
-Testing_cf_plot =  list_main$Veneto_ratio.csv %>%  
-  bind_rows(list_cf$Veneto_ratio_cf4.csv,
-            list_cf$Veneto_ratio_cf2.csv,
-            list_cf$Veneto_ratio_cf3.csv,
-            list_cf$Veneto_ratio_cf5.csv) %>%  
+Testing_cf_plot =  list_main$Veneto_ratio.csv %>% # baseline  
+  bind_rows(list_cf$Veneto_ratio_cf4.csv, # molecular follows ag neg
+            list_cf$Veneto_ratio_cf1.csv, # antigen only 68.9% sens
+            list_cf$Veneto_ratio_cf3.csv, # antigen only 87.5% sens
+            list_cf$Veneto_ratio_cf5.csv) %>%   # Italy testing in veneto 
   filter(grepl('true', variant)) %>%
-  mutate(model = factor(rep(c("molecular follows \nantigen+ \n(baseline)",
-                              "molecular follows \nantigen-", 
-                              "only antigen \nmass testing \n 68.9% test sensitivity",
-                              "only antigen \nmass testing \n 87.5% test sensitivity", 
-                              "Italy testing"), each = 5),
-                       levels = c("molecular follows \nantigen+ \n(baseline)",
-                                  "molecular follows \nantigen-",
-                                  "Italy testing",
-                                  "only antigen \nmass testing \n 68.9% test sensitivity",
-                                  "only antigen \nmass testing \n 87.5% test sensitivity") )) %>% 
+  mutate(model = factor(rep(c("Molecular follows antigen+ \n(baseline)",
+                              "Molecular follows antigen-", 
+                              "Only antigen testing \n 68.9% test sensitivity",
+                              "Only antigen testing \n 87.5% test sensitivity", 
+                              "Rest of Italy testing"), each = 5),
+                       levels = c("Molecular follows antigen+ \n(baseline)",
+                                  "Molecular follows antigen-",
+                                  "Rest of Italy testing",
+                                  "Only antigen testing \n 68.9% test sensitivity",
+                                  "Only antigen testing \n 87.5% test sensitivity") )) %>% 
   separate(variant, into = c("ratio", "variant")) %>%
   mutate(variant = ifelse(variant == "A","A220V model",
     ifelse(variant == "M","M234I-A376T model",
@@ -161,17 +160,17 @@ Testing_cf_plot =  list_main$Veneto_ratio.csv %>%
 Transmission_cf_plot = list_cf$Veneto_ratio_cf6.csv %>%  
   bind_rows(list_cf$Veneto_ratio_cf7.csv,list_cf$Veneto_ratio_cf8.csv ) %>%
   filter(grepl('true', variant)) %>%
-  mutate(model = factor(rep(c("molecular follows \nantigen+ \n(baseline)",
-                              "only antigen \nmass testing", "Italy testing"), each = 25), 
-                        levels = c("molecular follows \nantigen+ \n(baseline)","Italy testing",
-                                   "only antigen \nmass testing") )) %>% 
+  mutate(model = factor(rep(c("Molecular follows antigen+ \n(baseline)",
+                              "Only antigen testing", "Rest of Italy testing"), each = 25), 
+                        levels = c("Molecular follows antigen+ \n(baseline)","Rest of Italy testing",
+                                   "Only antigen testing") )) %>% 
   separate(variant, into = c("metric", "variant")) %>%
   filter(variant  == "M" | variant == "tot") %>%  
-  mutate(Variant =  ifelse(variant == "M","M234I-A376T \nmodel", "total \nmodel")) %>%
+  mutate(Variant =  ifelse(variant == "M","M234I-A376T \nmodel", "Total \nmodel")) %>%
   mutate(Variant = factor(
     Variant, levels = c(
       "M234I-A376T \nmodel",
-      "total \nmodel"
+      "Total \nmodel"
     ))) %>% 
   mutate("R0m scaling factor" = factor(R0_scale)) %>%  
   ggplot(aes(x = model, y = mean)) +
@@ -218,8 +217,8 @@ Fig5 = plot_grid(
 
 ggsave(
   plot = Fig5,
-  filename = "Fig5.jpg",
-  height = 40,
+  filename = "Figure5.tiff",
+  height = 45,
   width = 50,
   units = "cm",
   dpi = 800

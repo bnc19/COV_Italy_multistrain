@@ -259,13 +259,26 @@ generated quantities {
    p_daily_it[t] = (epsilon2 * sum(E_it[t,2:4])) / S0_it;
    
    pPCR_daily_it[t] = 
-   PCR_daily_it[t]  / 
+   (PCR_daily_it[t] - (Ag_daily_it[t] * (1-p_daily_it[t]) ) )  / 
    (PCR_daily_it[t] + (Ag_daily_it[t] * p_daily_it[t]));
    
+   if(pPCR_daily_it[t] < 0) {
+     pPCR_daily_it[t] =  0 ;
+   } else if (pPCR_daily_it[t] > 1) {
+     pPCR_daily_it[t] = 1; 
+   } else {
+     pPCR_daily_it[t] = pPCR_daily_it[t] ; 
+   }
    
-   delta_it[t,1] = pPCR_daily_it[t] * rho_it * phi_PCR;
+   
+   delta_it[t,1] = 
+     (rho_it * pPCR_daily_it[t] * phi_PCR) 
+   + (rho_it * (1 - pPCR_daily_it[t])  * phi_PCR  ) ;
+   
    for(i in 2:n_var) delta_it[t,i] = 
-   rho_it * (phi_PCR * pPCR_daily_it[t] + phi_Ag * (1 - pPCR_daily_it[t]));
+     (rho_it * pPCR_daily_it[t] * phi_PCR ) 
+   + (rho_it * (1 - pPCR_daily_it[t]) * phi_Ag  ) 
+   + (rho_it * (1 - pPCR_daily_it[t]) *  (1-phi_Ag) * phi_PCR );
 
    for(i in 1:n_var) FOI_it[t,i] =
    beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i]) / S0_it;
@@ -314,13 +327,26 @@ generated quantities {
    p_daily_ven[t] = (epsilon2 * sum(E_ven[t,2:4])) / S0_ven;
      
    pPCR_daily_ven[t] = 
-   PCR_daily_ven[t]/ 
+   (PCR_daily_ven[t] - (Ag_daily_ven[t] * (1-p_daily_ven[t]) ) )  / 
    (PCR_daily_ven[t] + (Ag_daily_ven[t] * p_daily_ven[t]));
    
+   if(pPCR_daily_ven[t] < 0) {
+     pPCR_daily_ven[t] =  0 ;
+   } else if (pPCR_daily_ven[t] > 1) {
+     pPCR_daily_ven[t] = 1; 
+   } else {
+     pPCR_daily_ven[t] = pPCR_daily_ven[t] ; 
+   }
    
-   delta_ven[t,1] = pPCR_daily_ven[t] * rho_ven * phi_PCR;
+   
+   delta_ven[t,1] = 
+     (rho_ven * pPCR_daily_ven[t] * phi_PCR) 
+   + (rho_ven * (1 - pPCR_daily_ven[t])  * phi_PCR  ) ;
+   
    for(i in 2:n_var) delta_ven[t,i] = 
-   rho_ven * (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
+     (rho_ven * pPCR_daily_ven[t] * phi_PCR ) 
+   + (rho_ven * (1 - pPCR_daily_ven[t]) * phi_Ag  ) 
+   + (rho_ven * (1 - pPCR_daily_ven[t]) *  (1-phi_Ag) * phi_PCR );
 
    for(i in 1:n_var) FOI_ven[t,i] =
    beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + IS_ven[t,i]) / S0_ven;

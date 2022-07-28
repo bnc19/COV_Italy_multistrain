@@ -17,7 +17,7 @@ source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
 
-posterior_chains = read.csv("MF_results/inc/symp_test/6/posterior_chains.csv")
+posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
 
 file_path = "CF_results"
@@ -37,16 +37,11 @@ posterior_samples = sample_posterior_chains(
   number_of_samples = 100
 )
 
+posterior_samples_cf2 = posterior_samples
 
+posterior_samples_cf2$rho_v = 1
 
-posterior_samples_cf2.3 = posterior_samples
-
-posterior_samples_cf2.3$rho_v = 1
-
-
-
-# CF 1: antigen testing only, 0.643 sens, rho = est ----------------------------
-
+# CF 1: antigen testing only, 0.689 sens, rho = est ----------------------------
 
 model_posts_cf1 = sapply(1:nrow(posterior_samples), function(i) {
   replicate_rstan_fixed(model = antigen_only_model,
@@ -70,11 +65,11 @@ Veneto_ratio_cf1 = calculate_ratio_reported(Veneto_posts_cf1,
 
 write.csv(Veneto_ratio_cf1, paste0(file_path, "/Veneto_ratio_cf1.csv"))
 
-# CF 2: antigen testing only, 0.643 sens, rho = 1 ------------------------------
+# CF 2: antigen testing only, 0.689 sens, rho = 1 ------------------------------
 
-model_posts_cf2 = sapply(1:nrow(posterior_samples_cf2.3), function(i) {
+model_posts_cf2 = sapply(1:nrow(posterior_samples_cf2), function(i) {
   replicate_rstan_fixed(model = antigen_only_model,
-                        posterior_sample_row = posterior_samples_cf2.3[i, ],
+                        posterior_sample_row = posterior_samples_cf2[i, ],
                         scale_time_step = 2,
                         start_date_veneto =  "01-05-2020",
                         time_seed_M_veneto = "01-08-2020")
@@ -82,7 +77,7 @@ model_posts_cf2 = sapply(1:nrow(posterior_samples_cf2.3), function(i) {
 
 
 
-Veneto_posts_cf2 = sapply(1:nrow(posterior_samples_cf2.3), function(i) {
+Veneto_posts_cf2 = sapply(1:nrow(posterior_samples_cf2), function(i) {
   extract_fit_results(posts = model_posts_cf2[, i],
                       location = "Veneto")
 }, simplify = "array")
@@ -96,18 +91,18 @@ Veneto_ratio_cf2 = calculate_ratio_reported(Veneto_posts_cf2,
 write.csv(Veneto_ratio_cf2, paste0(file_path, "/Veneto_ratio_cf2.csv"))
 
 
-# CF 3: antigen testing only, 0.875 sens, rho = 1 ------------------------------
+# CF 3: antigen testing only, 0.875 sens, rho = est ------------------------------
 
-model_posts_cf3 = sapply(1:nrow(posterior_samples_cf2.3), function(i) {
+model_posts_cf3 = sapply(1:nrow(posterior_samples), function(i) {
   replicate_rstan_fixed(model = antigen_only_model,
-                        posterior_sample_row = posterior_samples_cf2.3[i, ],
+                        posterior_sample_row = posterior_samples[i, ],
                         phi_Ag = 0.875,
                         scale_time_step = 2,
                         start_date_veneto =  "01-05-2020",
                         time_seed_M_veneto = "01-08-2020")
 })
 
-Veneto_posts_cf3 = sapply(1:nrow(posterior_samples_cf2.3), function(i) {
+Veneto_posts_cf3 = sapply(1:nrow(posterior_samples), function(i) {
   extract_fit_results(posts = model_posts_cf3[, i],
                       location = "Veneto")
 }, simplify = "array")
@@ -121,7 +116,7 @@ Veneto_ratio_cf3 = calculate_ratio_reported(Veneto_posts_cf3,
 write.csv(Veneto_ratio_cf3, paste0(file_path, "/Veneto_ratio_cf3.csv"))
 
 
-# CF 4: molecular follows negative antigen test, 0.643 sens, rho = est ---------
+# CF 4: molecular follows negative antigen test, 0.689 sens, rho = est ---------
 
 model_posts_cf4 = sapply(1:nrow(posterior_samples), function(i) {
   replicate_rstan_fixed(model = molecular_after_antigen_neg_model,
@@ -144,7 +139,7 @@ Veneto_ratio_cf4 = calculate_ratio_reported(Veneto_posts_cf4,
 
 write.csv(Veneto_ratio_cf4, paste0(file_path, "/Veneto_ratio_cf4.csv"))
 
-# CF 5: Italy testing in Veneto, 0.643 sens, rho = est -------------------------
+# CF 5: Italy testing in Veneto, 0.689 sens, rho = est -------------------------
 
 
 model_posts_cf5 = sapply(1:nrow(posterior_samples), function(i) {

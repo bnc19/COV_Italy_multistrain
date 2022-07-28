@@ -4,6 +4,7 @@
 
 
 ################   Set up  ################  
+setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
 
 # rm(list = ls())
@@ -29,7 +30,8 @@ only_antigen  = calc_variant_detection_prob_AN_or_DN (
   title = c("antigen only\nsequence antigen +",  "antigen only\nsequence antigen -", 
             "antigen only\nsequence 50% antigen -, 50% antigen +"))
 
-
+# Cases detected given prev of 10% and 0.5% sequencing 
+filter(only_antigen[[1]], Var1 == 10.0 & Var2 == 0.5) 
 
 only_molecular  = calc_variant_detection_prob_AN_or_DN (
   sens_C = 0.92,
@@ -39,6 +41,10 @@ only_molecular  = calc_variant_detection_prob_AN_or_DN (
   y_axis_ticks = T,
   x_axis_ticks = F,
   title = c("molecular only\nsequence molecular +",  "molecular only\nsequence molecular -"))
+
+
+filter(only_molecular[[1]], Var1 == 10.0 & Var2 == 0.5) 
+
 
 follow_up50  =  calc_variant_detection_prob_AN_and_DN (
   PCR_sens = 0.92 ,
@@ -51,8 +57,7 @@ follow_up50  =  calc_variant_detection_prob_AN_and_DN (
   percent_follow_up = 0.5  ,
   title = c("molecular follows 50% antigen +\nsequence molecular +",  "molecular follows 50% antigen -\nsequence molecular +"))
   
-
-
+filter(follow_up50[[1]], Var1 == 10.0 & Var2 == 0.5) 
 
 follow_up100  =  calc_variant_detection_prob_AN_and_DN (
   PCR_sens = 0.92 ,
@@ -82,7 +87,7 @@ variant_detection_grid_anot = annotate_figure(variant_detection_grid,
 
 ggsave(
   plot = variant_detection_grid_anot,
-  filename = "fig7.jpg",
+  filename = "Figure7.png",
   height = 60,
   width = 60 * (3/4),
   units = "cm",
