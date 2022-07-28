@@ -21,7 +21,8 @@ source("R/plot_model_fit.R")
 posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
 
-file_path = "CF_results"
+file_path = "Results/counterfactuals"
+dir.create("Results")
 dir.create(paste0(file_path))
 
 baseline_model = stan_model("models/est_test_symp_cf.stan")

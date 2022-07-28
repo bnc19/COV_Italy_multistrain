@@ -54,7 +54,12 @@ Variant_data = Variant_data %>%
       new_reported_cases_daily_new / S0_it  * 100000,
       new_reported_cases_daily     / S0_ven * 100000
     ),
-    Var_rep_inc = Perc * Reported_incidence
+    percentage = ifelse(
+      Country == "Italy",
+      Freq_new  / TotSeq_new, 
+      Freq / TotSeq), 
+    , 
+    Var_rep_inc = percentage * Reported_incidence
   ) %>%
   mutate(Country = ifelse(Country == "Italy", "Rest of Italy", "Veneto"))%>% 
   mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>% 
@@ -64,9 +69,9 @@ Variant_data = Variant_data %>%
 
 # Plot prevalence in GISAID ----------------------------------------------------
 M_prev = Variant_data %>%  
-  select(Date, Mut, Country, Perc) %>%  
+  select(Date, Mut, Country, percentage) %>%  
   filter(Mut == "M234I-A376T") %>%  
-  ggplot(aes(x = Date, y = Perc*100)) +
+  ggplot(aes(x = Date, y = percentage*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
   labs(y = "Prevalence in GISAID (%)") +
   theme_bw() + theme(
@@ -79,9 +84,9 @@ M_prev = Variant_data %>%
   ggtitle("")
 
 A_prev = Variant_data %>%  
-  select(Date, Mut, Country, Perc) %>%  
+  select(Date, Mut, Country, percentage) %>%  
   filter(Mut == "A220V") %>%  
-  ggplot(aes(x = Date, y = Perc*100)) +
+  ggplot(aes(x = Date, y = percentage*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
   labs(y = "  ") +
   theme_bw() + theme(
@@ -92,9 +97,9 @@ A_prev = Variant_data %>%
   ggtitle("")
 
 O_prev = Variant_data %>%  
-  select(Date, Mut, Country, Perc) %>%  
+  select(Date, Mut, Country, percentage) %>%  
   filter(Mut == "Other") %>%  
-  ggplot(aes(x = Date, y = Perc*100)) +
+  ggplot(aes(x = Date, y = percentage*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
   labs(y = "") +
   theme_bw() + theme(
@@ -106,9 +111,9 @@ O_prev = Variant_data %>%
 
 
 Al_prev = Variant_data %>%  
-  select(Date, Mut, Country, Perc) %>%  
+  select(Date, Mut, Country, percentage) %>%  
   filter(Mut == "Alpha") %>%  
-  ggplot(aes(x = Date, y = Perc*100)) +
+  ggplot(aes(x = Date, y = percentage*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
   labs(y = "" ) +
   theme_bw() + theme(
@@ -232,7 +237,7 @@ grid_out = plot_grid(total_plots,  variant_plot,
 
 ggsave(
   plot = grid_out,
-  filename = "Figures/Figure3.pdf",
+  filename = "Figures/Figure3.png",
   height = 35,
   width = 55,
   units = "cm",

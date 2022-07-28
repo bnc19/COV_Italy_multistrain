@@ -18,13 +18,13 @@ source("R/plot_model_fit.R")
 dir.create("Figures")
 
 #  Import  data  -----------------------------------------------
-file_names_main = dir("CF_results/baseline") 
-list_main = lapply(paste0("CF_results/baseline/",file_names_main),read.csv, )
+file_names_main = dir("Results/baseline") 
+list_main = lapply(paste0("Results/baseline/",file_names_main),read.csv, )
 names(list_main) = file_names_main
 
-file_names_cf = dir("CF_Results") 
-list_cf = lapply(paste0("CF_Results/",file_names_cf[-1]),read.csv, )
-names(list_cf) = file_names_cf[-1]
+file_names_cf = dir("Results/counterfactuals") 
+list_cf = lapply(paste0("Results/counterfactuals/",file_names_cf),read.csv, )
+names(list_cf) = file_names_cf
 
 
 # Plot main models -------------------------------------------------------------
@@ -218,7 +218,7 @@ Fig5 = plot_grid(
 
 ggsave(
   plot = Fig5,
-  filename = "Figures/Figure5.tiff",
+  filename = "Figures/Figure5.pdf",
   height = 45,
   width = 50,
   units = "cm",
