@@ -18,7 +18,7 @@ source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
 
-posterior_chains = read.csv("MF_results/inc/symp_test/17/posterior_chains.csv")
+posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
 
 file_path = "CF_results"
@@ -58,11 +58,6 @@ beta_scale_posterior_samples_list = list(
   posterior_samples.1.6
 )
 
-beta_scale_rho1_posterior_samples_list = beta_scale_posterior_samples_list
-
-for(i in 1:length(R0_scales)){
-  beta_scale_rho1_posterior_samples_list[[i]]$rho_v = 1
-}
 
 # CF 6:baseline testing, 0.643 sens, rho = est, scale B_M -----------------
 
@@ -93,7 +88,7 @@ Veneto_ratio_cf6$R0_scale = rep(R0_scales, each = nrow(Veneto_ratio_cf6_list[[1]
 
 write.csv(Veneto_ratio_cf6, paste0(file_path, "/Veneto_ratio_cf6.csv"))
 
-# CF 7: antigen testing only, 0.643 sens, rho = 1, scale B_M -----------------
+# CF 7: antigen testing only, 0.643 sens, rho = est, scale B_M -----------------
 
 
 model_posts_cf7 = Veneto_posts_cf7  = Veneto_ratio_cf7_list  = list()
@@ -103,7 +98,7 @@ for(x in 1:length(R0_scales)){
   model_posts_cf7[[x]] =  sapply(1:nrow(posterior_samples), function(i) {
     replicate_rstan_fixed(model = antigen_only_model,
                           posterior_sample_row = 
-                            beta_scale_rho1_posterior_samples_list[[x]][i, ],
+                          beta_scale_posterior_samples_list[[x]][i, ],
                           start_date_veneto =  "01-05-2020",
                           time_seed_M_veneto = "01-08-2020")
   })
@@ -134,7 +129,7 @@ for(x in 1:length(R0_scales)){
   model_posts_cf8[[x]] =  sapply(1:nrow(posterior_samples), function(i) {
     replicate_rstan_fixed(model = baseline_model,
                           posterior_sample_row = 
-                            beta_scale_posterior_samples_list[[x]][i, ],
+                          beta_scale_posterior_samples_list[[x]][i, ],
                           italy_testing_in_veneto = TRUE,
                           start_date_veneto =  "01-05-2020",
                           time_seed_M_veneto = "01-08-2020")

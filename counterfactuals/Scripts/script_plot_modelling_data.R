@@ -3,6 +3,7 @@
 
 
 # Set up -----------------------------------------------------------------------
+setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
 
 # rm(list = ls())
@@ -55,21 +56,22 @@ Variant_data = Variant_data %>%
     ),
     Var_rep_inc = Perc * Reported_incidence
   ) %>%
-  mutate(Country = ifelse(Country == "Italy", "Rest of Italy", "Veneto")) 
+  mutate(Country = ifelse(Country == "Italy", "Rest of Italy", "Veneto"))%>% 
+  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>% 
+  filter(Date > "2020-04-01")
 
 
 
 # Plot prevalence in GISAID ----------------------------------------------------
 M_prev = Variant_data %>%  
   select(Date, Mut, Country, Perc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "M234I-A376T") %>%  
   ggplot(aes(x = Date, y = Perc*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
-  labs(y = "Prevalence in GISAID (%)", x= "") +
+  labs(y = "Prevalence in GISAID (%)") +
   theme_bw() + theme(
     text = element_text(size = 16),
-    legend.position = c(0.2, 0.9),
+    legend.position = c("none"),
     legend.title = element_blank(),
     legend.key.height = unit(.5, 'cm')) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months")+
@@ -78,11 +80,10 @@ M_prev = Variant_data %>%
 
 A_prev = Variant_data %>%  
   select(Date, Mut, Country, Perc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "A220V") %>%  
   ggplot(aes(x = Date, y = Perc*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
-  labs(y = "  ", x = "") +
+  labs(y = "  ") +
   theme_bw() + theme(
     text = element_text(size = 16),
     legend.position = c("none")) +
@@ -92,11 +93,10 @@ A_prev = Variant_data %>%
 
 O_prev = Variant_data %>%  
   select(Date, Mut, Country, Perc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "Other") %>%  
   ggplot(aes(x = Date, y = Perc*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
-  labs(y = "", x = "") +
+  labs(y = "") +
   theme_bw() + theme(
     text = element_text(size = 16),
     legend.position = c("none")) +
@@ -107,11 +107,10 @@ O_prev = Variant_data %>%
 
 Al_prev = Variant_data %>%  
   select(Date, Mut, Country, Perc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "Alpha") %>%  
   ggplot(aes(x = Date, y = Perc*100)) +
   geom_line(aes(colour = Country), size = 1.5) + 
-  labs(y = "" , x = "") +
+  labs(y = "" ) +
   theme_bw() + theme(
     text = element_text(size = 16),
     legend.position = c("none")) +
@@ -125,7 +124,6 @@ Al_prev = Variant_data %>%
 
 M_inc = Variant_data %>%  
   select(Date, Mut, Country, Var_rep_inc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "M234I-A376T") %>%  
   ggplot(aes(x = Date, y = Var_rep_inc)) +
   geom_line(aes(colour = Country), size = 1.5) + 
@@ -139,7 +137,6 @@ M_inc = Variant_data %>%
 
 A_inc = Variant_data %>%  
   select(Date, Mut, Country, Var_rep_inc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "A220V") %>%  
   ggplot(aes(x = Date, y = Var_rep_inc)) +
   geom_line(aes(colour = Country), size = 1.5) + 
@@ -153,7 +150,6 @@ A_inc = Variant_data %>%
 
 O_inc = Variant_data %>%  
   select(Date, Mut, Country, Var_rep_inc) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "Other") %>%  
   ggplot(aes(x = Date, y = Var_rep_inc)) +
   geom_line(aes(colour = Country), size = 1.5) + 
@@ -168,7 +164,6 @@ O_inc = Variant_data %>%
 
 Al_inc = Variant_data %>%  
   select(Date, Mut, Country,Var_rep_inc   ) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "Alpha") %>%  
   ggplot(aes(x = Date, y = Var_rep_inc  )) +
   geom_line(aes(colour = Country), size = 1.5) + 
@@ -191,11 +186,10 @@ variant_plot = plot_grid(M_inc, A_inc, O_inc, Al_inc,
 
 total_inc = Variant_data %>%  
   select(Date, Mut, Country,Reported_incidence) %>%  
-  mutate(Date= as.Date.character(Date, format = "%d/%m/%Y")) %>%  
   filter(Mut == "Alpha") %>%  
   ggplot(aes(x = Date, y = Reported_incidence  )) +
   geom_line(aes(colour = Country), size = 1.5) + 
-  labs(y = "Reported incidence \n per 100,000 population") +
+  labs(x = "", y = "Reported incidence \n per 100,000 population") +
   theme_bw() + theme(
     text = element_text(size = 16),
     legend.position = c("none")) +
@@ -205,7 +199,7 @@ total_inc = Variant_data %>%
 
 # Plot proportion diagnostic tests that are antigen ----------------------------
 Italy_test_data$total = Italy_test_data$pcr_daily_average + Italy_test_data$antigen_daily_average
-Italy_test_data$Country = "Italy"
+Italy_test_data$Country = "Rest of Italy"
 
 Veneto_test_data$total = Veneto_test_data$pcr_daily_average + Veneto_test_data$antigen_daily_average
 Veneto_test_data$Country = "Veneto"
@@ -215,18 +209,20 @@ Test_conf = Italy_test_data %>%
   bind_rows(Veneto_test_data) %>% 
   mutate(Date = as.Date.character(Date),
          perc_ant = antigen_daily_average / total *100) %>%  
+  filter(Date >= "2020-05-01"& Date <  "2021-05-02") %>% 
   ggplot(aes(x = Date, y = perc_ant )) +
   geom_line(aes(color = Country), size = 1.5) + 
-  labs(y = "Proportion of COVID-19 patients \n receiving antigen diagnostic tests") +
+  labs(x = "", y = "Proportion of COVID-19 patients \n receiving antigen diagnostic tests") +
   theme_bw() + theme(
     text = element_text(size = 16),
-    legend.position = c("none")) +
+    legend.position = c(0.08, 0.85),
+    legend.title = element_blank()) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months")+
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20))
 
 
 # Save -------------------------------------------------------------------------
-
+  
 total_plots = plot_grid( Test_conf,total_inc, labels=c("a", "b"), align= "h")
 
 grid_out = plot_grid(total_plots,  variant_plot,
@@ -236,9 +232,9 @@ grid_out = plot_grid(total_plots,  variant_plot,
 
 ggsave(
   plot = grid_out,
-  filename = "fig3.jpg",
+  filename = "Figure3.pdf",
   height = 35,
-  width = 45,
+  width = 55,
   units = "cm",
   dpi = 300
 )

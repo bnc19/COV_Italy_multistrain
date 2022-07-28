@@ -18,9 +18,9 @@ source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
 
-posterior_chains = read.csv("MF_results/inc/symp_test/17/posterior_chains.csv")
+posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
-file_path = "MF_results/baseline"
+file_path = "CF_results/baseline"
 dir.create(paste0(file_path))
 
 baseline_model = stan_model("models/est_test_symp_cf.stan")
@@ -31,7 +31,7 @@ posterior_samples = sample_posterior_chains(
   number_of_samples = 100
 )
 
-parameter_summary = summarise_posterior_chains(posterior_samples)
+parameter_summary = summarise_posterior_chains_symp(posterior_samples)
 
 
 # Run model across posterior samples -------------------------------------------
@@ -77,6 +77,7 @@ Veneto_ratio = calculate_ratio_reported(Veneto_posts,  S0 = 4753625)
 Veneto_ratio$Location = "Veneto"
 Italy_ratio = calculate_ratio_reported(Italy_posts,S0 = 53021564)
 Italy_ratio$Location = "Rest of Italy"
+
 
 # Save files  ---------------------------------------------------------
 write.csv(Veneto_post_df, paste0(file_path, "/Veneto_post_df.csv"))
