@@ -3,24 +3,17 @@
 # This script fits a multivariant model to epidemiological and genomic data from Veneto 
 # or the rest of Italy. The model can be run on a high performance cluster (HPC) or
 # locally. Currently, each model runs 3 chains for  200 iterations, discarding the first 
-# 100 as burnin. This is to demo the models ~ quickly (12 hours on a normal computer). 
-# In order to obtain the resultsprovided in the manuscript, 4 chains were run for
+# 100 as burnin. This is to demo the models ~ quickly (2 hours on a normal computer). 
+# In order to obtain the results provided in the manuscript, 4 chains were run for
 # 2000 iterations, discarding the first 1000 iterations as burnin. This takes ~6 
 # hours per model to run on the HPC. 
 #
 ################################                         ################################   
 
-# create folders 
-
-dir.create("model_fitting/Results")
-dir.create("model_fitting/Results/inc")
-
-
-
 #  Set up to run on HPC  -------------------------------------------------------
 rm(list = ls())
-root = "Q:/COV_Italy_multistrain_2/model_fitting"
-setwd("Q:/COV_Italy_multistrain_2/model_fitting")
+root = "Q:/COV_Italy_multistrain/model_fitting"
+setwd("Q:/COV_Italy_multistrain/model_fitting")
 
 
 ctx <- context::context_save(root, packages=c("tidyverse", "rstan", "bayesplot", "Hmisc",
@@ -35,8 +28,15 @@ config <- didehpc::didehpc_config(cores = 8,  parallel =T, cluster = "dideclusth
 # Create a queue within the context (/environment)
 obj <- didehpc::queue_didehpc(ctx, config)
 
+# create folders 
 
-file_path_inc = paste0("Results","/inc")
+dir.create("Results")
+dir.create("Results/symp_test")
+dir.create("Results/asymp_test")
+dir.create("Results/asymp_test_2")
+dir.create("Results/asymp_and_symp_test")
+
+file_path ="Results"
 
 # RUN MODEL VARINATS on HPC ----------------------------------------------------
 
@@ -44,7 +44,7 @@ file_path_inc = paste0("Results","/inc")
 
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/1"),
+    file_path=  paste0(file_path,"/symp_test/1"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -66,8 +66,8 @@ obj$enqueue(
   )
 )
 
-obj$task_get("f769b631c80f6e79b83ea58c8b9245ab")$log()
-fit = obj$task_get("f769b631c80f6e79b83ea58c8b9245ab")$result()
+obj$task_get("b859a91607d5664ccd180f9d04641e59")$log()
+fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
   print("Rhat too high")
@@ -78,7 +78,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_test/1"),
+    file_path= paste0(file_path,"/asymp_test/1"),
     model_path = "model/est_test_asymp.stan", 
     n_iter =2000,
     n_warmups = 1000,
@@ -100,8 +100,8 @@ obj$enqueue(
 )
 
 
-obj$task_get("dac7484fdeb89976f37695fe04b24e13")$log()
-fit = obj$task_get("dac7484fdeb89976f37695fe04b24e13")$result()
+obj$task_get("")$log()
+fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
   print("Rhat too high")
@@ -113,7 +113,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
  obj$enqueue(
   run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_test_2/1"),
+    file_path= paste0(file_path,"/asymp_test_2/1"),
     model_path = "model/est_test_asymp2.stan", 
     n_iter =2000,
     n_warmups = 1000,
@@ -135,8 +135,8 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
  )
 
 
-obj$task_get("62ca5578233449270df530f7ab3f7e34")$log()
-fit = obj$task_get("62ca5578233449270df530f7ab3f7e34")$result()
+obj$task_get("")$log()
+fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
   print("Rhat too high")
@@ -149,7 +149,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_and_symp_test/1"),
+    file_path= paste0(file_path,"/asymp_and_symp_test/1"),
     model_path = "model/est_test_asymp_and_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -171,7 +171,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("ecba5548a79a8660f9e128f349017510")$log()
+obj$task_get("")$log()
 fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
@@ -188,10 +188,10 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 # Symp model 1 -----------------------------------------------------------------
 
 symp =  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/1"),
+    file_path=  paste0(file_path,"/symp_test/1"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -206,17 +206,17 @@ symp =  run_model_fitting(
     start_date_veneto =  "01-05-2020",
     time_seed_M_veneto = "01-08-2020",
     phi_Ag =  0.689
-    
   )
+
 
 
 # Asymp model 1 ----------------------------------------------------------------
 
 asymp =  run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_test/1"),
+    file_path= paste0(file_path,"/asymp_test/1"),
     model_path = "model/est_test_asymp.stan", 
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -236,10 +236,10 @@ asymp =  run_model_fitting(
 # Asymp2 model 1 ---------------------------------------------------------------
 
 asymp2 =  run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_test_2/1"),
+    file_path= paste0(file_path,"/asymp_test_2/1"),
     model_path = "model/est_test_asymp2.stan", 
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -260,10 +260,10 @@ asymp2 =  run_model_fitting(
 
 
 asymp_symp =  run_model_fitting(
-    file_path= paste0(file_path_inc,"/asymp_and_symp_test/1"),
+    file_path= paste0(file_path,"/asymp_and_symp_test/1"),
     model_path = "model/est_test_asymp_and_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -289,7 +289,7 @@ asymp_symp =  run_model_fitting(
 # M2 - (0.643) -----------------------------------------------------------------
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/2"),
+    file_path=  paste0(file_path,"/symp_test/2"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -310,8 +310,8 @@ obj$enqueue(
   )
 )
 
-obj$task_get("55f33eca06b6181ca8940e2791496c51")$log()
-fit = obj$task_get("55f33eca06b6181ca8940e2791496c51")$result()
+obj$task_get("")$log()
+fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
   print("Rhat too high")
@@ -322,7 +322,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/3"),
+    file_path=  paste0(file_path,"/symp_test/3"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -343,7 +343,7 @@ obj$enqueue(
   )
 )
 
-obj$task_get("ba4b73cf60a0bbc83272311195402ebc")$log()
+obj$task_get("")$log()
 
 fit = obj$task_get("")$result()
 if(any(rhat(fit) > 1.05, na.rm = T)){
@@ -355,7 +355,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 # M4 - (5.6 inc period) -------------------------------------------------------
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/4"),
+    file_path=  paste0(file_path,"/symp_test/4"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -379,7 +379,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("f1aa00140d983be2263a54eb4508dc35")$log()
+obj$task_get("")$log()
 fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
@@ -392,7 +392,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 # M5 - (2.15 latent period) -------------------------------------------------------
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/5"),
+    file_path=  paste0(file_path,"/symp_test/5"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -417,7 +417,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("4ec136d0948f3f53b7ceb2d1e1c3f5a6")$log()
+obj$task_get("")$log()
 fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
@@ -432,7 +432,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/6"),
+    file_path=  paste0(file_path,"/symp_test/6"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -456,7 +456,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("8b0b24a6364cf9cf32aea664d44c984a")$log()
+obj$task_get("")$log()
 
 fit = obj$task_get("")$result()
 
@@ -472,7 +472,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/7"),
+    file_path=  paste0(file_path,"/symp_test/7"),
     model_path = "model/est_test_symp.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -496,7 +496,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("c1dde9e272627d2779d0b0684b279979")$log()
+obj$task_get("")$log()
 fit = obj$task_get("")$result()
 
 if(any(rhat(fit) > 1.05, na.rm = T)){
@@ -509,7 +509,7 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 obj$enqueue(
   run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/8"),
+    file_path=  paste0(file_path,"/symp_test/8"),
     model_path = "model/est_test_symp_alpha.stan",
     n_iter =2000,
     n_warmups = 1000,
@@ -531,7 +531,7 @@ obj$enqueue(
 )
 
 
-obj$task_get("734157ea8bfba34bafee3db3f8600632")$log()
+obj$task_get("b859a91607d5664ccd180f9d04641e59")$log()
 
 fit = obj$task_get("")$result()
 
@@ -549,10 +549,10 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 # M2 - (0.643) -----------------------------------------------------------------
 
  M2= run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/2"),
+    file_path=  paste0(file_path,"/symp_test/2"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -574,10 +574,10 @@ if(any(rhat(fit) > 1.05, na.rm = T)){
 
 
 M3=  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/3"),
+    file_path=  paste0(file_path,"/symp_test/3"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -598,10 +598,10 @@ M3=  run_model_fitting(
 # M4 - (5.6 inc period) -------------------------------------------------------
 
 M4=  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/4"),
+    file_path=  paste0(file_path,"/symp_test/4"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -623,10 +623,10 @@ M4=  run_model_fitting(
 # M5 - (2.15 latent period) -------------------------------------------------------
 
 M5=  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/5"),
+    file_path=  paste0(file_path,"/symp_test/5"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -652,10 +652,10 @@ M5=  run_model_fitting(
 
 
 M6=  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/6"),
+    file_path=  paste0(file_path,"/symp_test/6"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -679,10 +679,10 @@ M6=  run_model_fitting(
 
 
 M7=  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/7"),
+    file_path=  paste0(file_path,"/symp_test/7"),
     model_path = "model/est_test_symp.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
@@ -705,10 +705,10 @@ M7=  run_model_fitting(
 # M8 - (alpha) ----------------------------------------------------------------
 
 M8 =  run_model_fitting(
-    file_path=  paste0(file_path_inc,"/symp_test/8"),
+    file_path=  paste0(file_path,"/symp_test/8"),
     model_path = "model/est_test_symp_alpha.stan",
-    n_iter =2000,
-    n_warmups = 1000,
+    n_iter =200,
+    n_warmups = 100,
     prev = F,
     scale_time_step = 2,
     pars =  c("lp__", 
