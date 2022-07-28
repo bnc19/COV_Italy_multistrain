@@ -1,84 +1,87 @@
-# Script to calculate return parameter estimates for all sensitiity analyses ---
+################################################################################
+# Script to calculate the posterior mean and 95% CrI for the sensitivity       #
+# analysis (Table S7)                                                          #
+################################################################################
 
 
 # Set up -----------------------------------------------------------------------
 
 # rm(list = ls())
+# setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
-setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
-
+# packages 
 library(tidyverse)
 
+# functions 
 source("R/sample_posterior_chains.R")
 source("R/calculate_R0.R")
 
+# output 
 file_path = "Results/summarise_models"
-
 dir.create("Results")
 dir.create(paste0(file_path))
 
+
 # 64.3% sens (2) --------------------------------------------------------------------
 
-sum_symp_inc_2 = summarise_posterior_chains_symp(
-  posterior_chains = read.csv("MF_results/symp_test/2/posterior_chains.csv"))
+sum_symp_inc_2 = summarise_posterior_chains_symp(posterior_chains = read.csv("MF_results/symp_test/2/posterior_chains.csv"))
 
 
 write.csv(sum_symp_inc_2, paste0(file_path, "/sum_symp_inc_2.csv"))
 
 # 87.5% sens (3) --------------------------------------------------------------------
 
-# asymp summary 
-sum_symp_inc_3 = summarise_posterior_chains_symp(
-  posterior_chains = read.csv("MF_results/symp_test/3/posterior_chains.csv"))
+# asymp summary
+sum_symp_inc_3 = summarise_posterior_chains_symp(posterior_chains = read.csv("MF_results/symp_test/3/posterior_chains.csv"))
 
 write.csv(sum_symp_inc_3, paste0(file_path, "/sum_symp_inc_3.csv"))
 
 
 # 5.6 days exposure to symp (4) -----------------------------------------------
 
-# asymp summary 
+# asymp summary
 sum_symp_inc_4 = summarise_posterior_chains_symp(
   sigma = 1 / (5.6 - 1.31),
   gamma = 1 / 1.6 ,
-  posterior_chains = read.csv("MF_results/symp_test/4/posterior_chains.csv"))
+  posterior_chains = read.csv("MF_results/symp_test/4/posterior_chains.csv")
+)
 
 write.csv(sum_symp_inc_4, paste0(file_path, "/sum_symp_inc_4.csv"))
 
 
 # 2.15 day inc  (5) --------------------------------------------------------------------
 
-# asymp summary 
-sum_symp_inc_5= summarise_posterior_chains_symp(
+# asymp summary
+sum_symp_inc_5 = summarise_posterior_chains_symp(
   sigma = 1 / (5.1 - 2.15),
   gamma = 1 / 2.1 ,
-  posterior_chains = read.csv("MF_results/symp_test/5/posterior_chains.csv"))
+  posterior_chains = read.csv("MF_results/symp_test/5/posterior_chains.csv")
+)
 
 write.csv(sum_symp_inc_5, paste0(file_path, "/sum_symp_inc_5.csv"))
 
 
 # 70% VE  (6) --------------------------------------------------------------------
 
-# asymp summary 
-sum_symp_inc_6 = summarise_posterior_chains_symp(
-  posterior_chains = read.csv("MF_results/symp_test/6/posterior_chains.csv"))
+# asymp summary
+sum_symp_inc_6 = summarise_posterior_chains_symp(posterior_chains = read.csv("MF_results/symp_test/6/posterior_chains.csv"))
 
 write.csv(sum_symp_inc_6, paste0(file_path, "/sum_symp_inc_6.csv"))
 
 # 80% VE  (7) --------------------------------------------------------------------
 
-# asymp summary 
-sum_symp_inc_7= summarise_posterior_chains_symp(
-  posterior_chains = read.csv("MF_results/symp_test/7/posterior_chains.csv"))
+# asymp summary
+sum_symp_inc_7 = summarise_posterior_chains_symp(posterior_chains = read.csv("MF_results/symp_test/7/posterior_chains.csv"))
 
 write.csv(sum_symp_inc_7, paste0(file_path, "/sum_symp_inc_7.csv"))
 
 
 # alpha (8) --------------------------------------------------------------------
 
-# asymp summary 
+# asymp summary
 sum_symp_inc_8 = summarise_posterior_chains_symp(
   posterior_chains = read.csv("MF_results/symp_test/8/posterior_chains.csv"),
-  alpha = TRUE)
+  alpha = TRUE
+)
 
 write.csv(sum_symp_inc_8, paste0(file_path, "/sum_symp_inc_8.csv"))
-

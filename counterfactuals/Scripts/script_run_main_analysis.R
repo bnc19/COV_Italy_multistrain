@@ -1,35 +1,40 @@
-# Script to run the main analysis (baseline testing) in Veneto and rest of Italy 
+################################################################################
+# Script to run main analysis (baseline testing) in Veneto and rest of Italy   #                                                        #
+################################################################################
 
 
 # Set up -----------------------------------------------------------------------
 
 
 # rm(list = ls())
+# setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
-setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
-library(scales)  
+# packages 
+library(scales)
 library(tidyverse)
 library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
+# functions 
 source("R/sample_posterior_chains.R")
 source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
-
+# data 
 posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
+# output 
 file_path = "Results/baseline"
 dir.create(paste0(file_path))
 
+# models 
 baseline_model = stan_model("models/est_test_symp_cf.stan")
+
 # Sample from posterior distribution -------------------------------------------
 
-posterior_samples = sample_posterior_chains(
-  posterior_chains = posterior_chains,
-  number_of_samples = 100
-)
+posterior_samples = sample_posterior_chains(posterior_chains = posterior_chains,
+                                            number_of_samples = 100)
 
 parameter_summary = summarise_posterior_chains_symp(posterior_samples)
 
@@ -38,11 +43,13 @@ parameter_summary = summarise_posterior_chains_symp(posterior_samples)
 
 
 model_posts = sapply(1:nrow(posterior_samples), function(i) {
-  replicate_rstan_fixed(model = baseline_model,
-                        posterior_sample_row = posterior_samples[i, ],
-                        scale_time_step = 2,
-                        start_date_veneto =  "01-05-2020",
-                        time_seed_M_veneto = "01-08-2020")
+  replicate_rstan_fixed(
+    model = baseline_model,
+    posterior_sample_row = posterior_samples[i,],
+    scale_time_step = 2,
+    start_date_veneto =  "01-05-2020",
+    time_seed_M_veneto = "01-08-2020"
+  )
 })
 
 Italy_posts = sapply(1:nrow(posterior_samples), function(i) {
@@ -63,7 +70,7 @@ Veneto_posts = sapply(1:nrow(posterior_samples), function(i) {
 
 Veneto_post_df = summarise_results(Veneto_posts,
                                    start_date = "01-05-2020",
-                                   end_date = "31-05-2021", 
+                                   end_date = "31-05-2021",
                                    S0 = 4753625)
 
 Italy_post_df = summarise_results(Italy_posts,
@@ -75,7 +82,7 @@ Italy_post_df = summarise_results(Italy_posts,
 
 Veneto_ratio = calculate_ratio_reported(Veneto_posts,  S0 = 4753625)
 Veneto_ratio$Location = "Veneto"
-Italy_ratio = calculate_ratio_reported(Italy_posts,S0 = 53021564)
+Italy_ratio = calculate_ratio_reported(Italy_posts, S0 = 53021564)
 Italy_ratio$Location = "Rest of Italy"
 
 
@@ -84,4 +91,3 @@ write.csv(Veneto_post_df, paste0(file_path, "/Veneto_post_df.csv"))
 write.csv(Italy_post_df, paste0(file_path, "/Italy_post_df.csv"))
 write.csv(Veneto_ratio, paste0(file_path, "/Veneto_ratio.csv"))
 write.csv(Italy_ratio, paste0(file_path, "/Italy_ratio.csv"))
-

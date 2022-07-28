@@ -1,44 +1,48 @@
-# Script to run counterfactual M variant transmission scenarios in Veneto ------
+################################################################################
+# Script to run the counterfactual transmission scenarios for Veneto           #
+# (i.e., assuming scaling factors of R0M = 0.8, 1,1.2,1.4,1.6). Outputs the    #
+# data presented in Figure 5e.                                                 #                                                        #
+################################################################################
+
 
 
 # Set up -----------------------------------------------------------------------
 
 
 # rm(list = ls())
+#setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
-setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
-
+# packages 
 library(tidyverse)
 library(rstan)
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
+# functions 
 source("R/sample_posterior_chains.R")
 source("R/run_cf.R")
 source("R/plot_model_fit.R")
 
-
+# data 
 posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv")
 
-
+# output 
 file_path = "Results/counterfactuals"
 dir.create("Results")
 dir.create(paste0(file_path))
 
+# models 
 baseline_model = stan_model("models/est_test_symp_cf.stan")
 antigen_only_model = stan_model("models/cf/est_test_symp_cf_pPCR_0.stan")
-molecular_after_antigen_neg_model =stan_model("models/cf/est_test_symp_cf_PCR_after_Ag.stan")
+molecular_after_antigen_neg_model = stan_model("models/cf/est_test_symp_cf_PCR_after_Ag.stan")
 
-
-
+# scaling factors 
 R0_scales = c(".8", "1", "1.2", "1.4", "1.6")
 
 # Sample from posterior distribution -------------------------------------------
 
-posterior_samples = sample_posterior_chains(
-  posterior_chains = posterior_chains,
-  number_of_samples = 100
-)
+posterior_samples = sample_posterior_chains(posterior_chains = posterior_chains,
+                                            number_of_samples = 100)
 
 
 posterior_samples.8   = posterior_samples
@@ -64,27 +68,28 @@ beta_scale_posterior_samples_list = list(
 
 model_posts_cf6 = Veneto_posts_cf6  = Veneto_ratio_cf6_list  = list()
 
-for(x in 1:length(R0_scales)){
-  
+for (x in 1:length(R0_scales)) {
   model_posts_cf6[[x]] =  sapply(1:nrow(posterior_samples), function(i) {
-    replicate_rstan_fixed(model = baseline_model,
-                          posterior_sample_row = 
-                            beta_scale_posterior_samples_list[[x]][i, ],
-                          start_date_veneto =  "01-05-2020",
-                          time_seed_M_veneto = "01-08-2020")
+    replicate_rstan_fixed(
+      model = baseline_model,
+      posterior_sample_row =
+        beta_scale_posterior_samples_list[[x]][i,],
+      start_date_veneto =  "01-05-2020",
+      time_seed_M_veneto = "01-08-2020"
+    )
   })
   
   Veneto_posts_cf6[[x]] = sapply(1:nrow(posterior_samples), function(i) {
-      extract_fit_results(posts = model_posts_cf6[[x]][, i],
-                          location = "Veneto")
-    }, simplify = "array")
-
+    extract_fit_results(posts = model_posts_cf6[[x]][, i],
+                        location = "Veneto")
+  }, simplify = "array")
+  
   Veneto_ratio_cf6_list[[x]] = calculate_ratio_reported(Veneto_posts_cf6[[x]],
-                                                         S0 = 4753625)
+                                                        S0 = 4753625)
 }
 
 
-Veneto_ratio_cf6 = bind_rows(Veneto_ratio_cf6_list) 
+Veneto_ratio_cf6 = bind_rows(Veneto_ratio_cf6_list)
 Veneto_ratio_cf6$R0_scale = rep(R0_scales, each = nrow(Veneto_ratio_cf6_list[[1]]))
 
 write.csv(Veneto_ratio_cf6, paste0(file_path, "/Veneto_ratio_cf6.csv"))
@@ -94,14 +99,15 @@ write.csv(Veneto_ratio_cf6, paste0(file_path, "/Veneto_ratio_cf6.csv"))
 
 model_posts_cf7 = Veneto_posts_cf7  = Veneto_ratio_cf7_list  = list()
 
-for(x in 1:length(R0_scales)){
-  
+for (x in 1:length(R0_scales)) {
   model_posts_cf7[[x]] =  sapply(1:nrow(posterior_samples), function(i) {
-    replicate_rstan_fixed(model = antigen_only_model,
-                          posterior_sample_row = 
-                          beta_scale_posterior_samples_list[[x]][i, ],
-                          start_date_veneto =  "01-05-2020",
-                          time_seed_M_veneto = "01-08-2020")
+    replicate_rstan_fixed(
+      model = antigen_only_model,
+      posterior_sample_row =
+        beta_scale_posterior_samples_list[[x]][i,],
+      start_date_veneto =  "01-05-2020",
+      time_seed_M_veneto = "01-08-2020"
+    )
   })
   
   Veneto_posts_cf7[[x]] = sapply(1:nrow(posterior_samples), function(i) {
@@ -115,7 +121,7 @@ for(x in 1:length(R0_scales)){
 }
 
 
-Veneto_ratio_cf7 = bind_rows(Veneto_ratio_cf7_list) 
+Veneto_ratio_cf7 = bind_rows(Veneto_ratio_cf7_list)
 Veneto_ratio_cf7$R0_scale = rep(R0_scales, each = nrow(Veneto_ratio_cf7_list[[1]]))
 
 write.csv(Veneto_ratio_cf7, paste0(file_path, "/Veneto_ratio_cf7.csv"))
@@ -125,15 +131,16 @@ write.csv(Veneto_ratio_cf7, paste0(file_path, "/Veneto_ratio_cf7.csv"))
 
 model_posts_cf8 = Veneto_posts_cf8  = Veneto_ratio_cf8_list  = list()
 
-for(x in 1:length(R0_scales)){
-  
+for (x in 1:length(R0_scales)) {
   model_posts_cf8[[x]] =  sapply(1:nrow(posterior_samples), function(i) {
-    replicate_rstan_fixed(model = baseline_model,
-                          posterior_sample_row = 
-                          beta_scale_posterior_samples_list[[x]][i, ],
-                          italy_testing_in_veneto = TRUE,
-                          start_date_veneto =  "01-05-2020",
-                          time_seed_M_veneto = "01-08-2020")
+    replicate_rstan_fixed(
+      model = baseline_model,
+      posterior_sample_row =
+        beta_scale_posterior_samples_list[[x]][i,],
+      italy_testing_in_veneto = TRUE,
+      start_date_veneto =  "01-05-2020",
+      time_seed_M_veneto = "01-08-2020"
+    )
   })
   
   Veneto_posts_cf8[[x]] = sapply(1:nrow(posterior_samples), function(i) {
@@ -146,9 +153,7 @@ for(x in 1:length(R0_scales)){
 }
 
 
-Veneto_ratio_cf8 = bind_rows(Veneto_ratio_cf6_list) 
+Veneto_ratio_cf8 = bind_rows(Veneto_ratio_cf6_list)
 Veneto_ratio_cf8$R0_scale = rep(R0_scales, each = nrow(Veneto_ratio_cf8_list[[1]]))
 
 write.csv(Veneto_ratio_cf8, paste0(file_path, "/Veneto_ratio_cf8.csv"))
-
-

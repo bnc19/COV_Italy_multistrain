@@ -1,20 +1,23 @@
-
-# script to plot counterfactual results (Figure 5) -----------------------------  
-
+################################################################################
+# Script to plot the transmission dynamics of all variants under the baseline  #
+# testing scenario, theprobability of variant specific case detection and      #
+# cumulative incidence obtained under counterfactual scenarios. (Figure 5).    #                                                    #
+################################################################################
 
 # Set up -----------------------------------------------------------------------
 
 
 # rm(list = ls())
+# setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
 
-setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
-
+# packages 
 library("wesanderson")
 library(cowplot) 
 library(tidyverse)
 library(scales)
 source("R/plot_model_fit.R")
-
+ 
+# output
 dir.create("Figures")
 
 #  Import  data  -----------------------------------------------
