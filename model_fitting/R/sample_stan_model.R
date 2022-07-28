@@ -8,7 +8,7 @@ draw_init_values = function(seed=1){
          I0_it_M = replicate(1, runif(1, 1,100)),
          I0_it_Al = replicate(1,runif(1, 1,100)),
          I0_it_O = replicate(1, runif(1, 1,100)),
-         I0_ven_A = replicate(1, runif(1, 1,1)),
+         I0_ven_A = replicate(1, runif(1, 1,10)),
          I0_ven_M = replicate(1, runif(1, 1,10)),
          I0_ven_Al = replicate(1, runif(1, 1,10)),
          I0_ven_O = replicate(1, runif(1, 1,10)),
@@ -143,7 +143,8 @@ sample_stan_model = function(
     control = list(
       adapt_delta = adapt_delta, 
       max_treedepth = 15
-    )
+    ),
+    seed =1 
   ) 
   
   time.end = Sys.time()
