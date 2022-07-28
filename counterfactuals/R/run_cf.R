@@ -118,6 +118,15 @@ extract_fit_results = function(posts,
     ratio_O = posts$ratio_ven[,, 3]
     ratio_Al = posts$ratio_ven[,, 4]
     
+    
+    
+    R0_M = posts$R0_ven_daily[,, 1]
+    R0_A = posts$R0_ven_daily[,, 2]
+    R0_O = posts$R0_ven_daily[,, 3]
+    R0_Al = posts$R0_ven_daily[,, 4]
+    
+    pMO = posts$pPCR_ven[,]
+    
   } else if (location == "Italy") {
     rep_M = posts$daily_incidence_it[,, 1]
     rep_A = posts$daily_incidence_it[,, 2]
@@ -133,12 +142,21 @@ extract_fit_results = function(posts,
     ratio_A = posts$ratio_it[,, 2]
     ratio_O = posts$ratio_it[,, 3]
     ratio_Al = posts$ratio_it[,, 4]
+    
+    
+    R0_M = posts$R0_it_daily[,, 1]
+    R0_A = posts$R0_it_daily[,, 2]
+    R0_O = posts$R0_it_daily[,, 3]
+    R0_Al = posts$R0_it_daily[,, 4]
+    
+    pMO = posts$pPCR_it[,]
   }
   
   if(baseline == T){
   out = as.matrix(data.frame(rep_M, rep_A, rep_O, rep_Al,
                              true_M, true_A, true_O, true_Al, 
-                             ratio_M,ratio_A,ratio_O,ratio_Al))
+                             ratio_M,ratio_A,ratio_O,ratio_Al,
+                             R0_M, R0_A, R0_O, R0_Al,pMO))
   } else {
     out = as.matrix(data.frame(rep_M, rep_A, rep_O, rep_Al,
                                true_M, true_A, true_O, true_Al))
@@ -154,4 +172,166 @@ extract_fit_results = function(posts,
 change_rho = function(data.frame){
   data.frame$rho_chain = 1
   return(data.frame)
+}
+
+
+
+
+# summarise posterior across iterations and add date ---------------------------
+# returns a data frame of reported and true inc over time ----------------------
+
+summarise_results = function(posterior_results,
+                             start_date,
+                             end_date,
+                             S0){
+  
+  start = as.Date.character(start_date, format = "%d-%m-%Y")
+  end = as.Date.character(end_date, format = "%d-%m-%Y")
+  
+  all_dates = 
+    seq.Date(from = start, to = end,  by = "days")
+  
+  out =  posterior_results %>% as.data.frame.table() %>%
+    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(!grepl("ratio",variant )) %>% 
+    filter(!grepl("R0",variant )) %>%
+    filter(!grepl("pMO", variant)) %>%  
+    dplyr::mutate(ni = as.numeric(ni),
+                  time = as.numeric(time),
+                  value =  value / S0 * 100000) %>%
+    group_by(time,variant) %>%
+    summarise(
+      lower = quantile(value, 0.025),
+      mean = mean(value),
+      upper = quantile(value, 0.975)) %>% 
+    ungroup( ) %>%  
+    mutate(Date = rep(all_dates, each = 8)) %>% 
+    separate(variant, into = c("output", "variant")) %>% 
+    pivot_wider(id_cols = c("Date", "variant"), names_from = output,
+                values_from = c(lower,mean,upper))
+  
+  return(out)
+  
+}
+
+
+# calculate ratio of incidence reported incidence ------------------------------
+# returns a data frame of reported inc, true inc, ratio for each variant -------
+# aggregated over the study period ---------------------------------------------
+
+calculate_ratio_reported = function(posterior_results,
+                                    S0){
+  
+  out = posterior_results %>% as.data.frame.table() %>%
+    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(grepl("ratio",variant )) %>%  
+    dplyr::mutate(ni = as.numeric(ni),
+                  time = as.numeric(time),
+                  value = value ) %>%
+    group_by(variant, ni) %>% 
+    summarise(value = mean(value, na.rm=T)) %>%   # calculate cumulative incidence 
+    group_by(variant) %>%
+    summarise(
+      lower = quantile(value, 0.025),
+      mean = mean(value),
+      upper = quantile(value, 0.975)
+    ) %>%  
+    ungroup( )
+  
+  
+  out2 = posterior_results %>% as.data.frame.table() %>%
+    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(!grepl("ratio",variant )) %>%  
+    dplyr::mutate(ni = as.numeric(ni),
+                  time = as.numeric(time),
+                  value = value ) %>%
+    group_by(variant, ni) %>% 
+    summarise(value = sum(value, na.rm=T) / S0 * 100) %>%   # calculate cumulative incidence 
+    pivot_wider(id_cols = ni, names_from = variant, values_from = value ) %>%  
+    mutate(true_tot = true_M+true_A+true_O+true_Al, 
+           rep_tot = rep_M+rep_A+rep_O+rep_Al) %>% 
+    pivot_longer(cols= -ni, names_to = "variant") %>% 
+    group_by(variant) %>%
+    summarise(
+      lower = quantile(value, 0.025),
+      mean = mean(value),
+      upper = quantile(value, 0.975)
+    ) %>%  
+    ungroup( ) %>% 
+    bind_rows(out)
+  
+  return(out2)
+}
+
+
+
+
+# calculate R0 of each variant over time ---------------------------------------
+
+
+calculate_R0= function(posterior_results,
+                       start_date,
+                       end_date
+                       ){
+  
+  start = as.Date.character(start_date, format = "%d-%m-%Y")
+  end = as.Date.character(end_date, format = "%d-%m-%Y")
+  
+  all_dates = 
+    seq.Date(from = start, to = end,  by = "days")
+  
+  out = posterior_results %>% as.data.frame.table() %>%
+    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(grepl("R0",variant )) %>%  
+    dplyr::mutate(ni = as.numeric(ni),
+                  time = as.numeric(time),
+                  value = value ) %>%
+    group_by(variant,time) %>%
+    summarise(
+      lower = quantile(value, 0.025),
+      mean = mean(value),
+      upper = quantile(value, 0.975)
+    ) %>%  
+    ungroup( ) %>%  
+    mutate(Date = rep(all_dates,  4)) 
+  
+
+  
+  return(out)
+}
+
+
+
+# calculate probability of takking molecular diagnostic test over time ---------
+
+
+calculate_pMO = function(posterior_results,
+                       start_date,
+                       end_date
+){
+  
+  start = as.Date.character(start_date, format = "%d-%m-%Y")
+  end = as.Date.character(end_date, format = "%d-%m-%Y")
+  
+  all_dates = 
+    seq.Date(from = start, to = end,  by = "days")
+  
+  out = posterior_results %>% as.data.frame.table() %>%
+    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+    filter(variant == "pMO") %>%  
+    dplyr::mutate(ni = as.numeric(ni),
+                  time = as.numeric(time),
+                  value = value ) %>%
+    group_by(time) %>%
+    summarise(
+      lower = quantile(value, 0.025),
+      mean = mean(value),
+      upper = quantile(value, 0.975)
+    ) %>%  
+    ungroup( ) %>%  
+    mutate(Date = all_dates) 
+  
+  
+  
+  return(out)
 }

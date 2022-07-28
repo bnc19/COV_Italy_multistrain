@@ -1,87 +1,4 @@
 
-# summarise posterior across iterations and add date ---------------------------
-# returns a data frame of reported and true inc over time ----------------------
-
-summarise_results = function(posterior_results,
-                             start_date,
-                             end_date,
-                             S0){
-  
-  start = as.Date.character(start_date, format = "%d-%m-%Y")
-  end = as.Date.character(end_date, format = "%d-%m-%Y")
-  
-  all_dates = 
-    seq.Date(from = start, to = end,  by = "days")
-  
-  out =  posterior_results %>% as.data.frame.table() %>%
-    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
-    filter(!grepl("ratio",variant )) %>%  
-    dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time),
-                  value =  value / S0 * 100000) %>%
-    group_by(time,variant) %>%
-    summarise(
-      lower = quantile(value, 0.025),
-      mean = mean(value),
-      upper = quantile(value, 0.975)) %>% 
-    ungroup( ) %>%  
-    mutate(Date = rep(all_dates, each = 8)) %>% 
-    separate(variant, into = c("output", "variant")) %>% 
-    pivot_wider(id_cols = c("Date", "variant"), names_from = output,
-                values_from = c(lower,mean,upper))
-  
-  return(out)
-  
-}
-
-
-# calculate ratio of incidence reported incidence ------------------------------
-# returns a data frame of reported inc, true inc, ratio for each variant -------
-# aggregated over the study period ---------------------------------------------
-
-calculate_ratio_reported = function(posterior_results,
-                                    S0){
-  
-out = posterior_results %>% as.data.frame.table() %>%
-    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
-    filter(grepl("ratio",variant )) %>%  
-    dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time),
-                  value = value ) %>%
-  group_by(variant, ni) %>% 
-  summarise(value = mean(value, na.rm=T)) %>%   # calculate cumulative incidence 
-    group_by(variant) %>%
-    summarise(
-      lower = quantile(value, 0.025),
-      mean = mean(value),
-      upper = quantile(value, 0.975)
-    ) %>%  
-    ungroup( )
-  
-
-out2 = posterior_results %>% as.data.frame.table() %>%
-  rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
-  filter(!grepl("ratio",variant )) %>%  
-  dplyr::mutate(ni = as.numeric(ni),
-                time = as.numeric(time),
-                value = value ) %>%
-  group_by(variant, ni) %>% 
-  summarise(value = sum(value, na.rm=T) / S0 * 100) %>%   # calculate cumulative incidence 
-  pivot_wider(id_cols = ni, names_from = variant, values_from = value ) %>%  
-  mutate(true_tot = true_M+true_A+true_O+true_Al, 
-         rep_tot = rep_M+rep_A+rep_O+rep_Al) %>% 
-  pivot_longer(cols= -ni, names_to = "variant") %>% 
-  group_by(variant) %>%
-  summarise(
-    lower = quantile(value, 0.025),
-    mean = mean(value),
-    upper = quantile(value, 0.975)
-  ) %>%  
-  ungroup( ) %>% 
-  bind_rows(out)
-
-return(out2)
-}
 
 # calculated binomial confint for variant specific data ------------------------
 # plot the model reported incidence over time against binomial conf ------------
@@ -96,16 +13,17 @@ plot_model_fit = function(posts_df,
   
   
   
+  
   library(Hmisc)
   
-  if (location == "Italy") {
+  if (location == "Rest of Italy") {
     # Import Italy data ----------------------------------------------------------
-    A_data = read.csv("data/Dataset_italy_A_v5.csv")$Freq
-    M_data  = read.csv("data/Dataset_italy_M_v5.csv")$Freq
-    O_data  = read.csv("data/Dataset_italy_O_v1.csv")$Freq
-    Al_data  = read.csv("data/Dataset_italy_Alpha_v1.csv")$Freq
-    n_seq  = read.csv("data/Dataset_italy_A_v5.csv")$TotSeq
-    avg_daily_rep_inc  = read.csv("data/Dataset_italy_A_v5.csv")$new_reported_cases_daily
+    A_data = read.csv("data/Dataset_italy_A_v5.csv")$Freq_new
+    M_data  = read.csv("data/Dataset_italy_M_v5.csv")$Freq_new
+    O_data  = read.csv("data/Dataset_italy_O_v1.csv")$Freq_new
+    Al_data  = read.csv("data/Dataset_italy_Alpha_v1.csv")$Freq_new
+    n_seq  = read.csv("data/Dataset_italy_A_v5.csv")$TotSeq_new
+    avg_daily_rep_inc  = read.csv("data/Dataset_italy_A_v5.csv")$new_reported_cases_daily_new
     
     n_pop = 59257566 - 4847026
     n_recov  = 1482377 - 93401
