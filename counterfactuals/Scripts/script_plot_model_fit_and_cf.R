@@ -15,6 +15,7 @@ library(tidyverse)
 library(scales)
 source("R/plot_model_fit.R")
 
+dir.create("Figures")
 
 #  Import  data  -----------------------------------------------
 file_names_main = dir("CF_results/baseline") 
@@ -217,7 +218,7 @@ Fig5 = plot_grid(
 
 ggsave(
   plot = Fig5,
-  filename = "Figure5.tiff",
+  filename = "Figures/Figure5.tiff",
   height = 45,
   width = 50,
   units = "cm",

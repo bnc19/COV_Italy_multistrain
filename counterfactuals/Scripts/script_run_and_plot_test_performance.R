@@ -11,7 +11,7 @@ library(cowplot)
 
 
 source("R/plot_PPV_NPV_p_t+.R")
-
+dir.create("Figures")
 
 # define prevalence ------------------------------------------------------------
 
@@ -130,7 +130,7 @@ test_spec_test_prop_anot = annotate_figure(test_spec_test_prop, bottom = text_gr
 
 ggsave(
   plot = test_spec_test_prop_anot,
-  filename = "Figure6.png",
+  filename = "Figures/Figure6.png",
   height = (80 * 4/6),
   width = 80,
   units = "cm",

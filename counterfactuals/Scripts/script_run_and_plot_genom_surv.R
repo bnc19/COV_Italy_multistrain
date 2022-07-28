@@ -16,7 +16,7 @@ library(ggpubr)
 
 
 source("R/plot_variant_detection_prob.R")
-
+dir.create("Figures")
 
 ################  Produce plots ################
 
@@ -87,7 +87,7 @@ variant_detection_grid_anot = annotate_figure(variant_detection_grid,
 
 ggsave(
   plot = variant_detection_grid_anot,
-  filename = "Figure7.png",
+  filename = "Figures/Figure7.png",
   height = 60,
   width = 60 * (3/4),
   units = "cm",
