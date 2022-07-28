@@ -12,7 +12,7 @@ All required packages and their versions are available in the DESCRIPTION file. 
 
 This repository is divided into 3 sections: 
 
-* *hospital_based_surveillance* - code to analyse antigen assay performance observed during hospital surveillance in Veneto. Also includes code to produce Figures S3, S4, S5, S9, and Tables 1, S1 and S2 from the manuscript. 
+* *hospital_based_surveillance* - code to analyse antigen assay performance observed during hospital surveillance in Veneto.
 
 * *model_fitting* - code to fit a multivariant model to reconstruct the transmission dynamics of the dominant variants carrying the A220V and M234I-A376T mutations, all other co-circulating variants, and the alpha variant (B.1.1.7) for Veneto and the rest of Italy. **Note that the code is currently set up to run each model both locally and on a HPC for 200 iterations with the first 100 discarded as burn in. This is to demo the models quickly (~4 hours on a normal computer). In order to obtain the results provided in the manuscript, 4 chains were run for 2000 iterations, discarding the first 1000 iterations as burnin. This takes ~6  hours per model to run on the HPC.** 
 
@@ -24,7 +24,7 @@ This repository is divided into 3 sections:
 **This folder contains**
 
 * *S2.xlsx* -  data on frequency of variants carying concordant and discordant mutations during the study period in Veneto and the rest of Italy 
-* *S2.Rmd* - Rmarkdown file to run anal
+* *S2.Rmd* - Rmarkdown file to run analysis antigen assay performance observed during hospital surveillance in Veneto. Also includes code to produce figures S3, S4, S5, S9 and S10, and tables 1, S1 and S2 from the manuscript.
 
 ## *model_fitting*
 
