@@ -265,73 +265,73 @@ calculate_ratio_reported = function(posterior_results,
 
 
 
-
-# calculate R0 of each variant over time ---------------------------------------
-
-
-calculate_R0= function(posterior_results,
-                       start_date,
-                       end_date
-                       ){
-  
-  start = as.Date.character(start_date, format = "%d-%m-%Y")
-  end = as.Date.character(end_date, format = "%d-%m-%Y")
-  
-  all_dates = 
-    seq.Date(from = start, to = end,  by = "days")
-  
-  out = posterior_results %>% as.data.frame.table() %>%
-    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
-    filter(grepl("R0",variant )) %>%  
-    dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time),
-                  value = value ) %>%
-    group_by(variant,time) %>%
-    summarise(
-      lower = quantile(value, 0.025),
-      mean = mean(value),
-      upper = quantile(value, 0.975)
-    ) %>%  
-    ungroup( ) %>%  
-    mutate(Date = rep(all_dates,  4)) 
-  
-
-  
-  return(out)
-}
-
-
-
-# calculate probability of takking molecular diagnostic test over time ---------
-
-
-calculate_pMO = function(posterior_results,
-                       start_date,
-                       end_date
-){
-  
-  start = as.Date.character(start_date, format = "%d-%m-%Y")
-  end = as.Date.character(end_date, format = "%d-%m-%Y")
-  
-  all_dates = 
-    seq.Date(from = start, to = end,  by = "days")
-  
-  out = posterior_results %>% as.data.frame.table() %>%
-    rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
-    filter(variant == "pMO") %>%  
-    dplyr::mutate(ni = as.numeric(ni),
-                  time = as.numeric(time),
-                  value = value ) %>%
-    group_by(time) %>%
-    summarise(
-      lower = quantile(value, 0.025),
-      mean = mean(value),
-      upper = quantile(value, 0.975)
-    ) %>%  
-    ungroup( ) %>%  
-    mutate(Date = all_dates) 
-  
-  
-  
-  return(out)
-}
+# 
+# # calculate R0 of each variant over time ---------------------------------------
+# 
+# 
+# calculate_R0= function(posterior_results,
+#                        start_date,
+#                        end_date
+#                        ){
+#   
+#   start = as.Date.character(start_date, format = "%d-%m-%Y")
+#   end = as.Date.character(end_date, format = "%d-%m-%Y")
+#   
+#   all_dates = 
+#     seq.Date(from = start, to = end,  by = "days")
+#   
+#   out = posterior_results %>% as.data.frame.table() %>%
+#     rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+#     filter(grepl("R0",variant )) %>%  
+#     dplyr::mutate(ni = as.numeric(ni),
+#                   time = as.numeric(time),
+#                   value = value ) %>%
+#     group_by(variant,time) %>%
+#     summarise(
+#       lower = quantile(value, 0.025),
+#       mean = mean(value),
+#       upper = quantile(value, 0.975)
+#     ) %>%  
+#     ungroup( ) %>%  
+#     mutate(Date = rep(all_dates,  4)) 
+#   
+# 
+#   
+#   return(out)
+# }
+# 
+# # 
+# # 
+# # # calculate probability of takking molecular diagnostic test over time ---------
+# # 
+# # 
+# # calculate_pMO = function(posterior_results,
+# #                        start_date,
+# #                        end_date
+# # ){
+# #   
+# #   start = as.Date.character(start_date, format = "%d-%m-%Y")
+# #   end = as.Date.character(end_date, format = "%d-%m-%Y")
+# #   
+# #   all_dates = 
+# #     seq.Date(from = start, to = end,  by = "days")
+# #   
+# #   out = posterior_results %>% as.data.frame.table() %>%
+# #     rename(time = Var1, variant = Var2,ni = Var3, value = Freq) %>%
+# #     filter(variant == "pMO") %>%  
+# #     dplyr::mutate(ni = as.numeric(ni),
+# #                   time = as.numeric(time),
+# #                   value = value ) %>%
+# #     group_by(time) %>%
+# #     summarise(
+# #       lower = quantile(value, 0.025),
+# #       mean = mean(value),
+# #       upper = quantile(value, 0.975)
+# #     ) %>%  
+# #     ungroup( ) %>%  
+# #     mutate(Date = all_dates) 
+# #   
+# #   
+# #   
+# #   return(out)
+# # }
