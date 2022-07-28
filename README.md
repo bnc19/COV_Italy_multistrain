@@ -60,7 +60,8 @@ For Veneto, data on the mean daily per-capita number of second doses administere
 * *run_model_fitting.R* is the main script to fit a multivariant model to epidemiological and genomic data from Veneto / the rest of Italy. We fit parameters using a Markov chain Monte Carlo (MCMC) framework using the No-U-Turn sampler via Rstan. Stan models can be run on HPC or locally. 
 
 ### Model 
-* Rstan models to fit a multivariant model to epidemiological and genomic data from Veneto and the rest of Italy, assuming a negative binomial likelihood:
+
+Rstan models to fit a multivariant model to epidemiological and genomic data from Veneto and the rest of Italy, assuming a negative binomial likelihood:
 
  - *est_test_symp.stan* Model variant which assumes that only symptomatic individuals undergo diagnostic testing and that they isolate if they receive a positive result (main model). 
  
