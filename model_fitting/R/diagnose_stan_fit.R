@@ -23,6 +23,11 @@ diagnose_stan_fit = function(
   library(loo)
   library(rstan)
   
+  if(any(rhat(fit) > 1.05, na.rm = T)){
+    print("Rhat too high")
+  } else{
+    print("Rhat good")}
+  
   
 
   rstan::check_divergences(fit)
@@ -45,7 +50,7 @@ diagnose_stan_fit = function(
   # save files 
   write.csv(param_sum, file=paste0(file_path,"/param_sum.csv"))
   
-  ggsave(
+  diagggsave(
     markov_trace,
     file =  paste0(file_path, "/trace_plot.png"),
     height = 20,
