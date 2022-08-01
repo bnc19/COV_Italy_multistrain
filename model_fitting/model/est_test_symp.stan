@@ -1,5 +1,5 @@
 data {
-  
+
   // joint data 
   
   int<lower=1> n_var; 
@@ -12,7 +12,7 @@ data {
   
   real phi_PCR;
   real phi_Ag;
-  
+  real VE ; 
   // italy data 
 
   int<lower = 1> n_data_it[n_var];      // number of months observed 
@@ -93,16 +93,24 @@ parameters {
   real<lower = 0>              beta[n_var];  // transmission parameter 
   // real<lower = 0, upper = 1>   rho_ven;      // probability of reporting 
   real<lower = 0, upper = 1>   rho_it;       // probability of reporting
-  real<lower = 0>              I0_ven[4];    // seed
-  real<lower = 0>              I0_it[4] ;        // seed
+  real<lower = 0> I0_ven_M ;
+  real<lower = 0, upper = 5> I0_ven_A ;
+  real<lower = 0> I0_ven_O ;
+  real<lower = 0> I0_ven_Al;
+    
+  real<lower = 0> I0_it_M   ;
+  real<lower = 0, upper = 5> I0_it_A   ;
+  real<lower = 0> I0_it_O   ;
+  real<lower = 0> I0_it_Al  ;
   real<lower = 0, upper = 1>   omega[2];     // reduction in transmission
-  real<lower = 0>              k;            // overdispersion parameter  
+  real<lower = 0>              k;            // overdispersion parameter 
 
 }   
 
 transformed parameters{
   
-  real <lower = 0, upper = 1>  rho_ven = rho_it ;
+   real <lower = 0, upper = 1>  rho_ven = rho_it ;
+  // real <lower = 0, upper = 1>  rho_it = 1  ;
   real beta2[n_var] ;
    
 // Define Italy param ----------------------------------------------------------
@@ -125,11 +133,7 @@ transformed parameters{
 
 
   real beta2_it[n_ts_it,n_var]; 
-  
-  real I0_it_M  = I0_it[1] ;
-  real I0_it_A  = I0_it[2] ;
-  real I0_it_O  = I0_it[3] ;
-  real I0_it_Al = I0_it[4] ;
+
   
 // Define Veneto param ---------------------------------------------------------
   
@@ -151,11 +155,6 @@ transformed parameters{
 
 
   real beta2_ven[n_ts_ven,n_var]; 
-  
-  real I0_ven_M = I0_ven[1]  ;
-  real I0_ven_A =  I0_ven[2] ;
-  real I0_ven_O =  I0_ven[3] ;
-  real I0_ven_Al = I0_ven[4] ;
   
   
    // Scale beta 
@@ -243,10 +242,10 @@ transformed parameters{
    rho_it * (phi_PCR * pPCR_daily_it[t] + phi_Ag * (1 - pPCR_daily_it[t]));
 
    for(i in 1:n_var) FOI_it[t,i] =
-   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + IS_it[t,i]) / S0_it;
+   beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + (IS_it[t,i])) / S0_it;
    
    S_it[t+1] = 
-   S_it[t] - S_it[t]*sum(FOI_it[t,]) - vac_it[t]*S_it[t];
+   S_it[t] - S_it[t]*sum(FOI_it[t,])  - vac_it[t]*S_it[t];
    
    for(i in 1:n_var) E_it[t+1,i] = 
    E_it[t,i] + S_it[t] * FOI_it[t,i] - epsilon2 * E_it[t,i];
@@ -290,7 +289,7 @@ transformed parameters{
    rho_ven * (phi_PCR * pPCR_daily_ven[t] + phi_Ag * (1 - pPCR_daily_ven[t]));
 
    for(i in 1:n_var) FOI_ven[t,i] =
-   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + IS_ven[t,i]) / S0_ven;
+   beta2_ven[t,i] * (PS_ven[t,i] + IA_ven[t,i] + (IS_ven[t,i])) / S0_ven;
    
    S_ven[t+1] = 
    S_ven[t] - S_ven[t]*sum(FOI_ven[t,]) - vac_ven[t]*S_ven[t];
@@ -461,12 +460,22 @@ model {
 
 // priors ----------------------------------------------------------------------
    beta    ~ normal(1,1);
-   rho_it  ~ beta(1,1);//
+   rho_it  ~ beta(4.5,1.2);//
    // rho_ven ~ beta(1,1);
    omega   ~ beta(1,1); 
-   I0_it   ~ normal(1,100);
-   I0_ven  ~ normal(1,10);
+   I0_it_M   ~ normal(1,100);
+   I0_it_A   ~ normal(1,100);
+   I0_it_Al  ~ normal(1,100);
+   I0_it_O   ~ normal(1,100);
+
+   I0_ven_M  ~ normal(1,10);
+   I0_ven_A  ~ normal(1,10);
+   I0_ven_O  ~ normal(1,10);
+   I0_ven_Al  ~ normal(1,10);
+      
    k       ~ exponential(0.01);
+ 
+
 }
 
 
