@@ -460,7 +460,7 @@ model {
 
 // priors ----------------------------------------------------------------------
    beta    ~ normal(1,1);
-   rho_it  ~ beta(4.5,1.2);//
+   rho_it  ~ beta(1,1);//
    // rho_ven ~ beta(1,1);
    omega   ~ beta(1,1); 
    I0_it_M   ~ normal(1,100);
