@@ -245,7 +245,7 @@ transformed parameters{
    beta2_it[t,i] * (PS_it[t,i] + IA_it[t,i] + (IS_it[t,i])) / S0_it;
    
    S_it[t+1] = 
-   S_it[t] - S_it[t]*sum(FOI_it[t,])  - vac_it[t]*S_it[t];
+   S_it[t] - S_it[t]*sum(FOI_it[t,])  - VE * vac_it[t]*S_it[t];
    
    for(i in 1:n_var) E_it[t+1,i] = 
    E_it[t,i] + S_it[t] * FOI_it[t,i] - epsilon2 * E_it[t,i];
@@ -264,7 +264,7 @@ transformed parameters{
    
    R_it[t+1] = 
    R_it[t] + gamma2 * Q_it[t] + gamma2 * sum(IS_it[t,])  
-   + gamma2 * sum(IA_it[t,]) + vac_it[t] * S_it[t];
+   + gamma2 * sum(IA_it[t,]) + VE * vac_it[t] * S_it[t];
    
    
    for(i in 1:n_var) incidence_it[t,i] = 
