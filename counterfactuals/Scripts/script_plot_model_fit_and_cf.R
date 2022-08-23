@@ -1,6 +1,6 @@
 ################################################################################
 # Script to plot the transmission dynamics of all variants under the baseline  #
-# testing scenario, theprobability of variant specific case detection and      #
+# testing scenario, the probability of variant specific case detection and      #
 # cumulative incidence obtained under counterfactual scenarios. (Figure 5).    #                                                    #
 ################################################################################
 
@@ -16,6 +16,22 @@ library(cowplot)
 library(tidyverse)
 library(scales)
 source("R/plot_model_fit.R")
+
+theme_set(
+  theme_bw() +
+    theme(
+      text = element_text(size = 7),
+      axis.title.y = element_text(angle = 90, vjust = 0.7),
+      legend.position = c(0.06,0.78),
+      legend.title=element_text(size=5), 
+      legend.margin = margin(0, 0, 0, 0),
+      legend.spacing.x = unit(0, "mm"),
+      legend.text=element_text(size=5) ,
+      legend.spacing.y = unit(0.2, "mm"), 
+      axis.text.x = element_text(size=5),
+      legend.key.size = unit(.5,"line")) 
+)
+
  
 # output
 dir.create("Figures")
@@ -37,14 +53,14 @@ names(list_cf) = file_names_cf
   start_date = "01-05-2020",
   end_date = "31-05-2021",
   location = "Veneto"
-)
+)[[1]]
 
 Italy_plot = plot_model_fit(
   list_main$Italy_post_df.csv,
   start_date = "01-05-2020",
   end_date = "31-05-2021",
   location = "Rest of Italy"
-)
+)[[1]]
 
 
 #  Plot proportion of incidence reported in Veneto and Italy ---------------------------------------------------------
@@ -79,26 +95,22 @@ Prob_det_plot = list_main$Veneto_ratio.csv %>%
     values_from = value  )  %>%
   ggplot(aes(x = Location, y = mean)) +
   geom_point(
-    aes(color = variant),  shape = 19, size = 4,
+    aes(color = variant),  size = 1,
     position = position_dodge(width = 0.5)  ) +
   geom_errorbar(
     aes(ymin = lower, ymax = upper, color = variant),
     position = position_dodge(width = 0.5),
-    width =  0.4,  size = 1) +
+    width =  0.3,  size = .5) +
   labs(x = " ",
-       y = paste0("Mean probability of case detection \n during the modelling study period")) +
-  theme_bw() + theme(
-    text = element_text(size = 18),
-    axis.title.y = element_text(angle = 90, vjust = 0.7),
-    legend.position = c(0.22, 0.88), legend.title = element_blank(),
-    axis.text.x = element_text( size =20)) +
+       y = paste0("Probability of case detection \n during the modelling study period")) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
   scale_color_manual(
     name = '',values =
       c("A220V model" = hex_codes2[1],
         "Alpha model" = hex_codes2[2],
         "M234I-A376T model" = hex_codes2[3],
-        "Other model" = hex_codes2[4]) )
+        "Other model" = hex_codes2[4]) )  +
+theme(legend.position = c(0.22,0.84))
 
 
 ################  Plot cumulative incidence by test strategy ################  
@@ -134,21 +146,13 @@ Testing_cf_plot =  list_main$Veneto_ratio.csv %>% # baseline
     ))) %>%  
   ggplot(aes(x = model, y = mean)) +
   geom_point(
-    aes(color = variant),
-    shape = 19, size = 4,
+    aes(color = variant), size = 1,
     position = position_dodge(width = 0.5) ) +
   geom_errorbar(
     aes(ymin = lower, ymax = upper, color = variant),
     position = position_dodge(width = 0.5),
-    width =  0.4, size = 1 ) + 
+    width =  0.3,  size = .5 ) + 
   labs(x = " ", y = paste0("Cumulative incidence over \n the modelling period (%)")) +
-  theme_bw() + theme(
-    text = element_text(size = 18),
-    axis.title.y = element_text(angle = 90, vjust = 0.7),
-    legend.position = c(0.07, 0.77),
-    legend.title=element_blank(), 
-    legend.text=element_text(size=14) ,
-        axis.text.x = element_text(size = 20))+
   scale_y_continuous(limits = c(0, 50), breaks = seq(0, 50, 10)) +
   scale_color_manual(
     name = '',values =
@@ -170,29 +174,26 @@ Transmission_cf_plot = list_cf$Veneto_ratio_cf6.csv %>%
                                    "Only antigen testing") )) %>% 
   separate(variant, into = c("metric", "variant")) %>%
   filter(variant  == "M" | variant == "tot") %>%  
-  mutate(Variant =  ifelse(variant == "M","M234I-A376T \nmodel", "Total \nmodel")) %>%
+  mutate(Variant =  ifelse(variant == "M","M234I-A376T model", "Total model")) %>%
   mutate(Variant = factor(
     Variant, levels = c(
-      "M234I-A376T \nmodel",
-      "Total \nmodel"
+      "M234I-A376T model",
+      "Total model"
     ))) %>% 
   mutate("R0m scaling factor" = factor(R0_scale)) %>%  
   ggplot(aes(x = model, y = mean)) +
-  geom_point(shape = 19, size = 4,aes(group = interaction(Variant,`R0m scaling factor`),
-                                       color = `R0m scaling factor`, shape = Variant), position = position_dodge(width = 0.5)) +
+  geom_point(size = 1,aes(group = interaction(Variant,`R0m scaling factor`),
+                                       color = `R0m scaling factor`, shape = Variant), 
+             position = position_dodge(width = 0.5)) +
   geom_errorbar(aes(ymin = lower, ymax = upper,group = interaction(Variant,`R0m scaling factor`),
                     color = `R0m scaling factor`, linetype = Variant),
-                position = position_dodge(width = 0.5),  width =  0.4, size = 1) +
+                position = position_dodge(width = 0.5),  width =  0.3, size = .5) +
   labs(x = " ", y = paste0("Cumulative incidence over \n the modelling period (%)")) +
-  theme_bw() + theme(
-    text = element_text(size = 18),
-    axis.title.y = element_text(angle = 90, vjust = 0.7),
-    legend.position = c(0.06,0.54),
-    legend.title=element_text(size=14), 
-    legend.text=element_text(size=14),
-    axis.text.x = element_text(size=20)) +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
-  scale_color_manual(values = wes_palette(name = "Darjeeling1")) 
+  scale_color_manual(values = wes_palette(name = "Darjeeling1"))  +
+  theme(
+    legend.position = c(0.06,0.65))
+
 
 
 
@@ -205,7 +206,8 @@ Baseline_fig = plot_grid(
   Prob_det_plot,
   ncol = 3,
   labels = c("a", "b", "c"),
-  align = c("h")
+  align = c("h"),
+  label_size = 7
 )
 
 Fig5 = plot_grid(
@@ -215,15 +217,17 @@ Fig5 = plot_grid(
   ncol = 1,
   labels = c("", "d", "e"),
   rel_heights = c(1 /3, 1 / 4, 1 / 4),
-  align = "v,h"
+  align = "v,h",
+  label_size = 7
+  
 )
 
 
 ggsave(
   plot = Fig5,
   filename = "Figures/Figure5.pdf",
-  height = 45,
-  width = 50,
+  height = 16,
+  width = 18,
   units = "cm",
   dpi = 800
 )

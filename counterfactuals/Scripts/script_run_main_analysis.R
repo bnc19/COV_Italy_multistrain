@@ -55,14 +55,14 @@ model_posts = sapply(1:nrow(posterior_samples), function(i) {
 Italy_posts = sapply(1:nrow(posterior_samples), function(i) {
   extract_fit_results(posts = model_posts[, i],
                       location = "Italy",
-                      baseline = T)
+                      model = "baseline")
 }, simplify = "array")
 
 
 Veneto_posts = sapply(1:nrow(posterior_samples), function(i) {
   extract_fit_results(posts = model_posts[, i],
                       location = "Veneto",
-                      baseline = T)
+                       model = "baseline")
 }, simplify = "array")
 
 
