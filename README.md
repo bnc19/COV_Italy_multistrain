@@ -121,6 +121,8 @@ The order of scripts presented here indicates the order in which the analysis wa
 
 * *script_posterior_sensitivity_analyses.R* Script to summarise the posterior distributions of each sensitivity analysis (Supplementary Table 7)
 
+* *script_plot_main_models.R* Script to plot qualative fit of 4 main model variants. 
+
 
 ### Models 
 
@@ -150,7 +152,7 @@ The R folder contains the function used by the scripts:
 
 * *calculate_R0.R* Functions to calculate the R0 for all model varaints. 
 
-* *calc_dic.R* Function to calculate the DIC. 
+* *calc_LL.R* Function to calculate the mena and 95% CrI log-likelihood. 
 
 * *run_cf.R* Function to run fixed Stan models, taking as input parameter draws from the posterior distribution, obtained during model fitting; functions to extract and format the output of the running fixed Stan models; function to calculate the probability of detecting a case. 
 
