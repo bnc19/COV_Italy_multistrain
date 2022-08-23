@@ -1,5 +1,8 @@
 Claudia Del Vecchio, Bethan Cracknell Daniels, Giuseppina Brancaccio et al. Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants, 28 March 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-1481444/v1]
 
+[![DOI](https://zenodo.org/badge/472844552.svg)](https://zenodo.org/badge/latestdoi/472844552)
+
+
 # About this repository
 
 This repository contains all the code needed to reproduce the results presented in Impact of antigen test target failure and testing strategies on the transmission of SARS-CoV-2 variants, in full. All data used is made available in the repository. 
