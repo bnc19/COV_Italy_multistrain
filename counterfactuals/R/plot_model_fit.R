@@ -55,7 +55,7 @@ plot_model_fit = function(posts_df,
   index_Al = 9:14
   
   
-  leg = c(0.14,0.86)
+  leg = c(0.18,0.78)
   
   y = "Reported incidence per 100,000 population"
   }
@@ -112,7 +112,7 @@ plot_model_fit = function(posts_df,
   posts_df$Date = as.Date.character(posts_df$Date, format = "%Y-%m-%d")
   
   
-  plot = data_day %>%
+  data_plot = data_day %>%
     left_join(posts_df  , by = "Date") %>%
     mutate(Variant = ifelse(
       variant.y == "M",
@@ -125,30 +125,39 @@ plot_model_fit = function(posts_df,
       ))
     ))) %>%
     mutate(Data = ifelse(!is.na (PointEst), "Data", NA )) %>%  
-    mutate(Model = ifelse(is.na (PointEst), "Model", NA )) %>%  
-    ggplot(aes(x = Date , y = mean_rep)) +
+    mutate(Model = ifelse(is.na (PointEst), "Model", NA )) 
+  
+  
+  plot =  ggplot(data_plot, aes(x = Date , y = mean_rep)) +
     geom_line(aes(color = Variant, linetype = Model)) +
     geom_ribbon(aes(
       ymin = lower_rep,
       ymax = upper_rep,
       fill = Variant
     ), alpha = 0.4) +
-    geom_point(aes(y = PointEst , color = variant.x, shape = Data)) +
+    geom_point(aes(y = PointEst , color = variant.x, shape = Data),size=1) +
     geom_errorbar(aes(
       ymin = Lower,
       ymax = Upper,
       color = variant.x
-    )) +
+    ),  width = 2.5) +
     labs(y = paste0(y)) +
     theme_bw() +
     ggtitle(paste(location)) +
     ylim(c(0, 105)) + 
     scale_shape_manual(values = c('Data' = 16)) +
     scale_linetype_manual(values = c("Model" = "solid")) +
-    theme(text = element_text(size = 18), legend.position = leg, 
-          legend.margin = margin(0, 0, 0, 0),
-          legend.spacing.x = unit(0, "mm"),
-          legend.spacing.y = unit(0, "mm"), legend.title = element_blank()) +
+    theme(
+      text = element_text(size = 7),
+      axis.title.y = element_text(angle = 90, vjust = 0.7),
+      legend.position = leg,
+      legend.title=element_text(size=5), 
+      legend.margin = margin(0, 0, 0, 0),
+      legend.spacing.x = unit(0, "mm"),
+      legend.text=element_text(size=5) ,
+      legend.spacing.y = unit(0, "mm"), 
+      axis.text.x = element_text(size=5),
+      legend.key.size = unit(.5,"line")) +
     scale_x_date(date_labels = "%b/%Y", breaks = "3 months")
   
   
@@ -157,5 +166,5 @@ plot_model_fit = function(posts_df,
   
   
   
-  return(plot)
+  return(list(plot, data_plot))
 }
