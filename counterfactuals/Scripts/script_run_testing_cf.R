@@ -62,7 +62,6 @@ model_posts_cf1 = sapply(1:nrow(posterior_samples), function(i) {
 })
 
 
-
 Veneto_posts_cf1 = sapply(1:nrow(posterior_samples), function(i) {
   extract_fit_results(posts = model_posts_cf1[, i],
                       location = "Veneto")

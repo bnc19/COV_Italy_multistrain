@@ -1,5 +1,5 @@
 ################################################################################
-# Script to calculate the DIC, posterior means and 95% CrI for for all model   #
+# Script to calculate the log-lik, posterior means and 95% CrI for for all model   #
 # variants (Table 2, Table S6)                                                 #
 ################################################################################
 
@@ -7,7 +7,7 @@
 # Set up -----------------------------------------------------------------------
 
 # rm(list = ls())
-# setwd("C:/Users/bnc19/Desktop/COV_Italy_multistrain/counterfactuals")
+# setwd("Q:/COV_Italy_multistrain/counterfactuals")
 
 # packages
 library(tidyverse)
@@ -16,7 +16,7 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores())
 
 # functions 
-source("R/calc_dic.R")
+source("R/calc_LL.R")
 source("R/sample_posterior_chains.R")
 
 # output 
@@ -27,41 +27,19 @@ dir.create(paste0(file_path))
 
 # symp inc ---------------------------------------------------------------------
 
-# inc DIC / WAIC
-calc_dic(
-  posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/symp_test/1/log_lik.csv")[, -1],
-  fixed_model_path = "models/est_test_symp_cf.stan",
-  scale_time_step = 2,
-  start_date_veneto =  "01-05-2020",
-  time_seed_M_veneto = "01-08-2020",
-  phi_Ag =  0.689
-)
-
-
-# M1 - (baseline) -   1125.51
-
+# LL
+calculate_log_like(read.csv("MF_results/symp_test/1/log_lik.csv")[, -1])
 
 # symp summary
-sum_symp_inc = summarise_posterior_chains_symp(posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv"))
+sum_symp_inc = summarise_posterior_chains_symp(
+  posterior_chains = read.csv("MF_results/symp_test/1/posterior_chains.csv"))
 
 write.csv(sum_symp_inc, paste0(file_path, "/sum_symp_inc.csv"))
 
 # asymp inc --------------------------------------------------------------------
 
-# DIC
-calc_dic(
-  posterior_chains = read.csv("MF_results/asymp_test/1/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/asymp_test/1/log_lik.csv")[, -1],
-  fixed_model_path = "models/est_test_asymp_cf.stan",
-  scale_time_step = 2,
-  start_date_veneto =  "01-05-2020",
-  time_seed_M_veneto = "01-08-2020",
-  phi_Ag =  0.689
-)
-
-
-# M1   1174.05
+# LL
+calculate_log_like(read.csv("MF_results/asymp_test/1/log_lik.csv")[, -1])
 
 
 # asymp summary
@@ -75,20 +53,9 @@ write.csv(sum_asymp_inc, paste0(file_path, "/sum_asymp_inc.csv"))
 
 # asymp 2 inc -------------------------------------------------------------------
 
-# DIC
-calc_dic(
-  posterior_chains = read.csv("MF_results/asymp_test_2/1/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/asymp_test_2/1/log_lik.csv")[, -1],
-  fixed_model_path = "models/est_test_asymp2_cf.stan",
-  scale_time_step = 2,
-  start_date_veneto =  "01-05-2020",
-  time_seed_M_veneto = "01-08-2020",
-  phi_Ag =  0.689
-)
+# LL
+calculate_log_like(read.csv("MF_results/asymp_test_2/1/log_lik.csv")[, -1])
 
-
-
-# M1 - 1128.76
 
 # asymp 2 summary
 sum_asymp_2_inc = summarise_posterior_chains_not_symp(
@@ -100,21 +67,8 @@ write.csv(sum_asymp_2_inc, paste0(file_path, "/sum_asymp2_inc.csv"))
 
 # asymp symp inc --------------------------------------------------------------------
 
-# DIC
-calc_dic(
-  posterior_chains = read.csv("MF_results/asymp_and_symp_test/1/posterior_chains.csv"),
-  log_lik = read.csv("MF_results/asymp_and_symp_test/1/log_lik.csv")[, -1],
-  fixed_model_path = "models/est_test_asymp_and_symp_cf.stan",
-  scale_time_step = 2,
-  start_date_veneto =  "01-05-2020",
-  time_seed_M_veneto = "01-08-2020",
-  phi_Ag =  0.689
-)
-
-
-
-# M1 -  1140.87
-
+# LL
+calculate_log_like(read.csv("MF_results/asymp_and_symp_test/1/log_lik.csv")[, -1])
 
 # asymp symp summary
 sum_asymp_symp_inc = summarise_posterior_chains_not_symp(

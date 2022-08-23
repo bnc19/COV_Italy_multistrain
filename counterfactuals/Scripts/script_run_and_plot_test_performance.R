@@ -147,16 +147,16 @@ test_spec_test_prop = plot_grid(
   test_spec_0[[2]],
   ncol = 6,
   labels = c("a", "b", "c", "d", "e", "f"),
-  label_size = 16
+  label_size = 5
 )
 
 
 test_spec_test_prop_anot = annotate_figure(
   test_spec_test_prop,
-  bottom = text_grob("Concordant variant prevalence", size = 32),
+  bottom = text_grob("Concordant variant prevalence", size = 7),
   left = text_grob(
     "Discordant variant prevalence",
-    size = 32,
+    size = 7,
     rot = 90
   )
 )
@@ -165,9 +165,9 @@ test_spec_test_prop_anot = annotate_figure(
 
 ggsave(
   plot = test_spec_test_prop_anot,
-  filename = "Figures/Figure6.png",
-  height = (80 * 4 / 6),
-  width = 80,
+  filename = "Figures/Figure6.pdf",
+  height = (22 * 4 / 6),
+  width = 20.5,
   units = "cm",
-  dpi = 600
+  dpi = 800
 )

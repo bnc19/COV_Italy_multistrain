@@ -100,7 +100,7 @@ return(posts)
 
 extract_fit_results = function(posts,
                                location,
-                               baseline = F){
+                               model = "cf"){
   
   if(location== "Veneto"){
     rep_M = posts$daily_incidence_ven[,, 1]
@@ -152,14 +152,16 @@ extract_fit_results = function(posts,
     pMO = posts$pPCR_it[,]
   }
   
-  if(baseline == T){
+  if(model == "baseline"){
   out = as.matrix(data.frame(rep_M, rep_A, rep_O, rep_Al,
                              true_M, true_A, true_O, true_Al, 
                              ratio_M,ratio_A,ratio_O,ratio_Al,
-                             R0_M, R0_A, R0_O, R0_Al,pMO))
-  } else {
+                             R0_M, R0_A, R0_O, R0_Al, pMO))
+  } else if (model == "cf"){
     out = as.matrix(data.frame(rep_M, rep_A, rep_O, rep_Al,
                                true_M, true_A, true_O, true_Al))
+  } else if (model == "SA"){
+    out = as.matrix(data.frame(rep_M, rep_A, rep_O, rep_Al))
   }
   
   return(out)
@@ -183,7 +185,8 @@ change_rho = function(data.frame){
 summarise_results = function(posterior_results,
                              start_date,
                              end_date,
-                             S0){
+                             S0,
+                             no.col = 8){
   
   start = as.Date.character(start_date, format = "%d-%m-%Y")
   end = as.Date.character(end_date, format = "%d-%m-%Y")
@@ -205,7 +208,7 @@ summarise_results = function(posterior_results,
       mean = mean(value),
       upper = quantile(value, 0.975)) %>% 
     ungroup( ) %>%  
-    mutate(Date = rep(all_dates, each = 8)) %>% 
+    mutate(Date = rep(all_dates, each = no.col)) %>% 
     separate(variant, into = c("output", "variant")) %>% 
     pivot_wider(id_cols = c("Date", "variant"), names_from = output,
                 values_from = c(lower,mean,upper))

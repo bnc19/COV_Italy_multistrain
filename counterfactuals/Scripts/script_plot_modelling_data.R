@@ -70,7 +70,7 @@ Variant_data = Variant_data %>%
     percentage = ifelse(Country == "Italy",
                         Freq_new  / TotSeq_new,
                         Freq / TotSeq),
-    ,
+    
     Var_rep_inc = percentage * Reported_incidence
   ) %>%
   mutate(Country = ifelse(Country == "Italy", "Rest of Italy", "Veneto")) %>%
@@ -84,10 +84,10 @@ M_prev = Variant_data %>%
   select(Date, Mut, Country, percentage) %>%
   filter(Mut == "M234I-A376T") %>%
   ggplot(aes(x = Date, y = percentage * 100)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "Prevalence in GISAID (%)") +
   theme_bw() + theme(
-    text = element_text(size = 16),
+    text = element_text(size = 6),
     legend.position = c("none"),
     legend.title = element_blank(),
     legend.key.height = unit(.5, 'cm')
@@ -100,9 +100,9 @@ A_prev = Variant_data %>%
   select(Date, Mut, Country, percentage) %>%
   filter(Mut == "A220V") %>%
   ggplot(aes(x = Date, y = percentage * 100)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "  ") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -112,9 +112,9 @@ O_prev = Variant_data %>%
   select(Date, Mut, Country, percentage) %>%
   filter(Mut == "Other") %>%
   ggplot(aes(x = Date, y = percentage * 100)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -125,9 +125,9 @@ Al_prev = Variant_data %>%
   select(Date, Mut, Country, percentage) %>%
   filter(Mut == "Alpha") %>%
   ggplot(aes(x = Date, y = percentage * 100)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -141,9 +141,9 @@ M_inc = Variant_data %>%
   select(Date, Mut, Country, Var_rep_inc) %>%
   filter(Mut == "M234I-A376T") %>%
   ggplot(aes(x = Date, y = Var_rep_inc)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "Reported incidence \n per 100,000 population", x = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -153,9 +153,9 @@ A_inc = Variant_data %>%
   select(Date, Mut, Country, Var_rep_inc) %>%
   filter(Mut == "A220V") %>%
   ggplot(aes(x = Date, y = Var_rep_inc)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = " ", x = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -165,9 +165,9 @@ O_inc = Variant_data %>%
   select(Date, Mut, Country, Var_rep_inc) %>%
   filter(Mut == "Other") %>%
   ggplot(aes(x = Date, y = Var_rep_inc)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "", x = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -178,9 +178,9 @@ Al_inc = Variant_data %>%
   select(Date, Mut, Country, Var_rep_inc) %>%
   filter(Mut == "Alpha") %>%
   ggplot(aes(x = Date, y = Var_rep_inc)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(y = "" , x = "") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -199,7 +199,8 @@ variant_plot = plot_grid(
   Al_prev,
   labels = c("c", "d", "e", "f", "g", "h", "i", "j"),
   ncol = 4,
-  align = "h"
+  align = "h", 
+  label_size = 7
 )
 
 # plot total incidence --------------------------------------------------------------
@@ -208,9 +209,9 @@ total_inc = Variant_data %>%
   select(Date, Mut, Country, Reported_incidence) %>%
   filter(Mut == "Alpha") %>%
   ggplot(aes(x = Date, y = Reported_incidence)) +
-  geom_line(aes(colour = Country), size = 1.5) +
+  geom_line(aes(colour = Country),size = 1) +
   labs(x = "", y = "Reported incidence \n per 100,000 population") +
-  theme_bw() + theme(text = element_text(size = 16),
+  theme_bw() + theme(text = element_text(size = 6),
                      legend.position = c("none")) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
   scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
@@ -230,11 +231,11 @@ Test_conf = Italy_test_data %>%
          perc_ant = antigen_daily_average / total * 100) %>%
   filter(Date >= "2020-05-01" & Date <  "2021-05-02") %>%
   ggplot(aes(x = Date, y = perc_ant)) +
-  geom_line(aes(color = Country), size = 1.5) +
+  geom_line(aes(color = Country),size = 1) +
   labs(x = "", y = "Proportion of COVID-19 patients \n receiving antigen diagnostic tests") +
   theme_bw() + theme(
-    text = element_text(size = 16),
-    legend.position = c(0.08, 0.85),
+    text = element_text(size = 6),
+    legend.position = c(0.15, 0.75),
     legend.title = element_blank()
   ) +
   scale_x_date(date_labels = "%b/%Y", breaks = "3 months") +
@@ -246,7 +247,8 @@ Test_conf = Italy_test_data %>%
 total_plots = plot_grid(Test_conf,
                         total_inc,
                         labels = c("a", "b"),
-                        align = "h")
+                        align = "h", 
+                        label_size = 7)
 
 grid_out = plot_grid(total_plots,
                      variant_plot,
@@ -256,9 +258,11 @@ grid_out = plot_grid(total_plots,
 
 ggsave(
   plot = grid_out,
-  filename = "Figures/Figure3.png",
-  height = 35,
-  width = 55,
+  filename = "Figures/Figure3.pdf",
+  height =15,
+  width = 18,
   units = "cm",
-  dpi = 300
+  dpi = 800
 )
+
+

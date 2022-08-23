@@ -104,21 +104,21 @@ variant_detection_grid = plot_grid(
   follow_up100[[2]],
   follow_up100[[3]],
   ncol = 3,
-  label_size = 16,
+  label_size = 6,
   align = "h",
   labels = c("a", "b", "c", "", "", "", "d", "e", "f")
 )
 
 variant_detection_grid_anot = annotate_figure(variant_detection_grid,
-                                              bottom = text_grob("Specimens sequenced (%)", size = 32))
+                                              bottom = text_grob("Specimens sequenced (%)", size = 7))
 
 
 
 ggsave(
   plot = variant_detection_grid_anot,
-  filename = "Figures/Figure7.png",
-  height = 60,
-  width = 60 * (3 / 4),
+  filename = "Figures/Figure7.pdf",
+  height = 18,
+  width = 18 * (3 / 4),
   units = "cm",
   dpi = 600
 )

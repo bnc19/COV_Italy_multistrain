@@ -13,7 +13,7 @@ draw_init_values = function(seed=1){
          I0_ven_Al = replicate(1, runif(1, 1,10)),
          I0_ven_O = replicate(1, runif(1, 1,10)),
          omega = replicate(2,runif(1,0.2,0.8)),
-         #rho_it = runif(1,0.2,0.8),
+         rho_it = runif(1,0.2,0.8),
          #rho_ven = runif(1,0.2,0.8),
          k = runif(1,0.01,1)
   )}
