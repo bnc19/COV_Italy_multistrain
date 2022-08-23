@@ -385,12 +385,7 @@ real sum_LL ;
     for(i in 1:n_var) R0_ven[t,i] = (beta2[i] / sigma2) + ((1-mu) * beta2[i] / gamma2 ) + (((1- delta_ven[t,i]) * mu * beta2[i])  / gamma2 );
    
  }
- 
 
-
-
-
-  
 
 // Italy  model ----------------------------------------------------------------
 
@@ -477,38 +472,38 @@ real sum_LL ;
 
 
  for (i in 1:n_data_it[1]){
-    log_lik[i] =10 * neg_binomial_2_lpmf(y_M_it [i] | lambda_M_it [i], k);
+    log_lik[i] =10 * neg_binomial_2_lpmf(y_M_it [i] | lambda_M_it [i], 1/k);
   }
   
  for (i in (n_data_it[1] + 1): ( sum(n_data_it[1:2]))){
-    log_lik[i] = neg_binomial_2_lpmf(y_A_it [(i-n_data_it[1])] | lambda_A_it[(i-n_data_it[1])], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_A_it [(i-n_data_it[1])] | lambda_A_it[(i-n_data_it[1])], 1/k);
   }
 
  for (i in (sum(n_data_it[1:2])+1): sum(n_data_it[1:3]) ){
-    log_lik[i] = neg_binomial_2_lpmf(y_O_it [(i- sum(n_data_it[1:2]))] | lambda_O_it[(i- sum(n_data_it[1:2]))], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_O_it [(i- sum(n_data_it[1:2]))] | lambda_O_it[(i- sum(n_data_it[1:2]))], 1/k);
   }
 
  for (i in (sum(n_data_it[1:3])+1): (sum(n_data_it))){
-    log_lik[i] = neg_binomial_2_lpmf(y_Al_it [(i- sum(n_data_it[1:3]))] |lambda_Al_it[(i-sum(n_data_it[1:3]))], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_Al_it [(i- sum(n_data_it[1:3]))] |lambda_Al_it[(i-sum(n_data_it[1:3]))], 1/k);
   }
 
  for (i in ( sum(n_data_it) +1):(sum(n_data_it) + n_data_ven[1] )){
-    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_ven [(i-sum(n_data_it))] | lambda_M_ven[(i-sum(n_data_it))], k);
+    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_ven [(i-sum(n_data_it))] | lambda_M_ven[(i-sum(n_data_it))], 1/k);
   }
 
  for (i in ( sum(n_data_it) + n_data_ven[1]+1):(sum(n_data_it) + n_data_ven[1] + n_data_ven[2] )){
     log_lik[i] = neg_binomial_2_lpmf(y_A_ven [(i-sum(n_data_it) -  n_data_ven[1])] | 
-    lambda_A_ven[(i-sum(n_data_it)- n_data_ven[1])], k);
+    lambda_A_ven[(i-sum(n_data_it)- n_data_ven[1])], 1/k);
   }
   
  for (i in ( sum(n_data_it) + sum(n_data_ven[1:2])+1):(sum(n_data_it) + sum(n_data_ven[1:3]) )){
     log_lik[i] = neg_binomial_2_lpmf(y_O_ven [(i-sum(n_data_it) - sum(n_data_ven[1:2]))] | 
-    lambda_O_ven[(i-sum(n_data_it)- sum(n_data_ven[1:2]))], k);
+    lambda_O_ven[(i-sum(n_data_it)- sum(n_data_ven[1:2]))], 1/k);
   }  
   
    for (i in ( sum(n_data_it) + sum(n_data_ven[1:3])+1):(sum(n_data_it) + sum(n_data_ven) )){
     log_lik[i] = neg_binomial_2_lpmf(y_Al_ven [(i-sum(n_data_it) -  sum(n_data_ven[1:3]))] | 
-    lambda_Al_ven[(i-sum(n_data_it)- sum(n_data_ven[1:3]))], k);
+    lambda_Al_ven[(i-sum(n_data_it)- sum(n_data_ven[1:3]))], 1/k);
   }  
 
   sum_LL = sum(log_lik); 

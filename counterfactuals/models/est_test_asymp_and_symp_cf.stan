@@ -79,16 +79,15 @@ data {
   int time_seed_M_ven;
   int time_seed_alpha_ven;
   
-  
   // parameters 
-  
-  real<lower = 0>             beta[n_var];   // transmission parameter 
-  real<lower = 0>             I0_ven[n_var]; // seed
-  real<lower = 0, upper = 1>  rho_ven;       // probability of reporting 
-  real<lower = 0>             I0_it[n_var];  // seed
-  real<lower = 0, upper = 1>  rho_it;        // probability of reporting 
-  real<lower = 0, upper = 1>  omega[2];      // reduction in transmission
-  real<lower = 0>             k;             // overdispersion parameter 
+  real<lower = 0>              beta[n_var];  // transmission parameter 
+  real<lower = 0, upper = 1>   rho_ven;      // probability of reporting 
+  real<lower = 0, upper = 1>   rho_it;       // probability of reporting
+  real<lower = 0>              I0_ven[4];    // seed
+  real<lower = 0>              I0_it[4] ;        // seed
+  real<lower = 0, upper = 1>   omega[2];     // reduction in transmission
+  real<lower = 0>              k;            // overdispersion parameter 
+
 
 }
 
@@ -101,16 +100,13 @@ transformed data {
   real epsilon2 = epsilon / scale_time_step;
 }
 
-  
 
-
-model {
-}
+model {}
 
 
 
 generated quantities {
-  
+
    real beta2[n_var] ;
   
 // Define Italy param ----------------------------------------------------------
@@ -125,7 +121,6 @@ generated quantities {
   real FOI_it[n_ts_it, n_var]; 
   
   real incidence_it[n_ts_it,n_var];
-  real incidence_it_t[n_ts_it,n_var];
   
   
   real pPCR_daily_it[n_ts_it];     // daily probability of PCR test
@@ -134,6 +129,12 @@ generated quantities {
 
 
   real beta2_it[n_ts_it,n_var]; 
+  
+  real I0_it_M  = I0_it[1] ;
+  real I0_it_A  = I0_it[2] ;
+  real I0_it_O  = I0_it[3] ;
+  real I0_it_Al = I0_it[4] ;
+  
   
 // Define Veneto param ---------------------------------------------------------
   
@@ -145,8 +146,8 @@ generated quantities {
   real R_ven [(n_ts_ven +1)];
   
   real FOI_ven[n_ts_ven, n_var]; 
+  
   real incidence_ven[n_ts_ven,n_var];
-  real incidence_ven_t[n_ts_ven,n_var];
   
   
   real pPCR_daily_ven[n_ts_ven];     // daily probability of PCR test
@@ -156,16 +157,19 @@ generated quantities {
 
   real beta2_ven[n_ts_ven, n_var]; 
   
+  real I0_ven_M =  I0_ven[1] ;
+  real I0_ven_A =  I0_ven[2] ;
+  real I0_ven_O =  I0_ven[3] ;
+  real I0_ven_Al = I0_ven[4] ;
   
+  // LL 
+
   vector[sum(n_data_it) + sum(n_data_ven)] log_lik;
-   
-  real sum_LL;
+  real sum_LL ; 
   
 // Define Italy model param ----------------------------------------------------
-  
-  real daily_incidence_it[n_days_it, n_var];  // daily repored variant incidence
-  real daily_incidence_it_t[n_days_it, n_var];  // daily true variant incidence
-  real monthly_incidence_it[n_months_it, n_var];  // monthly reported variant incidence
+  real daily_incidence_it[n_days_it, n_var];  // monthly variant incidence
+  real monthly_incidence_it[n_months_it, n_var];  // monthly variant incidence
 
   // poisson rate paramater 
   
@@ -185,9 +189,8 @@ generated quantities {
   
 // Define veneto model param ---------------------------------------------------
  
-  real daily_incidence_ven[n_days_ven, n_var];  // dayily reported variant incidence
-  real daily_incidence_ven_t[n_days_ven, n_var];  // true reported variant incidence
-  real monthly_incidence_ven[n_months_ven, n_var];  // monthly reported variant incidence
+  real daily_incidence_ven[n_days_ven, n_var];  // monthly variant incidence
+  real monthly_incidence_ven[n_months_ven, n_var];  // monthly variant incidence
 
   // poisson rate paramater 
   
@@ -203,6 +206,7 @@ generated quantities {
   int ind_ven ; 
   int index_v;
   int ind_v ;
+
   
   // Scale beta 
 
@@ -210,14 +214,14 @@ generated quantities {
   
   // Initial values  Italy 
 
-  S_it[1] = S0_it - I0_it[2] - I0_it[3] ;
+  S_it[1] = S0_it - I0_it_A - I0_it_O ;
 
   for(i in 1:n_var) E_it[1,i] = 0 ;
   for(i in 1:n_var) PS_it[1,i] = 0 ;
 
   IA_it[1,1] = 0 ;
-  IA_it[1,2] = I0_it[2] ;
-  IA_it[1,3] = I0_it[3] ;
+  IA_it[1,2] = I0_it_A;
+  IA_it[1,3] = I0_it_O ;
   IA_it[1,4] = 0 ;
   
   Q_it[1] = 0 ;
@@ -225,14 +229,14 @@ generated quantities {
   
 // Initial values Veneto -------------------------------------------------------
 
-  S_ven[1] = S0_ven - I0_ven[2] - I0_ven[3] ;
+  S_ven[1] = S0_ven - I0_ven_A - I0_ven_O ;
 
  for(i in 1:n_var) E_ven[1,i] = 0 ;
  for(i in 1:n_var) PS_ven[1,i] = 0 ;
 
   IA_ven[1,1] = 0 ;
-  IA_ven[1,2] = I0_ven[2] ;
-  IA_ven[1,3] = I0_ven[3] ;
+  IA_ven[1,2] = I0_ven_A ;
+  IA_ven[1,3] = I0_ven_O ;
   IA_ven[1,4] = 0 ;
   
   Q_ven[1] = 0 ;
@@ -273,8 +277,8 @@ generated quantities {
 // Simulate Italy --------------------------------------------------------------
  for (t in 1:(n_ts_it)){
    
-   IA_it[time_seed_M_it,1] = I0_it[1];
-   IA_it[time_seed_alpha_it,4] = I0_it[4];
+   IA_it[time_seed_M_it,1] = I0_it_M;
+   IA_it[time_seed_alpha_it,4] = I0_it_Al;
 
    p_daily_it[t] = (epsilon2 * sum(E_it[t,2:4])) / S0_it;
    
@@ -312,12 +316,7 @@ generated quantities {
    
    
    for(i in 1:n_var) incidence_it[t,i] = 
-   (delta_it[t,i]*sigma2*PS_it[t,i])   ;
- 
- 
-     for(i in 1:n_var) incidence_it_t[t,i] = 
-   (epsilon2 * E_it[t,i])   ;
- 
+   (delta_it[t,i]*sigma2*PS_it[t,i])  ;
  }
  
  
@@ -325,9 +324,9 @@ generated quantities {
 // Simulate Veneto -------------------------------------------------------------
  for (t in 1:(n_ts_ven)){
    
-   IA_ven[time_seed_M_ven,1] = I0_ven[1];
+   IA_ven[time_seed_M_ven,1] = I0_ven_M;
    
-   IA_ven[time_seed_alpha_ven,4] = I0_ven[4];
+   IA_ven[time_seed_alpha_ven,4] = I0_ven_Al;
 
    p_daily_ven[t] = (epsilon2 * sum(E_ven[t,2:4])) / S0_ven;
    
@@ -364,15 +363,10 @@ generated quantities {
    
    
    for(i in 1:n_var) incidence_ven[t,i] =
-  (delta_ven[t,i] * sigma2 * PS_ven[t,i])   ;
- 
-  for(i in 1:n_var) incidence_ven_t[t,i] =
-   (epsilon2 * E_ven[t,i])  ;
- 
+  (delta_ven[t,i] * sigma2 * PS_ven[t,i])  ;
  }
   
   
- 
 
 // Italy  model ----------------------------------------------------------------
 
@@ -382,7 +376,6 @@ generated quantities {
   ind_i = index_i + (scale_time_step-1);
 
   for(i in 1:n_var) daily_incidence_it[t,i] =  sum(incidence_it[index_i:ind_i,i]);
-  for(i in 1:n_var) daily_incidence_it_t[t,i] =  sum(incidence_it_t[index_i:ind_i,i]);
 
   index_i = index_i + scale_time_step;
 }
@@ -422,7 +415,6 @@ generated quantities {
   ind_v = index_v + (scale_time_step-1);
 
   for(i in 1:n_var) daily_incidence_ven[t,i] =  sum(incidence_ven[index_v:ind_v,i]);
-  for(i in 1:n_var) daily_incidence_ven_t[t,i] =  sum(incidence_ven_t[index_v:ind_v,i]);
 
   index_v = index_v + scale_time_step;
 }
@@ -434,7 +426,7 @@ generated quantities {
    ind_ven = index_ven + 1;
    for (i in 1:n_var){
      monthly_incidence_ven[m,i] =  
-     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) / S0_ven * 100000;    }
+     mean( daily_incidence_ven[month_index_ven[index_ven]:(month_index_ven[ind_ven]-1),i] ) / S0_it * 100000 ;    }
    index_ven = index_ven + 1;
  }
  
@@ -453,39 +445,39 @@ generated quantities {
 
 
  for (i in 1:n_data_it[1]){
-    log_lik[i] =10 * neg_binomial_2_lpmf(y_M_it [i] | lambda_M_it [i], k);
+    log_lik[i] =10 * neg_binomial_2_lpmf(y_M_it [i] | lambda_M_it [i], 1/k);
   }
   
  for (i in (n_data_it[1] + 1): ( sum(n_data_it[1:2]))){
-    log_lik[i] = neg_binomial_2_lpmf(y_A_it [(i-n_data_it[1])] | lambda_A_it[(i-n_data_it[1])], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_A_it [(i-n_data_it[1])] | lambda_A_it[(i-n_data_it[1])], 1/k);
   }
 
  for (i in (sum(n_data_it[1:2])+1): sum(n_data_it[1:3]) ){
-    log_lik[i] = neg_binomial_2_lpmf(y_O_it [(i- sum(n_data_it[1:2]))] | lambda_O_it[(i- sum(n_data_it[1:2]))], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_O_it [(i- sum(n_data_it[1:2]))] | lambda_O_it[(i- sum(n_data_it[1:2]))], 1/k);
   }
 
  for (i in (sum(n_data_it[1:3])+1): (sum(n_data_it))){
-    log_lik[i] = neg_binomial_2_lpmf(y_Al_it [(i- sum(n_data_it[1:3]))] |lambda_Al_it[(i-sum(n_data_it[1:3]))], k);
+    log_lik[i] = neg_binomial_2_lpmf(y_Al_it [(i- sum(n_data_it[1:3]))] |lambda_Al_it[(i-sum(n_data_it[1:3]))], 1/k);
   }
 
  for (i in ( sum(n_data_it) +1):(sum(n_data_it) + n_data_ven[1] )){
-    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_ven [(i-sum(n_data_it))] | lambda_M_ven[(i-sum(n_data_it))], k);
+    log_lik[i] = 10 * neg_binomial_2_lpmf(y_M_ven [(i-sum(n_data_it))] | lambda_M_ven[(i-sum(n_data_it))], 1/k);
   }
 
  for (i in ( sum(n_data_it) + n_data_ven[1]+1):(sum(n_data_it) + n_data_ven[1] + n_data_ven[2] )){
     log_lik[i] = neg_binomial_2_lpmf(y_A_ven [(i-sum(n_data_it) -  n_data_ven[1])] | 
-    lambda_A_ven[(i-sum(n_data_it)- n_data_ven[1])], k);
+    lambda_A_ven[(i-sum(n_data_it)- n_data_ven[1])], 1/k);
   }
   
  for (i in ( sum(n_data_it) + sum(n_data_ven[1:2])+1):(sum(n_data_it) + sum(n_data_ven[1:3]) )){
     log_lik[i] = neg_binomial_2_lpmf(y_O_ven [(i-sum(n_data_it) - sum(n_data_ven[1:2]))] | 
-    lambda_O_ven[(i-sum(n_data_it)- sum(n_data_ven[1:2]))], k);
+    lambda_O_ven[(i-sum(n_data_it)- sum(n_data_ven[1:2]))], 1/k);
   }  
   
    for (i in ( sum(n_data_it) + sum(n_data_ven[1:3])+1):(sum(n_data_it) + sum(n_data_ven) )){
     log_lik[i] = neg_binomial_2_lpmf(y_Al_ven [(i-sum(n_data_it) -  sum(n_data_ven[1:3]))] | 
-    lambda_Al_ven[(i-sum(n_data_it)- sum(n_data_ven[1:3]))], k);
+    lambda_Al_ven[(i-sum(n_data_it)- sum(n_data_ven[1:3]))], 1/k);
   }  
-sum_LL = sum(log_lik); 
 
+ sum_LL = sum(log_lik); 
 }
