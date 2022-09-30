@@ -153,7 +153,7 @@ for (x in 1:length(R0_scales)) {
 }
 
 
-Veneto_ratio_cf8 = bind_rows(Veneto_ratio_cf6_list)
+Veneto_ratio_cf8 = bind_rows(Veneto_ratio_cf8_list)
 Veneto_ratio_cf8$R0_scale = rep(R0_scales, each = nrow(Veneto_ratio_cf8_list[[1]]))
 
 write.csv(Veneto_ratio_cf8, paste0(file_path, "/Veneto_ratio_cf8.csv"))
